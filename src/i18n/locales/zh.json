@@ -1,0 +1,113 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试",
+    "noData": "暂无数据",
+    "average": "平均",
+    "max": "最高",
+    "min": "最低",
+    "value": "数值",
+    "times": "次",
+    "time": "次",
+    "good": "良好",
+    "inAverage": "平均"
+  },
+  "vitals": {
+    "bloodPressure": "血压",
+    "systolic": "收缩压",
+    "diastolic": "舒张压",
+    "sbp": "高压",
+    "dbp": "低压",
+    "pulse": "脉搏",
+    "spo2": "血氧",
+    "heartRate": "心率",
+    "glucose": "血糖",
+    "fasting": "空腹",
+    "postMeal": "餐后"
+  },
+  "units": {
+    "mmHg": "mmHg",
+    "percent": "%",
+    "mgDl": "mg/dL",
+    "mmolL": "mmol/L",
+    "bpm": "次/分"
+  },
+  "status": {
+    "normal": "正常",
+    "elevated": "偏高",
+    "high": "过高",
+    "low": "偏低",
+    "good": "良好",
+    "warning": "警告",
+    "danger": "危险",
+    "normalHighValue": "正常高值",
+    "tooLow": "过低",
+    "tooHigh": "过高"
+  },
+  "trend": {
+    "up": "上升",
+    "down": "下降",
+    "stable": "平稳"
+  },
+  "time": {
+    "week": "周",
+    "month": "月",
+    "year": "年",
+    "today": "今天",
+    "yesterday": "昨天",
+    "lastWeek": "上周"
+  },
+  "weekdays": {
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六",
+    "sun": "周日"
+  },
+  "page": {
+    "bloodPressure": {
+      "title": "血压详情",
+      "trendyReport": "趋势报告",
+      "weeksAverageSBP": "本周平均高压",
+      "weeksAverageDBP": "本周平均低压",
+      "bpStatistics": "血压统计",
+      "normalResults": "次正常血压结果",
+      "compareWithLastWeek": "与上周对比",
+      "averageSBP": "平均高压",
+      "averageDBP": "平均舒张压",
+      "weeklyOverview": "周报概览",
+      "overallSituation": "整体情况",
+      "needsAttention": "需要注意",
+      "defaultInsight": "您的血压整体处于理想范围内。虽然与上周相比，收缩压略有上升，但仍处于正常波动范围内。"
+    },
+    "spo2": {
+      "title": "血氧详情",
+      "trendTitle": "血氧趋势",
+      "weeklyComparison": "本周对比",
+      "averageReading": "平均血氧",
+      "lastReading": "最近读数",
+      "rangeToday": "今日范围"
+    },
+    "heartRate": {
+      "title": "心率详情",
+      "trendTitle": "心率趋势",
+      "weeklyComparison": "本周对比",
+      "averageReading": "平均心率",
+      "lastReading": "最近读数",
+      "restingHR": "静息心率",
+      "maxHR": "最高心率"
+    },
+    "glucose": {
+      "title": "血糖详情",
+      "trendTitle": "血糖趋势",
+      "weeklyComparison": "本周对比",
+      "averageReading": "平均血糖",
+      "lastReading": "最近读数",
+      "fastingLevel": "空腹血糖",
+      "postMealLevel": "餐后血糖"
+    }
+  }
+}

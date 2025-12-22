@@ -1,0 +1,113 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "noData": "No data available",
+    "average": "Average",
+    "max": "Max",
+    "min": "Min",
+    "value": "Value",
+    "times": "times",
+    "time": "time",
+    "good": "Good",
+    "inAverage": "in average"
+  },
+  "vitals": {
+    "bloodPressure": "Blood Pressure",
+    "systolic": "Systolic",
+    "diastolic": "Diastolic",
+    "sbp": "SBP",
+    "dbp": "DBP",
+    "pulse": "Pulse",
+    "spo2": "Blood Oxygen",
+    "heartRate": "Heart Rate",
+    "glucose": "Blood Glucose",
+    "fasting": "Fasting",
+    "postMeal": "Post-meal"
+  },
+  "units": {
+    "mmHg": "mmHg",
+    "percent": "%",
+    "mgDl": "mg/dL",
+    "mmolL": "mmol/L",
+    "bpm": "bpm"
+  },
+  "status": {
+    "normal": "Normal",
+    "elevated": "Elevated",
+    "high": "High",
+    "low": "Low",
+    "good": "Good",
+    "warning": "Warning",
+    "danger": "Danger",
+    "normalHighValue": "Normal high value",
+    "tooLow": "Too low",
+    "tooHigh": "Too High"
+  },
+  "trend": {
+    "up": "Increased",
+    "down": "Decreased",
+    "stable": "Stable"
+  },
+  "time": {
+    "week": "Week",
+    "month": "Month",
+    "year": "Year",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "lastWeek": "Last week"
+  },
+  "weekdays": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "page": {
+    "bloodPressure": {
+      "title": "Blood Pressure Details",
+      "trendyReport": "Trendy report",
+      "weeksAverageSBP": "Week's average SBP",
+      "weeksAverageDBP": "Week's average DBP",
+      "bpStatistics": "BP Statistics",
+      "normalResults": "normal blood pressure results",
+      "compareWithLastWeek": "Compare with last week",
+      "averageSBP": "Average SBP",
+      "averageDBP": "Average diastolic blood pressure",
+      "weeklyOverview": "Weekly overview",
+      "overallSituation": "Overall situation",
+      "needsAttention": "Needs attention",
+      "defaultInsight": "Your blood pressure is generally within the ideal range. Although your systolic blood pressure has risen slightly compared to last week, it remains within the normal fluctuation range."
+    },
+    "spo2": {
+      "title": "Blood Oxygen Details",
+      "trendTitle": "SpO2 Trend",
+      "weeklyComparison": "Weekly Comparison",
+      "averageReading": "Average Reading",
+      "lastReading": "Last Reading",
+      "rangeToday": "Today's Range"
+    },
+    "heartRate": {
+      "title": "Heart Rate Details",
+      "trendTitle": "Heart Rate Trend",
+      "weeklyComparison": "Weekly Comparison",
+      "averageReading": "Average Reading",
+      "lastReading": "Last Reading",
+      "restingHR": "Resting HR",
+      "maxHR": "Max HR"
+    },
+    "glucose": {
+      "title": "Blood Glucose Details",
+      "trendTitle": "Blood Glucose Trend",
+      "weeklyComparison": "Weekly Comparison",
+      "averageReading": "Average Reading",
+      "lastReading": "Last Reading",
+      "fastingLevel": "Fasting Level",
+      "postMealLevel": "Post-meal Level"
+    }
+  }
+}

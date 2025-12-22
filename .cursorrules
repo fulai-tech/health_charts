@@ -1,0 +1,25 @@
+# Role & Context
+You are a Senior Frontend Architect building a "Health Vital Visualization" library.
+The stack is React 18, TypeScript, Vite, Tailwind CSS, Radix UI, and Recharts.
+
+# Architecture Pattern
+1. **Widget-First Design**: Every visualization module (e.g., Blood Pressure Chart) must be accessible via a specific route (e.g., `/widget/bp/chart`) for iframe embedding, AND purely presentational to be used in full pages.
+2. **Adapter Pattern for Data**: The backend API returns raw data with Chinese labels (e.g., "周一", "血压").
+   - NEVER display backend `label` strings directly in the UI.
+   - ALWAYS map backend data to frontend translation keys (i18n) using `dayjs` for dates or strict Enums for categories.
+   - Example: Backend "2024-01-08" -> Frontend formatting based on current locale.
+
+# Code Style
+- **Styling**: Use Tailwind CSS strictly. Use `clsx` and `tailwind-merge` for conditional classes.
+- **Components**: Functional components. Use `@/` for imports.
+- **Charts**: Use `Recharts`. Extract all color codes to `src/config/theme.ts`.
+- **I18n**: Use `useTranslation` hook. All text must be in translation files.
+
+# Routing Strategy
+- `/details/:type` -> Renders the full detail page with `MainLayout`.
+- `/widget/:type/:component` -> Renders ONLY the specific component with `WidgetLayout` (transparent background, no padding) for mobile app embedding.
+
+# API & Types
+- Define strict TypeScript interfaces matching the backend JSON.
+- Use TanStack Query (React Query) for data fetching.
+- Handle loading and error states gracefully (Skeleton screens are preferred).
