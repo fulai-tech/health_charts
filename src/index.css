@@ -15,6 +15,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Remove focus outline globally */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: none;
+}
+
 /* Smooth scrolling */
 html {
   scroll-behavior: smooth;

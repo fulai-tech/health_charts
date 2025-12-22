@@ -150,7 +150,10 @@ export interface BPDetailData {
 export interface HRTrendChartDataPoint {
   date: string
   label: string
-  value: number
+  avg: number
+  max: number
+  min: number
+  value?: number // legacy support
 }
 
 /** Heart rate detail response */
@@ -159,10 +162,15 @@ export interface HRDetailData {
   title: string
   overview: {
     average: number
+    max?: number
+    max_label?: string
+    min?: number
+    min_label?: string
     resting_avg?: number
   }
   trend_chart: {
     chart_data: HRTrendChartDataPoint[]
+    average_line?: number
     y_axis_range: {
       min: number
       max: number
@@ -189,6 +197,7 @@ export interface HRDetailData {
     overview: string | null
     highlights: string | null
     suggestions: string[]
+    data_analysis?: { content: string }[]
   }
 }
 
@@ -196,7 +205,9 @@ export interface HRDetailData {
 export interface GlucoseTrendChartDataPoint {
   date: string
   label: string
-  value: number
+  max: number
+  min: number
+  value?: number // legacy support
   type?: string // 空腹/餐后
 }
 
@@ -204,14 +215,28 @@ export interface GlucoseTrendChartDataPoint {
 export interface GlucoseDetailData {
   indicator_type: 'blood_glucose'
   title: string
+  normal_range?: {
+    min: number
+    max: number
+  }
   overview: {
     average: number
+    max?: number
+    max_label?: string
+    min?: number
+    min_label?: string
+    standard_deviation?: number
     fasting_avg?: number
     post_meal_avg?: number
   }
   trend_chart: {
     chart_data: GlucoseTrendChartDataPoint[]
+    average_line?: number
     y_axis_range: {
+      min: number
+      max: number
+    }
+    normal_range?: {
       min: number
       max: number
     }
@@ -237,6 +262,7 @@ export interface GlucoseDetailData {
     overview: string | null
     highlights: string | null
     suggestions: string[]
+    data_analysis?: { content: string }[]
   }
 }
 
@@ -255,9 +281,14 @@ export interface SpO2DetailData {
   title: string
   overview: {
     average: number
+    max: number
+    max_label: string
+    min: number
+    min_label: string
   }
   trend_chart: {
     chart_data: SpO2TrendChartDataPoint[]
+    average_line: number
     y_axis_range: {
       min: number
       max: number
@@ -284,6 +315,7 @@ export interface SpO2DetailData {
     overview: string | null
     highlights: string | null
     suggestions: string[]
+    data_analysis: string[]
   }
 }
 

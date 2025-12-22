@@ -67,33 +67,33 @@ export function adaptGlucoseData(apiData: GlucoseDetailData): GlucoseDomainModel
 
   const rawData = apiData?.trend_chart?.chart_data || []
 
-  // Transform each data point
+  // Transform each data point - now with min/max range
   const chartData: GlucoseDataPoint[] = rawData.map((point) => {
     const date = new Date(point.date)
+    const max = point.max ?? point.value ?? 0
+    const min = point.min ?? point.value ?? 0
 
     return {
       date,
       dateLabel: formatDate(point.date),
       weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
-      value: point.value || 0,
+      max,
+      min,
+      avg: (max + min) / 2,
       typeKey: point.type ? GLUCOSE_TYPE_MAP[point.type] : undefined,
     }
   })
 
-  // Get average from API
-  const avgValue = apiData?.overview?.average || 0
-  const avgFasting = apiData?.overview?.fasting_avg
-  const avgPostMeal = apiData?.overview?.post_meal_avg
-
-  // Calculate min/max from chart data
-  const minValue =
-    chartData.length > 0
-      ? Math.round(Math.min(...chartData.map((p) => p.value)) * 10) / 10
-      : 0
-  const maxValue =
-    chartData.length > 0
-      ? Math.round(Math.max(...chartData.map((p) => p.value)) * 10) / 10
-      : 0
+  // Get values from overview
+  const overview = apiData?.overview || {}
+  const avgValue = overview.average || 0
+  const maxValue = overview.max ?? (chartData.length > 0 ? Math.max(...chartData.map(p => p.max)) : 0)
+  const minValue = overview.min ?? (chartData.length > 0 ? Math.min(...chartData.map(p => p.min)) : 0)
+  const maxWeekdayKey = overview.max_label ? (WEEKDAY_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
+  const minWeekdayKey = overview.min_label ? (WEEKDAY_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
+  
+  const avgFasting = overview.fasting_avg
+  const avgPostMeal = overview.post_meal_avg
 
   // Determine status
   const status = determineGlucoseStatus(avgFasting || avgValue)
@@ -103,24 +103,38 @@ export function adaptGlucoseData(apiData: GlucoseDetailData): GlucoseDomainModel
   const changes = comparison.changes || {}
   const trend = safeTrend(changes.average?.trend)
   const changeValue = changes.average?.value || 0
+  const previousAvg = comparison.previous?.average || 0
 
   // Get latest reading
   const latestReading =
     chartData.length > 0
       ? {
-          value: chartData[chartData.length - 1].value,
+          value: chartData[chartData.length - 1].avg,
           typeKey: chartData[chartData.length - 1].typeKey,
           date: chartData[chartData.length - 1].date,
         }
       : null
 
+  // Get normal range
+  const normalRange = apiData?.normal_range || 
+    apiData?.trend_chart?.normal_range || 
+    { min: 3.9, max: 6.1 }
+
+  // Get weekly summary
+  const weeklySummary = apiData?.weekly_summary || {}
+
   const result: GlucoseDomainModel = {
     chartData,
-    yAxisRange: apiData?.trend_chart?.y_axis_range || { min: 3, max: 12 },
+    yAxisRange: apiData?.trend_chart?.y_axis_range || { min: 2, max: 9 },
+    averageLine: apiData?.trend_chart?.average_line || avgValue,
+    normalRange,
     summary: {
       avgValue,
       minValue,
       maxValue,
+      minWeekdayKey,
+      maxWeekdayKey,
+      previousAvg,
       avgFasting,
       avgPostMeal,
       status,
@@ -132,8 +146,14 @@ export function adaptGlucoseData(apiData: GlucoseDetailData): GlucoseDomainModel
     },
     comparison: {
       current: { average: comparison.current?.average || avgValue },
-      previous: { average: comparison.previous?.average || 0 },
+      previous: { average: previousAvg },
       insight: comparison.insight || null,
+    },
+    weeklySummary: {
+      overview: weeklySummary.overview || null,
+      highlights: weeklySummary.highlights || null,
+      suggestions: weeklySummary.suggestions || [],
+      dataAnalysis: weeklySummary.data_analysis || [],
     },
     latestReading,
   }

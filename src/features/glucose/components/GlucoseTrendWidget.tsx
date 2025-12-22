@@ -60,7 +60,10 @@ export function GlucoseTrendWidget({
 
   const chartData = data.chartData.map((point) => ({
     dateLabel: point.dateLabel,
-    value: point.value,
+    avg: point.avg,
+    min: point.min,
+    max: point.max,
+    range: [point.min, point.max] as [number, number],
     date: point.date,
   }))
 
@@ -73,16 +76,20 @@ export function GlucoseTrendWidget({
             className="w-3 h-3 rounded"
             style={{ backgroundColor: `${CHART_COLORS.glucose.primary}40` }}
           />
-          <span className="text-xs text-slate-500">{t('vitals.glucose')}</span>
+          <span className="text-xs text-slate-500">{t('page.glucose.rangeToday')}</span>
         </div>
-        <div className="text-xs text-slate-400">
-          {t('units.mmolL')}
+        <div className="flex items-center gap-1.5">
+          <span
+            className="w-3 h-0.5 rounded"
+            style={{ backgroundColor: CHART_COLORS.glucose.primary }}
+          />
+          <span className="text-xs text-slate-500">{t('common.average')}</span>
         </div>
       </div>
 
       <VitalTrendChart
         data={chartData}
-        type="area"
+        type="mixed"
         color={CHART_COLORS.glucose.primary}
         height={height}
         yDomain={[data.yAxisRange.min, data.yAxisRange.max]}

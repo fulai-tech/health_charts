@@ -1,100 +1,201 @@
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MainLayout } from '@/layouts/MainLayout'
-import { GlucoseTrendWidget, GlucoseSummaryCard } from '@/features/glucose'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { GlucoseTrendyReportCard } from '@/features/glucose/components/GlucoseTrendyReportCard'
+import { GlucoseStatisticsCard } from '@/features/glucose/components/GlucoseStatisticsCard'
+import { GlucoseCompareCard } from '@/features/glucose/components/GlucoseCompareCard'
+import { GlucoseWeeklyOverviewCard } from '@/features/glucose/components/GlucoseWeeklyOverviewCard'
+import { useGlucoseTrendData } from '@/features/glucose/api'
+import { useUrlConfig } from '@/hooks/useUrlParams'
+
+/**
+ * Format Date to YYYY-MM-DD string
+ */
+function formatDateToAPI(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+/**
+ * Format Date for display (YYYY/MM/DD)
+ */
+function formatDateForDisplay(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}/${m}/${d}`
+}
 
 /**
  * Blood Glucose Details Page
- * Route: /details/glucose
+ *
+ * URL Params:
+ * - ?lang=zh or ?lang=en (language)
+ * - ?theme=light or ?theme=dark (theme mode)
  */
 export function GlucosePage() {
   const { t } = useTranslation()
+  const { theme } = useUrlConfig()
+
+  // Date range state
+  const [dateRange, setDateRange] = useState(() => {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(end.getDate() - 6)
+    return { start, end }
+  })
+
+  // Check if we can go to next period (current end date is already today or later)
+  const canGoNext = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const endDate = new Date(dateRange.end)
+    endDate.setHours(0, 0, 0, 0)
+    // Can go next if end date is before today
+    return endDate < today
+  }, [dateRange.end])
+
+  // Format dates for API
+  const apiDateRange = useMemo(
+    () => ({
+      startDate: formatDateToAPI(dateRange.start),
+      endDate: formatDateToAPI(dateRange.end),
+    }),
+    [dateRange]
+  )
+
+  // Format dates for display
+  const displayDateRange = useMemo(
+    () => ({
+      start: formatDateForDisplay(dateRange.start),
+      end: formatDateForDisplay(dateRange.end),
+    }),
+    [dateRange]
+  )
+
+  // Handle date navigation
+  const handlePrevious = () => {
+    setDateRange((prev) => {
+      const newStart = new Date(prev.start)
+      const newEnd = new Date(prev.end)
+      newStart.setDate(newStart.getDate() - 7)
+      newEnd.setDate(newEnd.getDate() - 7)
+      return { start: newStart, end: newEnd }
+    })
+  }
+
+  const handleNext = () => {
+    if (!canGoNext) return
+
+    setDateRange((prev) => {
+      const newStart = new Date(prev.start)
+      const newEnd = new Date(prev.end)
+      newStart.setDate(newStart.getDate() + 7)
+      newEnd.setDate(newEnd.getDate() + 7)
+
+      // Ensure we don't go past today
+      const today = new Date()
+      if (newEnd > today) {
+        newEnd.setTime(today.getTime())
+        newStart.setTime(today.getTime())
+        newStart.setDate(newStart.getDate() - 6)
+      }
+
+      return { start: newStart, end: newEnd }
+    })
+  }
+
+  // Fetch Glucose data with date range - will refetch when dates change
+  const { data, isLoading, error } = useGlucoseTrendData(apiDateRange)
+
+  // Error state
+  if (error) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ backgroundColor: theme.background }}
+      >
+        <div className="text-center">
+          <p className="text-red-500 mb-2">{t('common.error')}</p>
+          <p className="text-sm" style={{ color: theme.textSecondary }}>
+            {String(error)}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <MainLayout>
-      <div className="space-y-4">
-        {/* Summary Card */}
-        <GlucoseSummaryCard />
+    <div
+      className="min-h-screen pb-20"
+      style={{ backgroundColor: theme.background }}
+    >
+      <div className="max-w-2xl mx-auto">
+        {/* Date Range Picker - Always visible, not affected by loading */}
+        <div
+          className="sticky top-0 z-10 py-3 px-4"
+          style={{
+            backgroundColor: `${theme.background}CC`,
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          <div className="flex justify-center">
+            <DateRangePicker
+              startDate={displayDateRange.start}
+              endDate={displayDateRange.end}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              disableNext={!canGoNext}
+            />
+          </div>
+        </div>
 
-        {/* Trend Chart */}
-        <GlucoseTrendWidget height={240} />
-
-        {/* Weekly Insights Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('page.glucose.weeklyComparison')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <InsightItem
-                labelKey="page.glucose.fastingLevel"
-                value="5.2"
-                unit={t('units.mmolL')}
-                change="-0.3"
-                isPositive={true}
-              />
-              <InsightItem
-                labelKey="page.glucose.postMealLevel"
-                value="7.8"
-                unit={t('units.mmolL')}
-                change="-0.5"
-                isPositive={true}
-              />
+        {/* Content - Shows loading or data */}
+        <div className="px-4 space-y-4">
+          {isLoading ? (
+            // Loading skeletons
+            <>
+              <LoadingSkeleton height="320px" />
+              <LoadingSkeleton height="200px" />
+              <LoadingSkeleton height="180px" />
+              <LoadingSkeleton height="240px" />
+            </>
+          ) : data ? (
+            // Data cards
+            <>
+              <GlucoseTrendyReportCard data={data} />
+              <GlucoseStatisticsCard data={data} />
+              <GlucoseCompareCard data={data} />
+              <GlucoseWeeklyOverviewCard data={data} />
+            </>
+          ) : (
+            // No data state
+            <div className="text-center py-12">
+              <p className="text-slate-500">{t('common.noData')}</p>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Health Tips */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-amber-500 text-sm">💡</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800 mb-1">
-                  {t('vitals.glucose')}
-                </p>
-                <p className="text-sm text-slate-500">
-                  空腹血糖正常范围为 3.9-6.1 mmol/L，餐后两小时血糖应低于 7.8 mmol/L。保持规律饮食和适当运动有助于血糖控制。
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
-    </MainLayout>
+    </div>
   )
 }
 
-interface InsightItemProps {
-  labelKey: string
-  value: string
-  unit: string
-  change: string
-  isPositive: boolean
-}
-
-function InsightItem({
-  labelKey,
-  value,
-  unit,
-  change,
-  isPositive,
-}: InsightItemProps) {
-  const { t } = useTranslation()
-
+/**
+ * Loading skeleton component
+ */
+function LoadingSkeleton({ height }: { height: string }) {
   return (
-    <div className="p-3 rounded-xl bg-slate-50">
-      <p className="text-xs text-slate-500 mb-1">{t(labelKey)}</p>
-      <div className="flex items-baseline gap-1">
-        <span className="text-xl font-semibold text-slate-800">{value}</span>
-        <span className="text-xs text-slate-400">{unit}</span>
-      </div>
-      <div
-        className={`text-xs mt-1 ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}
-      >
-        {change} vs 上周
+    <div
+      className="animate-pulse bg-white rounded-2xl p-4"
+      style={{ height }}
+    >
+      <div className="h-4 bg-slate-200 rounded w-1/3 mb-4" />
+      <div className="space-y-3">
+        <div className="h-3 bg-slate-200 rounded w-full" />
+        <div className="h-3 bg-slate-200 rounded w-5/6" />
+        <div className="h-3 bg-slate-200 rounded w-4/6" />
       </div>
     </div>
   )

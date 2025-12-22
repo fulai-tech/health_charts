@@ -60,7 +60,10 @@ export function HRTrendWidget({
 
   const chartData = data.chartData.map((point) => ({
     dateLabel: point.dateLabel,
-    value: point.value,
+    avg: point.avg,
+    min: point.min,
+    max: point.max,
+    range: [point.min, point.max] as [number, number],
     date: point.date,
   }))
 
@@ -70,19 +73,23 @@ export function HRTrendWidget({
       <div className="flex items-center gap-4 mb-3">
         <div className="flex items-center gap-1.5">
           <span
+            className="w-3 h-3 rounded"
+            style={{ backgroundColor: `${CHART_COLORS.heartRate.primary}40` }}
+          />
+          <span className="text-xs text-slate-500">{t('page.heartRate.rangeToday')}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span
             className="w-3 h-0.5 rounded"
             style={{ backgroundColor: CHART_COLORS.heartRate.primary }}
           />
-          <span className="text-xs text-slate-500">{t('vitals.heartRate')}</span>
-        </div>
-        <div className="text-xs text-slate-400">
-          {t('units.bpm')}
+          <span className="text-xs text-slate-500">{t('common.average')}</span>
         </div>
       </div>
 
       <VitalTrendChart
         data={chartData}
-        type="line"
+        type="mixed"
         color={CHART_COLORS.heartRate.primary}
         height={height}
         yDomain={[data.yAxisRange.min, data.yAxisRange.max]}

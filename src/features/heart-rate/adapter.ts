@@ -58,27 +58,32 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
 
   const rawData = apiData?.trend_chart?.chart_data || []
 
-  // Transform each data point
+  // Transform each data point - now with min/max/avg range
   const chartData: HRDataPoint[] = rawData.map((point) => {
     const date = new Date(point.date)
+    const max = point.max ?? point.value ?? 0
+    const min = point.min ?? point.value ?? 0
+    const avg = point.avg ?? point.value ?? Math.round((max + min) / 2)
 
     return {
       date,
       dateLabel: formatDate(point.date),
       weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
-      value: point.value || 0,
+      max,
+      min,
+      avg,
     }
   })
 
-  // Get average from API
-  const avgValue = apiData?.overview?.average || 0
-  const avgResting = apiData?.overview?.resting_avg
-
-  // Calculate min/max from chart data
-  const minValue =
-    chartData.length > 0 ? Math.min(...chartData.map((p) => p.value)) : 0
-  const maxValue =
-    chartData.length > 0 ? Math.max(...chartData.map((p) => p.value)) : 0
+  // Get values from overview
+  const overview = apiData?.overview || {}
+  const avgValue = overview.average || 0
+  const maxValue = overview.max ?? (chartData.length > 0 ? Math.max(...chartData.map(p => p.max)) : 0)
+  const minValue = overview.min ?? (chartData.length > 0 ? Math.min(...chartData.map(p => p.min)) : 0)
+  const maxWeekdayKey = overview.max_label ? (WEEKDAY_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
+  const minWeekdayKey = overview.min_label ? (WEEKDAY_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
+  
+  const avgResting = overview.resting_avg
 
   // Determine status
   const status = determineHRStatus(avgResting || avgValue)
@@ -88,23 +93,31 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
   const changes = comparison.changes || {}
   const trend = safeTrend(changes.average?.trend)
   const changeValue = changes.average?.value || 0
+  const previousAvg = comparison.previous?.average || 0
 
   // Get latest reading
   const latestReading =
     chartData.length > 0
       ? {
-          value: chartData[chartData.length - 1].value,
+          value: chartData[chartData.length - 1].avg,
           date: chartData[chartData.length - 1].date,
         }
       : null
 
+  // Get weekly summary
+  const weeklySummary = apiData?.weekly_summary || {}
+
   const result: HRDomainModel = {
     chartData,
     yAxisRange: apiData?.trend_chart?.y_axis_range || { min: 40, max: 160 },
+    averageLine: apiData?.trend_chart?.average_line || avgValue,
     summary: {
       avgValue,
       minValue,
       maxValue,
+      minWeekdayKey,
+      maxWeekdayKey,
+      previousAvg,
       avgResting,
       status,
       statusKey: `status.${status}`,
@@ -115,8 +128,14 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
     },
     comparison: {
       current: { average: comparison.current?.average || avgValue },
-      previous: { average: comparison.previous?.average || 0 },
+      previous: { average: previousAvg },
       insight: comparison.insight || null,
+    },
+    weeklySummary: {
+      overview: weeklySummary.overview || null,
+      highlights: weeklySummary.highlights || null,
+      suggestions: weeklySummary.suggestions || [],
+      dataAnalysis: weeklySummary.data_analysis || [],
     },
     latestReading,
   }

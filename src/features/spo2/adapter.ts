@@ -4,6 +4,7 @@ import type {
   SpO2DataPoint,
   SpO2Status,
   TrendDirection,
+  SpO2WeeklySummary,
 } from './types'
 
 /**
@@ -31,12 +32,12 @@ function formatDate(dateStr: string): string {
 
 /**
  * Determine SpO2 status based on value
- * Normal: 95-100%, Low: 90-94%, Danger: <90%
+ * Normal: 95-100%, Low: 90-94%, Too Low: <90%
  */
 function determineSpO2Status(value: number): SpO2Status {
   if (value >= 95) return 'normal'
   if (value >= 90) return 'low'
-  return 'danger'
+  return 'too_low'
 }
 
 /**
@@ -47,6 +48,14 @@ function safeTrend(trend?: string): TrendDirection {
     return trend
   }
   return 'stable'
+}
+
+/**
+ * Get weekday key from Chinese label
+ */
+function getWeekdayKey(label?: string): string {
+  if (!label) return 'weekdays.mon'
+  return WEEKDAY_MAP[label] || 'weekdays.mon'
 }
 
 /**
@@ -76,11 +85,11 @@ export function adaptSpO2Data(apiData: SpO2DetailData): SpO2DomainModel {
   // Get average from API
   const avgValue = apiData?.overview?.average || 0
 
-  // Calculate min/max from chart data
-  const minValue =
-    chartData.length > 0 ? Math.min(...chartData.map((p) => p.min)) : 0
-  const maxValue =
-    chartData.length > 0 ? Math.max(...chartData.map((p) => p.max)) : 0
+  // Get min/max from overview
+  const minValue = apiData?.overview?.min || 0
+  const maxValue = apiData?.overview?.max || 0
+  const maxWeekdayKey = getWeekdayKey(apiData?.overview?.max_label)
+  const minWeekdayKey = getWeekdayKey(apiData?.overview?.min_label)
 
   // Determine status
   const status = determineSpO2Status(avgValue)
@@ -90,6 +99,9 @@ export function adaptSpO2Data(apiData: SpO2DetailData): SpO2DomainModel {
   const changes = comparison.changes || {}
   const trend = safeTrend(changes.average?.trend)
   const changeValue = changes.average?.value || 0
+
+  // Get previous average
+  const previousAvg = comparison.previous?.average || 0
 
   // Get latest reading
   const latestReading =
@@ -102,25 +114,41 @@ export function adaptSpO2Data(apiData: SpO2DetailData): SpO2DomainModel {
         }
       : null
 
+  // Process weekly summary
+  const weeklySummaryRaw = apiData?.weekly_summary || {}
+  const weeklySummary: SpO2WeeklySummary = {
+    overview: weeklySummaryRaw.overview || null,
+    highlights: weeklySummaryRaw.highlights || null,
+    suggestions: weeklySummaryRaw.suggestions || [],
+    dataAnalysis: (weeklySummaryRaw.data_analysis || []).map((item: string) => ({
+      content: item,
+    })),
+  }
+
   const result: SpO2DomainModel = {
     chartData,
     yAxisRange: apiData?.trend_chart?.y_axis_range || { min: 85, max: 100 },
+    averageLine: apiData?.trend_chart?.average_line || avgValue,
     summary: {
       avgValue,
       minValue,
       maxValue,
+      maxWeekdayKey,
+      minWeekdayKey,
       status,
       statusKey: `status.${status}`,
       trend,
       changeValue,
       totalCount: apiData?.statistics?.total_count || 0,
       distribution: apiData?.statistics?.distribution || [],
+      previousAvg,
     },
     comparison: {
       current: { average: comparison.current?.average || avgValue },
       previous: { average: comparison.previous?.average || 0 },
       insight: comparison.insight || null,
     },
+    weeklySummary,
     latestReading,
   }
 

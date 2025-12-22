@@ -1,102 +1,186 @@
+import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MainLayout } from '@/layouts/MainLayout'
-import { SpO2TrendWidget, SpO2SummaryCard } from '@/features/spo2'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { SpO2TrendyReportCard } from '@/features/spo2/components/SpO2TrendyReportCard'
+import { SpO2StatisticsCard } from '@/features/spo2/components/SpO2StatisticsCard'
+import { SpO2DataAnalysisCard } from '@/features/spo2/components/SpO2DataAnalysisCard'
+import { SpO2WeeklyOverviewCard } from '@/features/spo2/components/SpO2WeeklyOverviewCard'
+import { useSpO2TrendData } from '@/features/spo2/api'
+import { useUrlConfig } from '@/hooks/useUrlParams'
 
 /**
- * SpO2 Details Page
- * Route: /details/spo2
+ * Format Date to YYYY-MM-DD string
+ */
+function formatDateToAPI(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+/**
+ * Format Date for display (YYYY/MM/DD)
+ */
+function formatDateForDisplay(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}/${m}/${d}`
+}
+
+/**
+ * SpO2 (Blood Oxygen) Details Page
+ *
+ * URL Params:
+ * - ?lang=zh or ?lang=en (language)
+ * - ?theme=light or ?theme=dark (theme mode)
  */
 export function SpO2Page() {
   const { t } = useTranslation()
+  const { theme } = useUrlConfig()
 
-  return (
-    <MainLayout>
-      <div className="space-y-4">
-        {/* Summary Card */}
-        <SpO2SummaryCard />
+  // Date range state
+  const [dateRange, setDateRange] = useState(() => {
+    const end = new Date()
+    const start = new Date()
+    start.setDate(end.getDate() - 6)
+    return { start, end }
+  })
 
-        {/* Trend Chart */}
-        <SpO2TrendWidget height={240} />
+  // Check if we can go to next period (current end date is already today or later)
+  const canGoNext = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const endDate = new Date(dateRange.end)
+    endDate.setHours(0, 0, 0, 0)
+    // Can go next if end date is before today
+    return endDate < today
+  }, [dateRange.end])
 
-        {/* Weekly Insights Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('page.spo2.weeklyComparison')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <InsightItem
-                labelKey="common.average"
-                value="97"
-                unit={t('units.percent')}
-                change="+0.5"
-                isPositive={true}
-              />
-              <InsightItem
-                labelKey="common.min"
-                value="95"
-                unit={t('units.percent')}
-                change="+1"
-                isPositive={true}
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Health Tips */}
-        <Card>
-          <CardContent className="py-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0">
-                <span className="text-cyan-500 text-sm">💡</span>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-800 mb-1">
-                  {t('vitals.spo2')}
-                </p>
-                <p className="text-sm text-slate-500">
-                  正常血氧饱和度应保持在 95% 以上。若低于 90%，建议及时就医检查。保持良好的呼吸习惯和适当运动有助于维持血氧水平。
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </MainLayout>
+  // Format dates for API
+  const apiDateRange = useMemo(
+    () => ({
+      startDate: formatDateToAPI(dateRange.start),
+      endDate: formatDateToAPI(dateRange.end),
+    }),
+    [dateRange]
   )
-}
 
-interface InsightItemProps {
-  labelKey: string
-  value: string
-  unit: string
-  change: string
-  isPositive: boolean
-}
+  // Format dates for display
+  const displayDateRange = useMemo(
+    () => ({
+      start: formatDateForDisplay(dateRange.start),
+      end: formatDateForDisplay(dateRange.end),
+    }),
+    [dateRange]
+  )
 
-function InsightItem({
-  labelKey,
-  value,
-  unit,
-  change,
-  isPositive,
-}: InsightItemProps) {
-  const { t } = useTranslation()
+  // Handle date navigation
+  const handlePrevious = () => {
+    setDateRange((prev) => {
+      const newStart = new Date(prev.start)
+      const newEnd = new Date(prev.end)
+      newStart.setDate(newStart.getDate() - 7)
+      newEnd.setDate(newEnd.getDate() - 7)
+      return { start: newStart, end: newEnd }
+    })
+  }
+
+  const handleNext = () => {
+    if (!canGoNext) return
+
+    setDateRange((prev) => {
+      const newStart = new Date(prev.start)
+      const newEnd = new Date(prev.end)
+      newStart.setDate(newStart.getDate() + 7)
+      newEnd.setDate(newEnd.getDate() + 7)
+
+      // Ensure we don't go past today
+      const today = new Date()
+      if (newEnd > today) {
+        newEnd.setTime(today.getTime())
+        newStart.setTime(today.getTime())
+        newStart.setDate(newStart.getDate() - 6)
+      }
+
+      return { start: newStart, end: newEnd }
+    })
+  }
+
+  // Fetch SpO2 data with date range - will refetch when dates change
+  const { data, isLoading, error } = useSpO2TrendData(apiDateRange)
+
+  // Error state
+  if (error) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ backgroundColor: theme.background }}
+      >
+        <div className="text-center">
+          <p className="text-red-500 mb-2">{t('common.error')}</p>
+          <p className="text-sm" style={{ color: theme.textSecondary }}>
+            {String(error)}
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="p-3 rounded-xl bg-slate-50">
-      <p className="text-xs text-slate-500 mb-1">{t(labelKey)}</p>
-      <div className="flex items-baseline gap-1">
-        <span className="text-xl font-semibold text-slate-800">{value}</span>
-        <span className="text-xs text-slate-400">{unit}</span>
-      </div>
-      <div
-        className={`text-xs mt-1 ${isPositive ? 'text-emerald-500' : 'text-rose-500'}`}
-      >
-        {change} vs 上周
+    <div
+      className="min-h-screen pb-20"
+      style={{ backgroundColor: theme.background }}
+    >
+      <div className="max-w-2xl mx-auto">
+        {/* Date Range Picker - Always visible, not affected by loading */}
+        <div
+          className="sticky top-0 z-10 py-3 px-4"
+          style={{
+            backgroundColor: `${theme.background}CC`,
+            backdropFilter: 'blur(8px)',
+          }}
+        >
+          <div className="flex justify-center">
+            <DateRangePicker
+              startDate={displayDateRange.start}
+              endDate={displayDateRange.end}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              disableNext={!canGoNext}
+            />
+          </div>
+        </div>
+
+        {/* Content - Shows loading or data */}
+        <div className="px-4 space-y-4">
+          {isLoading ? (
+            // Loading skeleton
+            <>
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="h-48 rounded-2xl animate-pulse"
+                  style={{ backgroundColor: theme.cardBackground }}
+                />
+              ))}
+            </>
+          ) : !data ? (
+            // No data state
+            <div className="flex items-center justify-center py-20">
+              <p style={{ color: theme.textSecondary }}>{t('common.noData')}</p>
+            </div>
+          ) : (
+            // Data loaded
+            <>
+              <SpO2TrendyReportCard data={data} />
+              <SpO2StatisticsCard data={data} />
+              <SpO2DataAnalysisCard data={data} />
+              <SpO2WeeklyOverviewCard data={data} />
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
 }
-

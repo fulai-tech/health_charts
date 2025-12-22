@@ -17,6 +17,9 @@ import { HRTrendWidgetPage } from '@/pages/widget/HRTrendWidgetPage'
 import { GlucosePage } from '@/pages/details/GlucosePage'
 import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
 
+// Home Page
+import { HomePage } from '@/pages/HomePage'
+
 // Initialize i18n
 import '@/i18n'
 
@@ -41,8 +44,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          {/* Home redirect to blood pressure details */}
-          <Route path="/" element={<Navigate to="/details/blood-pressure" replace />} />
+          {/* Home Page - Route Navigation */}
+          <Route path="/" element={<HomePage />} />
 
           {/* ============================================ */}
           {/* Full Detail Pages */}

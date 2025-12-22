@@ -1,4 +1,16 @@
 {
+  "nav": {
+    "bloodPressure": "血压",
+    "spo2": "血氧",
+    "heartRate": "心率",
+    "glucose": "血糖"
+  },
+  "home": {
+    "title": "健康数据可视化",
+    "subtitle": "Health Vital Visualization 组件库",
+    "detailPages": "详情页面",
+    "widgetPages": "Widget 组件"
+  },
   "common": {
     "loading": "加载中...",
     "error": "发生错误",
@@ -31,13 +43,15 @@
     "percent": "%",
     "mgDl": "mg/dL",
     "mmolL": "mmol/L",
-    "bpm": "次/分"
+    "bpm": "次/分",
+    "minute": "分钟"
   },
   "status": {
     "normal": "正常",
     "elevated": "偏高",
     "high": "过高",
     "low": "偏低",
+    "slow": "过缓",
     "good": "良好",
     "warning": "警告",
     "danger": "危险",
@@ -86,28 +100,79 @@
     "spo2": {
       "title": "血氧详情",
       "trendTitle": "血氧趋势",
+      "trendyReport": "趋势报告",
+      "weeksAverage": "本周平均血氧",
+      "normalRange": "正常范围",
+      "range": "范围",
+      "mean": "均值",
+      "statistics": "血氧统计",
+      "totalTests": "总测试次数",
+      "dataAnalysis": "数据分析",
+      "weeklyOverview": "周报概览",
+      "overallSituation": "整体情况",
+      "anomalyAlert": "异常警报",
       "weeklyComparison": "本周对比",
       "averageReading": "平均血氧",
       "lastReading": "最近读数",
-      "rangeToday": "今日范围"
+      "rangeToday": "今日范围",
+      "defaultAnalysis1": "本周平均血氧饱和度为 {{avg}}%，与上周持平。",
+      "defaultAnalysis2": "血氧水平在{{maxDay}}保持较高水平（{{max}}%）。",
+      "defaultAnalysis3": "{{minDay}}记录到血氧水平为 {{min}}%，略低于正常范围下限。",
+      "defaultOverview": "您的血氧整体处于理想范围内。虽然与上周相比略有波动，但仍处于正常波动范围内。",
+      "defaultHighlights": "趋势图显示您的血氧在本周中有明显波动。统计数据显示您的血氧测量值在不同水平间有一定变化。我们将继续监测您的状况，并帮助您识别任何可能导致血氧偏低的原因。",
+      "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
     },
     "heartRate": {
       "title": "心率详情",
       "trendTitle": "心率趋势",
+      "trendyReport": "趋势报告",
+      "weeksAverage": "本周平均心率",
+      "range": "范围",
+      "mean": "均值",
+      "statistics": "心率统计",
+      "totalTests": "总测试次数",
+      "dataAnalysis": "数据分析",
+      "weeklyOverview": "周报概览",
+      "overallSituation": "整体情况",
+      "anomalyAlert": "异常警报",
       "weeklyComparison": "本周对比",
       "averageReading": "平均心率",
       "lastReading": "最近读数",
       "restingHR": "静息心率",
-      "maxHR": "最高心率"
+      "maxHR": "最高心率",
+      "defaultAnalysis1": "本周平均心率为 {{avg}} 次/分。",
+      "defaultAnalysis2": "心率在{{maxDay}}达到峰值 {{max}} 次/分。",
+      "defaultAnalysis3": "{{minDay}}记录到最低心率 {{min}} 次/分。",
+      "defaultOverview": "您的心率本周整体处于正常范围内。继续保持常规的运动习惯！",
+      "defaultHighlights": "趋势图显示您的心率在本周中有一些波动。这是正常的，可能会受到体力活动、压力水平和睡眠质量的影响。",
+      "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
     },
     "glucose": {
       "title": "血糖详情",
       "trendTitle": "血糖趋势",
+      "trendyReport": "趋势报告",
+      "weeksAverage": "本周平均血糖",
+      "normalRange": "正常范围",
+      "range": "范围",
+      "mean": "均值",
+      "statistics": "血糖统计",
+      "normalResults": "次正常血糖结果",
+      "compareWithLastWeek": "与上周对比",
+      "averageGlucose": "平均血糖",
+      "weeklyOverview": "周报概览",
+      "overallSituation": "整体情况",
+      "needsAttention": "需要注意",
       "weeklyComparison": "本周对比",
       "averageReading": "平均血糖",
       "lastReading": "最近读数",
       "fastingLevel": "空腹血糖",
-      "postMealLevel": "餐后血糖"
+      "postMealLevel": "餐后血糖",
+      "fastingNormal": "空腹正常值",
+      "postMealNormal": "餐后正常值",
+      "defaultInsight": "您的血糖水平整体处于正常范围内。请继续保持均衡的饮食和规律的运动习惯，以维持稳定的血糖水平。",
+      "defaultOverview": "本周您的血糖水平整体处于正常范围内。继续保持良好的饮食和运动习惯！",
+      "defaultHighlights": "趋势图显示您的血糖在本周中有一些波动。请注意饮食，尤其是餐后，以保持血糖水平稳定。",
+      "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
     }
   }
 }

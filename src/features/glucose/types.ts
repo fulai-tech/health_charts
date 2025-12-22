@@ -25,8 +25,12 @@ export interface GlucoseDataPoint {
   dateLabel: string
   /** Short weekday label (translation key) */
   weekdayKey: string
-  /** Glucose value in mmol/L */
-  value: number
+  /** Maximum glucose value in mmol/L */
+  max: number
+  /** Minimum glucose value in mmol/L */
+  min: number
+  /** Average glucose value (calculated from min/max) */
+  avg: number
   /** Measurement type translation key */
   typeKey?: string
 }
@@ -39,6 +43,12 @@ export interface GlucoseSummary {
   minValue: number
   /** Maximum recorded value */
   maxValue: number
+  /** Weekday key for min value */
+  minWeekdayKey: string
+  /** Weekday key for max value */
+  maxWeekdayKey: string
+  /** Previous week average */
+  previousAvg: number
   /** Average fasting glucose */
   avgFasting?: number
   /** Average post-meal glucose */
@@ -64,16 +74,30 @@ export interface GlucoseComparison {
   insight: string | null
 }
 
+/** Weekly summary data */
+export interface GlucoseWeeklySummary {
+  overview: string | null
+  highlights: string | null
+  suggestions: string[]
+  dataAnalysis: { content: string }[]
+}
+
 /** Complete domain model for glucose feature */
 export interface GlucoseDomainModel {
   /** Processed chart data points */
   chartData: GlucoseDataPoint[]
   /** Y-axis range for chart */
   yAxisRange: { min: number; max: number }
+  /** Average line value for chart */
+  averageLine: number
+  /** Normal range */
+  normalRange: { min: number; max: number }
   /** Summary statistics */
   summary: GlucoseSummary
   /** Comparison with previous period */
   comparison: GlucoseComparison
+  /** Weekly summary */
+  weeklySummary: GlucoseWeeklySummary
   /** Latest reading */
   latestReading: {
     value: number

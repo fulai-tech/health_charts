@@ -4,7 +4,7 @@
  */
 
 /** Status levels for SpO2 readings */
-export type SpO2Status = 'normal' | 'low' | 'danger'
+export type SpO2Status = 'normal' | 'low' | 'too_low'
 
 /** Trend direction */
 export type TrendDirection = 'up' | 'down' | 'stable'
@@ -43,6 +43,10 @@ export interface SpO2Summary {
   minValue: number
   /** Maximum recorded value */
   maxValue: number
+  /** Max value weekday key */
+  maxWeekdayKey: string
+  /** Min value weekday key */
+  minWeekdayKey: string
   /** Status based on average values */
   status: SpO2Status
   /** Status translation key */
@@ -55,6 +59,8 @@ export interface SpO2Summary {
   totalCount: number
   /** Distribution data */
   distribution: SpO2Distribution[]
+  /** Previous week average */
+  previousAvg: number
 }
 
 /** Comparison data */
@@ -64,16 +70,33 @@ export interface SpO2Comparison {
   insight: string | null
 }
 
+/** Data analysis item */
+export interface SpO2DataAnalysisItem {
+  content: string
+}
+
+/** Weekly summary */
+export interface SpO2WeeklySummary {
+  overview: string | null
+  highlights: string | null
+  suggestions: string[]
+  dataAnalysis: SpO2DataAnalysisItem[]
+}
+
 /** Complete domain model for SpO2 feature */
 export interface SpO2DomainModel {
   /** Processed chart data points */
   chartData: SpO2DataPoint[]
   /** Y-axis range for chart */
   yAxisRange: { min: number; max: number }
+  /** Average line value for chart */
+  averageLine: number
   /** Summary statistics */
   summary: SpO2Summary
   /** Comparison with previous period */
   comparison: SpO2Comparison
+  /** Weekly summary */
+  weeklySummary: SpO2WeeklySummary
   /** Latest reading */
   latestReading: {
     avg: number

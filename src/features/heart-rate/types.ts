@@ -25,8 +25,12 @@ export interface HRDataPoint {
   dateLabel: string
   /** Short weekday label (translation key) */
   weekdayKey: string
-  /** Heart rate value */
-  value: number
+  /** Maximum heart rate value */
+  max: number
+  /** Minimum heart rate value */
+  min: number
+  /** Average heart rate value */
+  avg: number
 }
 
 /** Summary statistics */
@@ -37,6 +41,12 @@ export interface HRSummary {
   minValue: number
   /** Maximum recorded value */
   maxValue: number
+  /** Weekday key for min value */
+  minWeekdayKey: string
+  /** Weekday key for max value */
+  maxWeekdayKey: string
+  /** Previous week average */
+  previousAvg: number
   /** Average resting heart rate */
   avgResting?: number
   /** Status based on average values */
@@ -60,16 +70,28 @@ export interface HRComparison {
   insight: string | null
 }
 
+/** Weekly summary data */
+export interface HRWeeklySummary {
+  overview: string | null
+  highlights: string | null
+  suggestions: string[]
+  dataAnalysis: { content: string }[]
+}
+
 /** Complete domain model for heart rate feature */
 export interface HRDomainModel {
   /** Processed chart data points */
   chartData: HRDataPoint[]
   /** Y-axis range for chart */
   yAxisRange: { min: number; max: number }
+  /** Average line value for chart */
+  averageLine: number
   /** Summary statistics */
   summary: HRSummary
   /** Comparison with previous period */
   comparison: HRComparison
+  /** Weekly summary */
+  weeklySummary: HRWeeklySummary
   /** Latest reading */
   latestReading: {
     value: number
