@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { SpO2TrendyReportCard } from '@/features/spo2/components/SpO2TrendyReportCard'
@@ -108,7 +108,45 @@ export function SpO2Page() {
   }
 
   // Fetch SpO2 data with date range - will refetch when dates change
-  const { data, isLoading, error } = useSpO2TrendData(apiDateRange)
+  const { data, isLoading, isFetching, error } = useSpO2TrendData(apiDateRange)
+
+  // Minimum loading time control (1 second)
+  const [showLoading, setShowLoading] = useState(false)
+  const loadingTimerRef = useRef<number | null>(null)
+  const loadingStartRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (isFetching) {
+      // Start loading
+      setShowLoading(true)
+      loadingStartRef.current = Date.now()
+      
+      // Clear any existing timer
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+        loadingTimerRef.current = null
+      }
+    } else {
+      // Data loaded - ensure minimum 1s display time
+      const elapsed = Date.now() - loadingStartRef.current
+      const remaining = Math.max(0, 1000 - elapsed)
+      
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+      }
+      
+      loadingTimerRef.current = setTimeout(() => {
+        setShowLoading(false)
+        loadingTimerRef.current = null
+      }, remaining)
+    }
+
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+      }
+    }
+  }, [isFetching])
 
   // Error state
   if (error) {
@@ -154,30 +192,19 @@ export function SpO2Page() {
 
         {/* Content - Shows loading or data */}
         <div className="px-4 space-y-4">
-          {isLoading ? (
-            // Loading skeleton
-            <>
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-48 rounded-2xl animate-pulse"
-                  style={{ backgroundColor: theme.cardBackground }}
-                />
-              ))}
-            </>
-          ) : !data ? (
-            // No data state
+          {!data && !isLoading ? (
+            // No data state (after loading completes with no data)
             <div className="flex items-center justify-center py-20">
               <p style={{ color: theme.textSecondary }}>{t('common.noData')}</p>
             </div>
           ) : (
-            // Data loaded
-            <>
-              <SpO2TrendyReportCard data={data} />
-              <SpO2StatisticsCard data={data} />
-              <SpO2DataAnalysisCard data={data} />
-              <SpO2WeeklyOverviewCard data={data} />
-            </>
+            // Always show cards - with overlay when loading
+            <div className="space-y-4">
+              <SpO2TrendyReportCard data={data} isLoading={showLoading || isLoading} />
+              <SpO2StatisticsCard data={data} isLoading={showLoading || isLoading} />
+              <SpO2DataAnalysisCard data={data} isLoading={showLoading || isLoading} />
+              <SpO2WeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
+            </div>
           )}
         </div>
       </div>

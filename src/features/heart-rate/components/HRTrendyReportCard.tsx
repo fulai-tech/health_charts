@@ -10,14 +10,15 @@ import {
   ReferenceLine,
   Tooltip,
 } from 'recharts'
-import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { HRDomainModel } from '../types'
 
 interface HRTrendyReportCardProps {
-  data: HRDomainModel
+  data?: HRDomainModel
   className?: string
+  isLoading?: boolean
 }
 
 /**
@@ -65,22 +66,34 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 /**
  * HR Trendy Report Card
  */
-export function HRTrendyReportCard({ data, className }: HRTrendyReportCardProps) {
+export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.heartRate
 
+  // Placeholder data when no real data
+  const placeholderChartData = [
+    { name: 'Mon', weekdayKey: 'weekday.mon', range: [60, 85] as [number, number], avg: 72, max: 85, min: 60 },
+    { name: 'Tues', weekdayKey: 'weekday.tue', range: [62, 88] as [number, number], avg: 75, max: 88, min: 62 },
+    { name: 'Wed', weekdayKey: 'weekday.wed', range: [58, 82] as [number, number], avg: 70, max: 82, min: 58 },
+    { name: 'Thu', weekdayKey: 'weekday.thu', range: [65, 90] as [number, number], avg: 78, max: 90, min: 65 },
+    { name: 'Fri', weekdayKey: 'weekday.fri', range: [60, 84] as [number, number], avg: 72, max: 84, min: 60 },
+    { name: 'Sat', weekdayKey: 'weekday.sat', range: [55, 80] as [number, number], avg: 68, max: 80, min: 55 },
+    { name: 'Sun', weekdayKey: 'weekday.sun', range: [58, 83] as [number, number], avg: 70, max: 83, min: 58 },
+  ]
+
   // Prepare chart data with range as [min, max] tuple for Area
-  const chartData = data.chartData.map((point, index) => ({
+  const chartData = data?.chartData?.map((point, index) => ({
     name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
     weekdayKey: point.weekdayKey,
     range: [point.min, point.max] as [number, number],
     avg: point.avg,
     max: point.max,
     min: point.min,
-  }))
+  })) ?? placeholderChartData
 
   // Get trend icon and color
   const getTrendDisplay = () => {
+    if (!data) return null
     const { trend, changeValue } = data.summary
     if (changeValue === 0) return null
 
@@ -97,7 +110,16 @@ export function HRTrendyReportCard({ data, className }: HRTrendyReportCardProps)
   }
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
@@ -116,13 +138,13 @@ export function HRTrendyReportCard({ data, className }: HRTrendyReportCardProps)
             </p>
             <div className="flex items-baseline gap-1.5">
               <span className="text-3xl font-bold" style={{ color: themeColor }}>
-                {data.summary.avgValue}
+                {data?.summary?.avgValue ?? '--'}
               </span>
               <span className="text-lg text-slate-500">/{t('units.minute')}</span>
               {getTrendDisplay()}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              {t('time.lastWeek')}: {data.summary.previousAvg}/{t('units.minute')}
+              {t('time.lastWeek')}: {data?.summary?.previousAvg ?? '--'}/{t('units.minute')}
             </p>
           </div>
         </div>
@@ -130,15 +152,15 @@ export function HRTrendyReportCard({ data, className }: HRTrendyReportCardProps)
         {/* Bottom Row: Highest / Lowest */}
         <div className="flex gap-6">
           <div>
-            <span className="text-xs text-slate-400">{t('common.max')}({t(data.summary.maxWeekdayKey)})</span>
+            <span className="text-xs text-slate-400">{t('common.max')}({data ? t(data.summary.maxWeekdayKey) : '--'})</span>
             <p className="text-xl font-semibold" style={{ color: themeColor }}>
-              {data.summary.maxValue} <span className="text-sm font-normal">/{t('units.minute')}</span>
+              {data?.summary?.maxValue ?? '--'} <span className="text-sm font-normal">/{t('units.minute')}</span>
             </p>
           </div>
           <div>
-            <span className="text-xs text-slate-400">{t('common.min')}({t(data.summary.minWeekdayKey)})</span>
+            <span className="text-xs text-slate-400">{t('common.min')}({data ? t(data.summary.minWeekdayKey) : '--'})</span>
             <p className="text-xl font-semibold text-slate-600">
-              {data.summary.minValue} <span className="text-sm font-normal">/{t('units.minute')}</span>
+              {data?.summary?.minValue ?? '--'} <span className="text-sm font-normal">/{t('units.minute')}</span>
             </p>
           </div>
         </div>
@@ -183,11 +205,11 @@ export function HRTrendyReportCard({ data, className }: HRTrendyReportCardProps)
               tick={{ fontSize: 11, fill: '#94a3b8' }}
               tickLine={false}
               axisLine={false}
-              domain={[data.yAxisRange.min, data.yAxisRange.max]}
+              domain={[data?.yAxisRange?.min ?? 50, data?.yAxisRange?.max ?? 120]}
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine
-              y={data.averageLine}
+              y={data?.averageLine ?? 72}
               stroke={themeColor}
               strokeDasharray="4 4"
               strokeWidth={1.5}

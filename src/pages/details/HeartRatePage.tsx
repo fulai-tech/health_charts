@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { HRTrendyReportCard } from '@/features/heart-rate/components/HRTrendyReportCard'
@@ -108,7 +108,45 @@ export function HeartRatePage() {
   }
 
   // Fetch HR data with date range - will refetch when dates change
-  const { data, isLoading, error } = useHRTrendData(apiDateRange)
+  const { data, isLoading, isFetching, error } = useHRTrendData(apiDateRange)
+
+  // Minimum loading time control (1 second)
+  const [showLoading, setShowLoading] = useState(false)
+  const loadingTimerRef = useRef<number | null>(null)
+  const loadingStartRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (isFetching) {
+      // Start loading
+      setShowLoading(true)
+      loadingStartRef.current = Date.now()
+      
+      // Clear any existing timer
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+        loadingTimerRef.current = null
+      }
+    } else {
+      // Data loaded - ensure minimum 1s display time
+      const elapsed = Date.now() - loadingStartRef.current
+      const remaining = Math.max(0, 1000 - elapsed)
+      
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+      }
+      
+      loadingTimerRef.current = setTimeout(() => {
+        setShowLoading(false)
+        loadingTimerRef.current = null
+      }, remaining)
+    }
+
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+      }
+    }
+  }, [isFetching])
 
   // Error state
   if (error) {
@@ -154,26 +192,18 @@ export function HeartRatePage() {
 
         {/* Content - Shows loading or data */}
         <div className="px-4 space-y-4">
-          {isLoading ? (
-            // Loading skeletons
-            <>
-              <LoadingSkeleton height="320px" />
-              <LoadingSkeleton height="180px" />
-              <LoadingSkeleton height="200px" />
-              <LoadingSkeleton height="240px" />
-            </>
-          ) : data ? (
-            // Data cards
-            <>
-              <HRTrendyReportCard data={data} />
-              <HRStatisticsCard data={data} />
-              <HRDataAnalysisCard data={data} />
-              <HRWeeklyOverviewCard data={data} />
-            </>
-          ) : (
-            // No data state
+          {!data && !isLoading ? (
+            // No data state (after loading completes with no data)
             <div className="text-center py-12">
               <p className="text-slate-500">{t('common.noData')}</p>
+            </div>
+          ) : (
+            // Always show cards - with overlay when loading
+            <div className="space-y-4">
+              <HRTrendyReportCard data={data} isLoading={showLoading || isLoading} />
+              <HRStatisticsCard data={data} isLoading={showLoading || isLoading} />
+              <HRDataAnalysisCard data={data} isLoading={showLoading || isLoading} />
+              <HRWeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
             </div>
           )}
         </div>
@@ -181,23 +211,3 @@ export function HeartRatePage() {
     </div>
   )
 }
-
-/**
- * Loading skeleton component
- */
-function LoadingSkeleton({ height }: { height: string }) {
-  return (
-    <div
-      className="animate-pulse bg-white rounded-2xl p-4"
-      style={{ height }}
-    >
-      <div className="h-4 bg-slate-200 rounded w-1/3 mb-4" />
-      <div className="space-y-3">
-        <div className="h-3 bg-slate-200 rounded w-full" />
-        <div className="h-3 bg-slate-200 rounded w-5/6" />
-        <div className="h-3 bg-slate-200 rounded w-4/6" />
-      </div>
-    </div>
-  )
-}
-

@@ -13,27 +13,17 @@ export interface SubMetric {
 }
 
 export interface MetricSummaryCardProps {
-  /** Translation key for the title */
   titleKey: string
-  /** Main value to display */
   value: number | string
-  /** Unit of the value */
   unit: string
-  /** Trend direction */
   trend?: TrendDirection
-  /** Optional trend value (e.g., "+5%") */
   trendValue?: string
-  /** Sub-metrics to display below the main value */
   subMetrics?: SubMetric[]
-  /** Accent color for the card */
   accentColor?: string
   className?: string
+  loadingIndicator?: React.ReactNode
 }
 
-/**
- * MetricSummaryCard - Displays a health metric with trend and sub-metrics
- * Used for blood pressure, blood oxygen, glucose summaries
- */
 export function MetricSummaryCard({
   titleKey,
   value,
@@ -43,10 +33,10 @@ export function MetricSummaryCard({
   subMetrics = [],
   accentColor,
   className,
+  loadingIndicator,
 }: MetricSummaryCardProps) {
   const { t } = useTranslation()
 
-  // Safely get trend icon with fallback
   const trendIconMap = {
     up: TrendingUp,
     down: TrendingDown,
@@ -69,31 +59,30 @@ export function MetricSummaryCard({
         borderLeftColor: accentColor,
       }}
     >
-      {/* Title */}
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm font-medium text-slate-600">
           {t(titleKey)}
         </span>
-        {/* Trend Badge */}
-        <div
-          className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-          style={{
-            backgroundColor: `${trendColor}15`,
-            color: trendColor,
-          }}
-        >
-          <TrendIcon className="w-3 h-3" />
-          {trendValue && <span>{trendValue}</span>}
+        <div className="flex items-center gap-2">
+          {loadingIndicator}
+          <div
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+            style={{
+              backgroundColor: `${trendColor}15`,
+              color: trendColor,
+            }}
+          >
+            <TrendIcon className="w-3 h-3" />
+            {trendValue && <span>{trendValue}</span>}
+          </div>
         </div>
       </div>
 
-      {/* Main Value */}
       <div className="flex items-baseline gap-2 mb-4">
         <span className="text-4xl font-bold text-slate-900">{value}</span>
         <span className="text-lg text-slate-500">{unit}</span>
       </div>
 
-      {/* Sub Metrics */}
       {subMetrics.length > 0 && (
         <div className="flex gap-4 pt-3 border-t border-slate-100">
           {subMetrics.map((metric, index) => (

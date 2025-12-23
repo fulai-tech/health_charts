@@ -4,49 +4,23 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { CHART_COLORS } from '@/config/theme'
 import { useBPTrendData } from '../api'
 import { cn } from '@/lib/utils'
+import { memo, useMemo } from 'react'
+import { Loader2 } from 'lucide-react'
 
 interface BPTrendWidgetProps {
-  /** Show card wrapper (true for standalone, false for embedding) */
   showCard?: boolean
-  /** Chart height */
   height?: number
   className?: string
 }
 
-/**
- * Blood Pressure Trend Widget
- * Displays a trend chart with systolic/diastolic values
- * Can be used standalone or embedded in larger components
- */
-export function BPTrendWidget({
+const BPTrendWidgetInner = ({
   showCard = true,
   height = 200,
   className,
-}: BPTrendWidgetProps) {
+}: BPTrendWidgetProps) => {
   const { t } = useTranslation()
   const { data, isLoading, isError, refetch } = useBPTrendData()
 
-  // Loading skeleton
-  if (isLoading) {
-    return (
-      <SkeletonWrapper showCard={showCard} className={className}>
-        <div className="animate-pulse">
-          <div className="h-4 bg-slate-200 rounded w-1/3 mb-4" />
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="h-3 bg-slate-200 rounded"
-                style={{ width: `${60 + Math.random() * 40}%` }}
-              />
-            ))}
-          </div>
-        </div>
-      </SkeletonWrapper>
-    )
-  }
-
-  // Error state
   if (isError || !data) {
     return (
       <SkeletonWrapper showCard={showCard} className={className}>
@@ -61,19 +35,21 @@ export function BPTrendWidget({
         </div>
       </SkeletonWrapper>
     )
+
   }
 
-  // Transform data for range chart
-  const chartData = data.chartData.map((point) => ({
-    dateLabel: point.dateLabel,
-    high: point.systolic,
-    low: point.diastolic,
-    date: point.date,
-  }))
+  const chartData = useMemo(
+    () => data.chartData.map((point) => ({
+      dateLabel: point.dateLabel,
+      high: point.systolic,
+      low: point.diastolic,
+      date: point.date,
+    })),
+    [data.chartData]
+  )
 
   const chartContent = (
     <>
-      {/* Legend */}
       <div className="flex items-center gap-4 mb-3">
         <div className="flex items-center gap-1.5">
           <span
@@ -92,9 +68,14 @@ export function BPTrendWidget({
           />
           <span className="text-xs text-slate-500">{t('vitals.diastolic')}</span>
         </div>
+        {isLoading && (
+          <div className="ml-auto flex items-center gap-1.5 text-xs text-slate-400">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>{t('common.loading')}</span>
+          </div>
+        )}
       </div>
 
-      {/* Chart */}
       <VitalTrendChart
         data={chartData}
         type="range"
@@ -120,7 +101,8 @@ export function BPTrendWidget({
   )
 }
 
-// Helper component for consistent wrapper
+export const BPTrendWidget = memo(BPTrendWidgetInner)
+
 function SkeletonWrapper({
   showCard,
   className,

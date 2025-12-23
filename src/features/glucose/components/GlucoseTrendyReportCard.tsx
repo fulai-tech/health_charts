@@ -10,14 +10,15 @@ import {
   ReferenceLine,
   Tooltip,
 } from 'recharts'
-import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { GlucoseDomainModel } from '../types'
 
 interface GlucoseTrendyReportCardProps {
-  data: GlucoseDomainModel
+  data?: GlucoseDomainModel
   className?: string
+  isLoading?: boolean
 }
 
 /**
@@ -62,22 +63,34 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 /**
  * Glucose Trendy Report Card
  */
-export function GlucoseTrendyReportCard({ data, className }: GlucoseTrendyReportCardProps) {
+export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseTrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.glucose
 
+  // Placeholder data when no real data
+  const placeholderChartData = [
+    { name: 'Mon', weekdayKey: 'weekday.mon', range: [4.5, 6.5] as [number, number], avg: 5.5, max: 6.5, min: 4.5 },
+    { name: 'Tues', weekdayKey: 'weekday.tue', range: [4.8, 7.0] as [number, number], avg: 5.8, max: 7.0, min: 4.8 },
+    { name: 'Wed', weekdayKey: 'weekday.wed', range: [4.6, 6.8] as [number, number], avg: 5.6, max: 6.8, min: 4.6 },
+    { name: 'Thu', weekdayKey: 'weekday.thu', range: [4.4, 6.4] as [number, number], avg: 5.4, max: 6.4, min: 4.4 },
+    { name: 'Fri', weekdayKey: 'weekday.fri', range: [4.7, 6.9] as [number, number], avg: 5.7, max: 6.9, min: 4.7 },
+    { name: 'Sat', weekdayKey: 'weekday.sat', range: [4.5, 6.6] as [number, number], avg: 5.5, max: 6.6, min: 4.5 },
+    { name: 'Sun', weekdayKey: 'weekday.sun', range: [4.6, 6.7] as [number, number], avg: 5.6, max: 6.7, min: 4.6 },
+  ]
+
   // Prepare chart data with range as [min, max] tuple for Area
-  const chartData = data.chartData.map((point, index) => ({
+  const chartData = data?.chartData?.map((point, index) => ({
     name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
     weekdayKey: point.weekdayKey,
     range: [point.min, point.max] as [number, number],
     avg: point.avg,
     max: point.max,
     min: point.min,
-  }))
+  })) ?? placeholderChartData
 
   // Get trend icon and color
   const getTrendDisplay = () => {
+    if (!data) return null
     const { trend, changeValue } = data.summary
     if (changeValue === 0) return null
 
@@ -95,7 +108,16 @@ export function GlucoseTrendyReportCard({ data, className }: GlucoseTrendyReport
   }
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
@@ -114,32 +136,32 @@ export function GlucoseTrendyReportCard({ data, className }: GlucoseTrendyReport
             </p>
             <div className="flex items-baseline gap-1.5">
               <span className="text-3xl font-bold" style={{ color: themeColor }}>
-                {data.summary.avgValue.toFixed(1)}
+                {data?.summary?.avgValue?.toFixed(1) ?? '--'}
               </span>
               <span className="text-lg text-slate-500">{t('units.mmolL')}</span>
               {getTrendDisplay()}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              {t('time.lastWeek')}: {data.summary.previousAvg.toFixed(1)} {t('units.mmolL')}
+              {t('time.lastWeek')}: {data?.summary?.previousAvg?.toFixed(1) ?? '--'} {t('units.mmolL')}
             </p>
           </div>
           <div className="text-right text-xs text-slate-400 px-3 py-1.5 rounded-lg bg-white/60">
-            <p>{t('page.glucose.normalRange')}: {data.normalRange.min}-{data.normalRange.max} {t('units.mmolL')}</p>
+            <p>{t('page.glucose.normalRange')}: {data?.normalRange?.min ?? 3.9}-{data?.normalRange?.max ?? 6.1} {t('units.mmolL')}</p>
           </div>
         </div>
 
         {/* Bottom Row: Highest / Lowest */}
         <div className="flex gap-6">
           <div>
-            <span className="text-xs text-slate-400">{t('common.max')}({t(data.summary.maxWeekdayKey)})</span>
+            <span className="text-xs text-slate-400">{t('common.max')}({data ? t(data.summary.maxWeekdayKey) : '--'})</span>
             <p className="text-xl font-semibold" style={{ color: themeColor }}>
-              {data.summary.maxValue.toFixed(1)} <span className="text-sm font-normal">{t('units.mmolL')}</span>
+              {data?.summary?.maxValue?.toFixed(1) ?? '--'} <span className="text-sm font-normal">{t('units.mmolL')}</span>
             </p>
           </div>
           <div>
-            <span className="text-xs text-slate-400">{t('common.min')}({t(data.summary.minWeekdayKey)})</span>
+            <span className="text-xs text-slate-400">{t('common.min')}({data ? t(data.summary.minWeekdayKey) : '--'})</span>
             <p className="text-xl font-semibold text-slate-600">
-              {data.summary.minValue.toFixed(1)} <span className="text-sm font-normal">{t('units.mmolL')}</span>
+              {data?.summary?.minValue?.toFixed(1) ?? '--'} <span className="text-sm font-normal">{t('units.mmolL')}</span>
             </p>
           </div>
         </div>
@@ -184,11 +206,11 @@ export function GlucoseTrendyReportCard({ data, className }: GlucoseTrendyReport
               tick={{ fontSize: 11, fill: '#94a3b8' }}
               tickLine={false}
               axisLine={false}
-              domain={[data.yAxisRange.min, data.yAxisRange.max]}
+              domain={[data?.yAxisRange?.min ?? 3, data?.yAxisRange?.max ?? 10]}
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine
-              y={data.averageLine}
+              y={data?.averageLine ?? 5.5}
               stroke={themeColor}
               strokeDasharray="4 4"
               strokeWidth={1.5}

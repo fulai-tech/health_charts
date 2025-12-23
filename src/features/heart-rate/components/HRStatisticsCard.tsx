@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
-import { Activity, Info } from 'lucide-react'
+import { Activity, Info, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { HRDomainModel } from '../types'
 
 interface HRStatisticsCardProps {
-  data: HRDomainModel
+  data?: HRDomainModel
   className?: string
+  isLoading?: boolean
 }
 
 // Status colors for Heart Rate
@@ -34,11 +35,12 @@ const STAT_LABELS: Record<string, string> = {
 /**
  * HR Statistics Card
  */
-export function HRStatisticsCard({ data, className }: HRStatisticsCardProps) {
+export function HRStatisticsCard({ data, className, isLoading }: HRStatisticsCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.heartRate
 
-  const { distribution, totalCount } = data.summary
+  const distribution = data?.summary?.distribution ?? []
+  const totalCount = data?.summary?.totalCount ?? 0
 
   // Order distribution by our defined order
   const orderedDistribution = STAT_ORDER.map((type) => {
@@ -62,7 +64,16 @@ export function HRStatisticsCard({ data, className }: HRStatisticsCardProps) {
     }))
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <Activity className="w-5 h-5" style={{ color: themeColor }} />

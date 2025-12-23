@@ -49,6 +49,14 @@ export const CHART_COLORS = {
   },
 } as const
 
+/**
+ * UI Components Styles
+ */
+export const UI_STYLES = {
+  /** Loading overlay background color */
+  loadingOverlay: 'rgba(0, 0, 0, 0.27)',
+} as const
+
 export const UI_COLORS = {
   card: {
     background: '#FFFFFF',

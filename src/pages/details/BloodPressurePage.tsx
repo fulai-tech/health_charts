@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { BPTrendyReportCard } from '@/features/blood-pressure/components/BPTrendyReportCard'
@@ -102,7 +102,45 @@ export function BloodPressurePage() {
   }
 
   // Fetch BP data with date range - will refetch when dates change
-  const { data, isLoading, error } = useBPTrendData(apiDateRange)
+  const { data, isLoading, isFetching, error } = useBPTrendData(apiDateRange)
+
+  // Minimum loading time control (1 second)
+  const [showLoading, setShowLoading] = useState(false)
+  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const loadingStartRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (isFetching) {
+      // Start loading
+      setShowLoading(true)
+      loadingStartRef.current = Date.now()
+      
+      // Clear any existing timer
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+        loadingTimerRef.current = null
+      }
+    } else {
+      // Data loaded - ensure minimum 1s display time
+      const elapsed = Date.now() - loadingStartRef.current
+      const remaining = Math.max(0, 1000 - elapsed)
+      
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+      }
+      
+      loadingTimerRef.current = setTimeout(() => {
+        setShowLoading(false)
+        loadingTimerRef.current = null
+      }, remaining)
+    }
+
+    return () => {
+      if (loadingTimerRef.current) {
+        clearTimeout(loadingTimerRef.current)
+      }
+    }
+  }, [isFetching])
 
   // Error state
   if (error) {
@@ -148,30 +186,19 @@ export function BloodPressurePage() {
 
         {/* Content - Shows loading or data */}
         <div className="px-4 space-y-4">
-          {isLoading ? (
-            // Loading skeleton
-            <>
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="h-48 rounded-2xl animate-pulse"
-                  style={{ backgroundColor: theme.cardBackground }}
-                />
-              ))}
-            </>
-          ) : !data ? (
-            // No data state
+          {!data && !isLoading ? (
+            // No data state (after loading completes with no data)
             <div className="flex items-center justify-center py-20">
               <p style={{ color: theme.textSecondary }}>{t('common.noData')}</p>
             </div>
           ) : (
-            // Data loaded
-            <>
-              <BPTrendyReportCard data={data} />
-              <BPStatisticsCard data={data} />
-              <BPCompareCard data={data} />
-              <BPWeeklyOverviewCard data={data} />
-            </>
+            // Always show cards - with skeleton content when no data, with overlay when loading
+            <div className="space-y-4">
+              <BPTrendyReportCard data={data} isLoading={showLoading || isLoading} />
+              <BPStatisticsCard data={data} isLoading={showLoading || isLoading} />
+              <BPCompareCard data={data} isLoading={showLoading || isLoading} />
+              <BPWeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
+            </div>
           )}
         </div>
       </div>

@@ -1,22 +1,25 @@
 import { useTranslation } from 'react-i18next'
-import { ArrowUp, ArrowDown, BarChart3 } from 'lucide-react'
+import { ArrowUp, ArrowDown, BarChart3, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { GlucoseDomainModel } from '../types'
 
 interface GlucoseCompareCardProps {
-  data: GlucoseDomainModel
+  data?: GlucoseDomainModel
   className?: string
+  isLoading?: boolean
 }
 
 /**
  * Glucose Compare Card
  */
-export function GlucoseCompareCard({ data, className }: GlucoseCompareCardProps) {
+export function GlucoseCompareCard({ data, className, isLoading }: GlucoseCompareCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.glucose
 
-  const { comparison, summary } = data
+  // Default values when data is not available
+  const comparison = data?.comparison ?? { current: { average: 0 }, previous: { average: 0 }, insight: null }
+  const summary = data?.summary ?? { changeValue: 0, trend: 'stable', previousAvg: 0, avgFasting: null, avgPostMeal: null } as any
 
   const getTrendIcon = (trend: string) => {
     if (trend === 'up') {
@@ -41,7 +44,16 @@ export function GlucoseCompareCard({ data, className }: GlucoseCompareCardProps)
     })
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <BarChart3 className="w-5 h-5" style={{ color: themeColor }} />
@@ -59,7 +71,7 @@ export function GlucoseCompareCard({ data, className }: GlucoseCompareCardProps)
           </p>
           <div className="flex items-center gap-2">
             <span className="text-xl font-bold" style={{ color: themeColor }}>
-              {comparison.current.average.toFixed(1)}
+              {data ? comparison.current.average.toFixed(1) : '--'}
             </span>
             <span className="text-sm text-slate-400">{t('units.mmolL')}</span>
             {summary.changeValue !== 0 && (
@@ -73,7 +85,7 @@ export function GlucoseCompareCard({ data, className }: GlucoseCompareCardProps)
             )}
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            {t('time.lastWeek')}: {data.summary.previousAvg.toFixed(1)}{t('units.mmolL')}
+            {t('time.lastWeek')}: {data ? data.summary.previousAvg.toFixed(1) : '--'}{t('units.mmolL')}
           </p>
         </div>
 

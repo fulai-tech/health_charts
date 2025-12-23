@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
-import { Activity, Info } from 'lucide-react'
+import { Activity, Info, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { SpO2DomainModel } from '../types'
 
 interface SpO2StatisticsCardProps {
-  data: SpO2DomainModel
+  data?: SpO2DomainModel
   className?: string
+  isLoading?: boolean
 }
 
 // Status colors for SpO2
@@ -30,11 +31,12 @@ const STAT_LABELS: Record<string, string> = {
 /**
  * SpO2 Statistics Card
  */
-export function SpO2StatisticsCard({ data, className }: SpO2StatisticsCardProps) {
+export function SpO2StatisticsCard({ data, className, isLoading }: SpO2StatisticsCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.spo2
 
-  const { distribution, totalCount } = data.summary
+  const distribution = data?.summary?.distribution ?? []
+  const totalCount = data?.summary?.totalCount ?? 0
 
   // Order distribution by our defined order
   const orderedDistribution = STAT_ORDER.map((type) => {
@@ -56,7 +58,16 @@ export function SpO2StatisticsCard({ data, className }: SpO2StatisticsCardProps)
   }))
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <Activity className="w-5 h-5" style={{ color: themeColor }} />

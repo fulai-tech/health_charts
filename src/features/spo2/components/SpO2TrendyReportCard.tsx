@@ -10,14 +10,15 @@ import {
   ReferenceLine,
   Tooltip,
 } from 'recharts'
-import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, CHART_COLORS } from '@/config/theme'
+import { VITAL_COLORS, CHART_COLORS, UI_STYLES } from '@/config/theme'
 import type { SpO2DomainModel } from '../types'
 
 interface SpO2TrendyReportCardProps {
-  data: SpO2DomainModel
+  data?: SpO2DomainModel
   className?: string
+  isLoading?: boolean
 }
 
 /**
@@ -62,22 +63,34 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 /**
  * SpO2 Trendy Report Card
  */
-export function SpO2TrendyReportCard({ data, className }: SpO2TrendyReportCardProps) {
+export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.spo2
 
+  // Placeholder data when no real data
+  const placeholderChartData = [
+    { name: 'Mon', weekdayKey: 'weekday.mon', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
+    { name: 'Tues', weekdayKey: 'weekday.tue', range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
+    { name: 'Wed', weekdayKey: 'weekday.wed', range: [96, 99] as [number, number], avg: 98, max: 99, min: 96 },
+    { name: 'Thu', weekdayKey: 'weekday.thu', range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
+    { name: 'Fri', weekdayKey: 'weekday.fri', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
+    { name: 'Sat', weekdayKey: 'weekday.sat', range: [97, 99] as [number, number], avg: 98, max: 99, min: 97 },
+    { name: 'Sun', weekdayKey: 'weekday.sun', range: [96, 98] as [number, number], avg: 97, max: 98, min: 96 },
+  ]
+
   // Prepare chart data with range as [min, max] tuple for Area
-  const chartData = data.chartData.map((point, index) => ({
+  const chartData = data?.chartData?.map((point, index) => ({
     name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
     weekdayKey: point.weekdayKey,
     range: [point.min, point.max] as [number, number],
     avg: point.avg,
     max: point.max,
     min: point.min,
-  }))
+  })) ?? placeholderChartData
 
   // Get trend icon and color
   const getTrendDisplay = () => {
+    if (!data) return null
     const { trend, changeValue } = data.summary
     if (changeValue === 0) return null
 
@@ -94,7 +107,16 @@ export function SpO2TrendyReportCard({ data, className }: SpO2TrendyReportCardPr
   }
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
@@ -113,13 +135,13 @@ export function SpO2TrendyReportCard({ data, className }: SpO2TrendyReportCardPr
             </p>
             <div className="flex items-baseline gap-1.5">
               <span className="text-3xl font-bold" style={{ color: themeColor }}>
-                {data.summary.avgValue}
+                {data?.summary?.avgValue ?? '--'}
               </span>
               <span className="text-lg text-slate-500">%</span>
               {getTrendDisplay()}
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              {t('time.lastWeek')}: {data.summary.previousAvg}%
+              {t('time.lastWeek')}: {data?.summary?.previousAvg ?? '--'}%
             </p>
           </div>
           <div className="text-right text-xs text-slate-400 px-3 py-1.5 rounded-lg bg-white/60">
@@ -130,15 +152,15 @@ export function SpO2TrendyReportCard({ data, className }: SpO2TrendyReportCardPr
         {/* Bottom Row: Highest / Lowest */}
         <div className="flex gap-6">
           <div>
-            <span className="text-xs text-slate-400">{t('common.max')}({t(data.summary.maxWeekdayKey)})</span>
+            <span className="text-xs text-slate-400">{t('common.max')}({data ? t(data.summary.maxWeekdayKey) : '--'})</span>
             <p className="text-xl font-semibold" style={{ color: themeColor }}>
-              {data.summary.maxValue} <span className="text-sm font-normal">%</span>
+              {data?.summary?.maxValue ?? '--'} <span className="text-sm font-normal">%</span>
             </p>
           </div>
           <div>
-            <span className="text-xs text-slate-400">{t('common.min')}({t(data.summary.minWeekdayKey)})</span>
+            <span className="text-xs text-slate-400">{t('common.min')}({data ? t(data.summary.minWeekdayKey) : '--'})</span>
             <p className="text-xl font-semibold text-slate-600">
-              {data.summary.minValue} <span className="text-sm font-normal">%</span>
+              {data?.summary?.minValue ?? '--'} <span className="text-sm font-normal">%</span>
             </p>
           </div>
         </div>
@@ -183,11 +205,11 @@ export function SpO2TrendyReportCard({ data, className }: SpO2TrendyReportCardPr
               tick={{ fontSize: 11, fill: '#94a3b8' }}
               tickLine={false}
               axisLine={false}
-              domain={[data.yAxisRange.min, data.yAxisRange.max]}
+              domain={[data?.yAxisRange?.min ?? 90, data?.yAxisRange?.max ?? 100]}
             />
             <Tooltip content={<CustomTooltip />} />
             <ReferenceLine
-              y={data.averageLine}
+              y={data?.averageLine ?? 97}
               stroke={themeColor}
               strokeDasharray="4 4"
               strokeWidth={1.5}

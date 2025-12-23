@@ -14,7 +14,8 @@ import {
   type TooltipProps,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@/lib/utils'
+import { cn, getOptimizedAnimationDuration } from '@/lib/utils'
+import { useMemo } from 'react'
 
 export type ChartType = 'line' | 'area' | 'range' | 'mixed'
 
@@ -128,29 +129,39 @@ export function VitalTrendChart({
   domainPadding = 5,
   yDomain,
 }: VitalTrendChartProps) {
-  const commonProps = {
-    data,
-    margin: { top: 10, right: 10, left: -20, bottom: 0 },
-  }
+  const optimizedAnimationDuration = useMemo(
+    () => getOptimizedAnimationDuration(animationDuration),
+    [animationDuration]
+  )
 
-  const axisProps = {
-    tick: { fontSize: 11, fill: '#94a3b8' },
-    tickLine: false,
-    axisLine: false,
-  }
+  const commonProps = useMemo(
+    () => ({
+      data,
+      margin: { top: 10, right: 10, left: -20, bottom: 0 },
+    }),
+    [data]
+  )
 
-  const getYDomain = (): [number | string, number | string] => {
-    if (yDomain) return yDomain
-    return [`dataMin - ${domainPadding}`, `dataMax + ${domainPadding}`]
-  }
+  const axisProps = useMemo(
+    () => ({
+      tick: { fontSize: 11, fill: '#94a3b8' },
+      tickLine: false,
+      axisLine: false,
+    }),
+    []
+  )
+
+  const getYDomain = useMemo(() => {
+    return (): [number | string, number | string] => {
+      if (yDomain) return yDomain
+      return [`dataMin - ${domainPadding}`, `dataMax + ${domainPadding}`]
+    }
+  }, [yDomain, domainPadding])
 
   const renderChart = () => {
-    // Mixed chart: ComposedChart with Bar for range and Line for average
     if (type === 'mixed') {
-      // Transform data to include range for bar chart
       const transformedData = data.map((point) => ({
         ...point,
-        // For the bar, we need base (min) and the height (max - min)
         rangeBase: point.min ?? point.range?.[0] ?? 0,
         rangeHeight:
           (point.max ?? point.range?.[1] ?? 0) -
@@ -169,27 +180,23 @@ export function VitalTrendChart({
           <XAxis dataKey="dateLabel" {...axisProps} />
           <YAxis {...axisProps} domain={getYDomain()} />
           <Tooltip content={<CustomTooltip />} />
-
-          {/* Range bars - stacked bar where base is transparent */}
           <Bar
             dataKey="rangeBase"
             stackId="range"
             fill="transparent"
-            animationDuration={animationDuration}
+            animationDuration={optimizedAnimationDuration}
           />
           <Bar
             dataKey="rangeHeight"
             stackId="range"
             fill={`${color}40`}
             radius={[4, 4, 4, 4]}
-            animationDuration={animationDuration}
+            animationDuration={optimizedAnimationDuration}
           >
             {transformedData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={`${color}40`} />
             ))}
           </Bar>
-
-          {/* Average line on top */}
           <Line
             type="monotone"
             dataKey="avg"
@@ -197,7 +204,7 @@ export function VitalTrendChart({
             strokeWidth={2.5}
             dot={{ fill: color, strokeWidth: 0, r: 4 }}
             activeDot={{ r: 6, stroke: color, strokeWidth: 2, fill: '#fff' }}
-            animationDuration={animationDuration}
+            animationDuration={optimizedAnimationDuration}
           />
         </ComposedChart>
       )
@@ -228,7 +235,7 @@ export function VitalTrendChart({
             stroke={color}
             strokeWidth={2}
             fill={`url(#gradient-${color})`}
-            animationDuration={animationDuration}
+            animationDuration={optimizedAnimationDuration}
           />
         </AreaChart>
       )
@@ -254,7 +261,7 @@ export function VitalTrendChart({
             strokeWidth={2}
             dot={{ fill: color, strokeWidth: 0, r: 3 }}
             activeDot={{ r: 5, stroke: color, strokeWidth: 2, fill: '#fff' }}
-            animationDuration={animationDuration}
+            animationDuration={optimizedAnimationDuration}
           />
           <Line
             type="monotone"
@@ -269,13 +276,12 @@ export function VitalTrendChart({
               strokeWidth: 2,
               fill: '#fff',
             }}
-            animationDuration={animationDuration}
+            animationDuration={optimizedAnimationDuration}
           />
         </LineChart>
       )
     }
 
-    // Default: line chart
     return (
       <LineChart {...commonProps}>
         {showGrid && (
@@ -295,7 +301,7 @@ export function VitalTrendChart({
           strokeWidth={2}
           dot={{ fill: color, strokeWidth: 0, r: 3 }}
           activeDot={{ r: 5, stroke: color, strokeWidth: 2, fill: '#fff' }}
-          animationDuration={animationDuration}
+          animationDuration={optimizedAnimationDuration}
         />
       </LineChart>
     )
@@ -303,7 +309,7 @@ export function VitalTrendChart({
 
   return (
     <div className={cn('w-full', className)} style={{ height }}>
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         {renderChart()}
       </ResponsiveContainer>
     </div>

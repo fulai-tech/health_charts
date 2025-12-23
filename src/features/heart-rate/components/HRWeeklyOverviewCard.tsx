@@ -1,35 +1,45 @@
 import { useTranslation } from 'react-i18next'
-import { FileText } from 'lucide-react'
+import { FileText, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { HRDomainModel } from '../types'
 
 interface HRWeeklyOverviewCardProps {
-  data: HRDomainModel
+  data?: HRDomainModel
   className?: string
+  isLoading?: boolean
 }
 
 /**
  * HR Weekly Overview Card
  */
-export function HRWeeklyOverviewCard({ data, className }: HRWeeklyOverviewCardProps) {
+export function HRWeeklyOverviewCard({ data, className, isLoading }: HRWeeklyOverviewCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.heartRate
 
-  const { weeklySummary } = data
+  const weeklySummary = data?.weeklySummary
 
-  const overviewText = weeklySummary.overview || 
+  const overviewText = weeklySummary?.overview || 
     t('page.heartRate.defaultOverview', {
       defaultValue: 'Your heart rate is generally within the normal range this week. Keep up with your regular exercise routine!'
     })
 
-  const highlightsText = weeklySummary.highlights ||
+  const highlightsText = weeklySummary?.highlights ||
     t('page.heartRate.defaultHighlights', {
       defaultValue: 'The trend chart shows some fluctuations in your heart rate during the week. This is normal and can be influenced by physical activity, stress levels, and sleep quality.'
     })
 
   return (
-    <Card className={className}>
+    <Card className={`${className} relative overflow-hidden`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <FileText className="w-5 h-5" style={{ color: themeColor }} />
@@ -62,7 +72,7 @@ export function HRWeeklyOverviewCard({ data, className }: HRWeeklyOverviewCardPr
       </div>
 
       {/* Suggestions */}
-      {weeklySummary.suggestions && weeklySummary.suggestions.length > 0 && (
+      {weeklySummary?.suggestions && weeklySummary.suggestions.length > 0 && (
         <div className="mb-5 pt-4 border-t border-slate-100">
           <ul className="space-y-2">
             {weeklySummary.suggestions.map((suggestion, index) => (

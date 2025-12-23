@@ -7,8 +7,8 @@ import { adaptBPData } from './adapter'
  * Date range interface
  */
 export interface DateRange {
-  startDate: string  // YYYY-MM-DD
-  endDate: string    // YYYY-MM-DD
+  startDate: string
+  endDate: string
 }
 
 /**
@@ -33,7 +33,6 @@ export function useBPTrendData(dateRange?: DateRange) {
     queryFn: async () => {
       console.log('[BP API] Fetching with dateRange:', dateRange)
       
-      // Convert to API format
       const apiDateRange = dateRange 
         ? { start_date: dateRange.startDate, end_date: dateRange.endDate }
         : undefined
@@ -45,5 +44,6 @@ export function useBPTrendData(dateRange?: DateRange) {
     select: (data): BPDomainModel => adaptBPData(data),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   })
 }

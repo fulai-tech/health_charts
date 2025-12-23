@@ -11,17 +11,18 @@ import {
 } from 'recharts'
 import { TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { BPDomainModel } from '../types'
+import { memo, useMemo } from 'react'
+import { getOptimizedAnimationDuration } from '@/lib/utils'
+import { Loader2 } from 'lucide-react'
 
 interface BPTrendyReportCardProps {
-  data: BPDomainModel
+  data?: BPDomainModel
   className?: string
+  isLoading?: boolean
 }
 
-/**
- * Custom Tooltip component
- */
 interface CustomTooltipProps {
   active?: boolean
   payload?: Array<{
@@ -51,35 +52,63 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   )
 }
 
-/**
- * BP Trendy Report Card
- */
-export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps) {
+const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportCardProps) => {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.bp
 
-  const chartData = data.chartData.map((point, index) => ({
-    name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
-    systolic: point.systolic,
-    diastolic: point.diastolic,
-  }))
+  // Placeholder data when no real data
+  const placeholderChartData = [
+    { name: 'Mon', systolic: 120, diastolic: 80 },
+    { name: 'Tues', systolic: 118, diastolic: 78 },
+    { name: 'Wed', systolic: 122, diastolic: 82 },
+    { name: 'Thu', systolic: 119, diastolic: 79 },
+    { name: 'Fri', systolic: 121, diastolic: 81 },
+    { name: 'Sat', systolic: 117, diastolic: 77 },
+    { name: 'Sun', systolic: 120, diastolic: 80 },
+  ]
+
+  const chartData = useMemo(
+    () => data?.chartData?.map((point, index) => ({
+      name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
+      systolic: point.systolic,
+      diastolic: point.diastolic,
+    })) ?? placeholderChartData,
+    [data?.chartData]
+  )
+
+  const animationDuration = getOptimizedAnimationDuration(800)
 
   return (
-    <Card className={className}>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
-        <h3 className="text-base font-semibold text-slate-800">
-          {t('page.bloodPressure.trendyReport')}
-        </h3>
+    <Card className={`${className} relative`}>
+      {/* Loading overlay */}
+      <div 
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
+          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
+      >
+        <Loader2 className="w-8 h-8 text-white animate-spin" />
+      </div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
+          <h3 className="text-base font-semibold text-slate-800">
+            {t('page.bloodPressure.trendyReport')}
+          </h3>
+        </div>
+        {isLoading && (
+          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <Loader2 className="w-3 h-3 animate-spin" />
+            <span>{t('common.loading')}</span>
+          </div>
+        )}
       </div>
 
-      {/* Average Values */}
       <div className="flex gap-3 mb-5">
         <div className="flex-1 p-3 rounded-xl bg-orange-50">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold" style={{ color: themeColor }}>
-              {data.summary.avgSystolic}
+              {data?.summary?.avgSystolic ?? '--'}
             </span>
             <span className="text-sm text-slate-500">{t('units.mmHg')}</span>
           </div>
@@ -90,7 +119,7 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
         <div className="flex-1 p-3 rounded-xl bg-orange-50">
           <div className="flex items-baseline gap-1">
             <span className="text-2xl font-bold" style={{ color: themeColor }}>
-              {data.summary.avgDiastolic}
+              {data?.summary?.avgDiastolic ?? '--'}
             </span>
             <span className="text-sm text-slate-500">{t('units.mmHg')}</span>
           </div>
@@ -100,7 +129,6 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
         </div>
       </div>
 
-      {/* Legend */}
       <div className="flex items-center gap-4 mb-2">
         <div className="flex items-center gap-1.5">
           <span className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColor }} />
@@ -112,9 +140,8 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
         </div>
       </div>
 
-      {/* Chart */}
       <div className="h-44 -mx-2">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <ComposedChart
             data={chartData}
             margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
@@ -149,6 +176,7 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
               stroke="transparent"
               fill="url(#sbpGradient)"
               name="systolic-area"
+              animationDuration={animationDuration}
             />
             <Area
               type="monotone"
@@ -156,6 +184,7 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
               stroke="transparent"
               fill="url(#dbpGradient)"
               name="diastolic-area"
+              animationDuration={animationDuration}
             />
             <Line
               type="monotone"
@@ -165,6 +194,7 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
               dot={{ fill: themeColor, strokeWidth: 0, r: 4 }}
               activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: '#fff' }}
               name="systolic"
+              animationDuration={animationDuration}
             />
             <Line
               type="monotone"
@@ -174,6 +204,7 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
               dot={{ fill: '#10B981', strokeWidth: 0, r: 4 }}
               activeDot={{ r: 6, stroke: '#10B981', strokeWidth: 2, fill: '#fff' }}
               name="diastolic"
+              animationDuration={animationDuration}
             />
           </ComposedChart>
         </ResponsiveContainer>
@@ -181,3 +212,5 @@ export function BPTrendyReportCard({ data, className }: BPTrendyReportCardProps)
     </Card>
   )
 }
+
+export const BPTrendyReportCard = memo(BPTrendyReportCardInner)
