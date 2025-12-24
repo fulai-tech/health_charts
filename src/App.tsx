@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Blood Pressure Pages
@@ -42,7 +42,7 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           {/* Home Page - Route Navigation */}
           <Route path="/" element={<HomePage />} />
@@ -50,39 +50,39 @@ function App() {
           {/* ============================================ */}
           {/* Full Detail Pages */}
           {/* ============================================ */}
-          
+
           {/* Blood Pressure */}
           <Route path="/details/blood-pressure" element={<BloodPressurePage />} />
-          
+
           {/* SpO2 (Blood Oxygen) */}
           <Route path="/details/spo2" element={<SpO2Page />} />
-          
+
           {/* Heart Rate */}
           <Route path="/details/heart-rate" element={<HeartRatePage />} />
-          
+
           {/* Blood Glucose */}
           <Route path="/details/glucose" element={<GlucosePage />} />
 
           {/* ============================================ */}
           {/* Widget Routes (for iframe embedding) */}
           {/* ============================================ */}
-          
+
           {/* Blood Pressure Widget */}
           <Route path="/widget/blood-pressure/trend" element={<BPTrendWidgetPage />} />
-          
+
           {/* SpO2 Widget */}
           <Route path="/widget/spo2/trend" element={<SpO2TrendWidgetPage />} />
-          
+
           {/* Heart Rate Widget */}
           <Route path="/widget/heart-rate/trend" element={<HRTrendWidgetPage />} />
-          
+
           {/* Glucose Widget */}
           <Route path="/widget/glucose/trend" element={<GlucoseTrendWidgetPage />} />
 
           {/* 404 Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </QueryClientProvider>
   )
 }
