@@ -33,6 +33,7 @@ export default defineConfig({
     port: 5174,
   },
   build: {
+    outDir: 'docs',
     cssTarget: 'chrome80',
     modulePreload: {
       polyfill: true,
