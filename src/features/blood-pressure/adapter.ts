@@ -69,8 +69,6 @@ function determineBPStatus(systolic: number, diastolic: number): BPStatus {
  * - Calculates derived statistics
  */
 export function adaptBPData(apiData: BPDetailData): BPDomainModel {
-  console.log('[BP Adapter] Input:', apiData)
-  
   const rawData = apiData?.trend_chart?.chart_data || []
 
   // Transform each data point
@@ -95,20 +93,20 @@ export function adaptBPData(apiData: BPDetailData): BPDomainModel {
 
   // Get trends from comparison
   const comparison = apiData?.comparison || {}
-  
+
   // Calculate trend based on actual values (current vs previous)
   const currentSystolic = comparison.current?.systolic_avg || avgSystolic
   const previousSystolic = comparison.previous?.systolic_avg || 0
   const currentDiastolic = comparison.current?.diastolic_avg || avgDiastolic
   const previousDiastolic = comparison.previous?.diastolic_avg || 0
-  
+
   // Determine trend direction from actual difference
   const systolicDiff = currentSystolic - previousSystolic
   const diastolicDiff = currentDiastolic - previousDiastolic
-  
+
   const systolicTrend: TrendDirection = systolicDiff > 0 ? 'up' : systolicDiff < 0 ? 'down' : 'stable'
   const diastolicTrend: TrendDirection = diastolicDiff > 0 ? 'up' : diastolicDiff < 0 ? 'down' : 'stable'
-  
+
   // Use absolute value for display
   const systolicChange = Math.abs(systolicDiff)
   const diastolicChange = Math.abs(diastolicDiff)
@@ -117,10 +115,10 @@ export function adaptBPData(apiData: BPDetailData): BPDomainModel {
   const latestReading =
     chartData.length > 0
       ? {
-          systolic: chartData[chartData.length - 1].systolic,
-          diastolic: chartData[chartData.length - 1].diastolic,
-          date: chartData[chartData.length - 1].date,
-        }
+        systolic: chartData[chartData.length - 1].systolic,
+        diastolic: chartData[chartData.length - 1].diastolic,
+        date: chartData[chartData.length - 1].date,
+      }
       : null
 
   // Map distribution labels to standard types
@@ -159,6 +157,5 @@ export function adaptBPData(apiData: BPDetailData): BPDomainModel {
     latestReading,
   }
 
-  console.log('[BP Adapter] Output:', result)
   return result
 }
