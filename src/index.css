@@ -40,6 +40,7 @@ html {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -54,19 +55,18 @@ html {
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
-}
+  }
+
   100% {
     background-position: 200% 0;
-}
+  }
 }
 
 .skeleton {
-  background: linear-gradient(
-    90deg,
-    #f0f0f0 25%,
-    #e0e0e0 50%,
-    #f0f0f0 75%
-  );
+  background: linear-gradient(90deg,
+      #f0f0f0 25%,
+      #e0e0e0 50%,
+      #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
@@ -76,22 +76,43 @@ html {
   outline: none;
 }
 
-/* Scrollbar styles */
+/* Hide scrollbars globally (including Tencent X5 WebView) */
+/* For WebKit browsers (Chrome, Safari, Edge, X5 WebView) */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 3px;
-  }
+  display: none;
+}
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-  }
+  display: none;
+}
 
-::-webkit-scrollbar-thumb:hover {
-  background: #a1a1a1;
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* For IE and Edge Legacy */
+* {
+  -ms-overflow-style: none;
+}
+
+/* Additional WebView specific hiding */
+html,
+body {
+  overflow: -moz-scrollbars-none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
