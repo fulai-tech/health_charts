@@ -23,7 +23,8 @@
     "times": "次",
     "time": "次",
     "good": "良好",
-    "inAverage": "平均"
+    "inAverage": "平均",
+    "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
   },
   "vitals": {
     "bloodPressure": "血压",
@@ -106,7 +107,7 @@
       "range": "范围",
       "mean": "均值",
       "statistics": "血氧统计",
-      "totalTests": "总测试次数",
+      "totalTests": "次数",
       "dataAnalysis": "数据分析",
       "weeklyOverview": "周报概览",
       "overallSituation": "整体情况",
@@ -119,8 +120,7 @@
       "defaultAnalysis2": "血氧水平在{{maxDay}}保持较高水平（{{max}}%）。",
       "defaultAnalysis3": "{{minDay}}记录到血氧水平为 {{min}}%，略低于正常范围下限。",
       "defaultOverview": "您的血氧整体处于理想范围内。虽然与上周相比略有波动，但仍处于正常波动范围内。",
-      "defaultHighlights": "趋势图显示您的血氧在本周中有明显波动。统计数据显示您的血氧测量值在不同水平间有一定变化。我们将继续监测您的状况，并帮助您识别任何可能导致血氧偏低的原因。",
-      "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
+      "defaultHighlights": "趋势图显示您的血氧在本周中有明显波动。统计数据显示您的血氧测量值在不同水平间有一定变化。我们将继续监测您的状况，并帮助您识别任何可能导致血氧偏低的原因。"
     },
     "heartRate": {
       "title": "心率详情",
@@ -130,7 +130,7 @@
       "range": "范围",
       "mean": "均值",
       "statistics": "心率统计",
-      "totalTests": "总测试次数",
+      "totalTests": "次数",
       "dataAnalysis": "数据分析",
       "weeklyOverview": "周报概览",
       "overallSituation": "整体情况",
@@ -144,8 +144,7 @@
       "defaultAnalysis2": "心率在{{maxDay}}达到峰值 {{max}} 次/分。",
       "defaultAnalysis3": "{{minDay}}记录到最低心率 {{min}} 次/分。",
       "defaultOverview": "您的心率本周整体处于正常范围内。继续保持常规的运动习惯！",
-      "defaultHighlights": "趋势图显示您的心率在本周中有一些波动。这是正常的，可能会受到体力活动、压力水平和睡眠质量的影响。",
-      "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
+      "defaultHighlights": "趋势图显示您的心率在本周中有一些波动。这是正常的，可能会受到体力活动、压力水平和睡眠质量的影响。"
     },
     "glucose": {
       "title": "血糖详情",
@@ -171,8 +170,7 @@
       "postMealNormal": "餐后正常值",
       "defaultInsight": "您的血糖水平整体处于正常范围内。请继续保持均衡的饮食和规律的运动习惯，以维持稳定的血糖水平。",
       "defaultOverview": "本周您的血糖水平整体处于正常范围内。继续保持良好的饮食和运动习惯！",
-      "defaultHighlights": "趋势图显示您的血糖在本周中有一些波动。请注意饮食，尤其是餐后，以保持血糖水平稳定。",
-      "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
+      "defaultHighlights": "趋势图显示您的血糖在本周中有一些波动。请注意饮食，尤其是餐后，以保持血糖水平稳定。"
     }
   }
 }

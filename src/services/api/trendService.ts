@@ -20,13 +20,13 @@ import type {
 function getDefaultDateRange(): { start_date: string; end_date: string } {
   const now = new Date()
   const endDate = now.toISOString().split('T')[0]
-  
+
   const startDateObj = new Date(now)
   startDateObj.setDate(startDateObj.getDate() - 6)
   const startDate = startDateObj.toISOString().split('T')[0]
-  
+
   console.log('[DateRange]', { start_date: startDate, end_date: endDate })
-  
+
   return {
     start_date: startDate,
     end_date: endDate,
@@ -65,8 +65,8 @@ export async function getIndicatorDetail<T>(
     start_date: range.start_date,
     end_date: range.end_date,
   }
-  
-  console.log('[getIndicatorDetail] Request body:', requestBody)
+
+  // console.log('[getIndicatorDetail] Request body:', requestBody)
 
   const response = await apiClient.post<ApiResponse<T>>(
     API_CONFIG.trendReview.indicatorDetail,

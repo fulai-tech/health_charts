@@ -54,7 +54,6 @@ function safeTrend(trend?: string): TrendDirection {
  * Adapter function to transform API response to frontend domain model
  */
 export function adaptHRData(apiData: HRDetailData): HRDomainModel {
-  console.log('[HR Adapter] Input:', apiData)
 
   const rawData = apiData?.trend_chart?.chart_data || []
 
@@ -82,7 +81,7 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
   const minValue = overview.min ?? (chartData.length > 0 ? Math.min(...chartData.map(p => p.min)) : 0)
   const maxWeekdayKey = overview.max_label ? (WEEKDAY_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
   const minWeekdayKey = overview.min_label ? (WEEKDAY_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
-  
+
   const avgResting = overview.resting_avg
 
   // Determine status
@@ -99,9 +98,9 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
   const latestReading =
     chartData.length > 0
       ? {
-          value: chartData[chartData.length - 1].avg,
-          date: chartData[chartData.length - 1].date,
-        }
+        value: chartData[chartData.length - 1].avg,
+        date: chartData[chartData.length - 1].date,
+      }
       : null
 
   // Get weekly summary
@@ -140,6 +139,5 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
     latestReading,
   }
 
-  console.log('[HR Adapter] Output:', result)
   return result
 }

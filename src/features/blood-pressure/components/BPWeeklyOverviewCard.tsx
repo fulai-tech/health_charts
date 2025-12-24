@@ -45,10 +45,9 @@ const BPWeeklyOverviewCardInner = ({
   return (
     <Card className={`${className} relative overflow-hidden`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -67,18 +66,34 @@ const BPWeeklyOverviewCardInner = ({
         >
           {t('page.bloodPressure.overallSituation')}
         </span>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {overviewText}
-        </p>
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: '#F8F9FA',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)'
+          }}
+        >
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {overviewText}
+          </p>
+        </div>
       </div>
 
       <div>
         <span className="inline-block px-3 py-1 rounded-full bg-amber-400 text-white text-xs font-medium mb-2">
           {t('page.bloodPressure.needsAttention')}
         </span>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {highlightsText}
-        </p>
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: '#F8F9FA',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)'
+          }}
+        >
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {highlightsText}
+          </p>
+        </div>
       </div>
 
       {weeklySummary?.suggestions && weeklySummary.suggestions.length > 0 && (

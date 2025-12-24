@@ -19,7 +19,7 @@ export function HRWeeklyOverviewCard({ data, className, isLoading }: HRWeeklyOve
 
   const weeklySummary = data?.weeklySummary
 
-  const overviewText = weeklySummary?.overview || 
+  const overviewText = weeklySummary?.overview ||
     t('page.heartRate.defaultOverview', {
       defaultValue: 'Your heart rate is generally within the normal range this week. Keep up with your regular exercise routine!'
     })
@@ -32,10 +32,9 @@ export function HRWeeklyOverviewCard({ data, className, isLoading }: HRWeeklyOve
   return (
     <Card className={`${className} relative overflow-hidden`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -50,15 +49,23 @@ export function HRWeeklyOverviewCard({ data, className, isLoading }: HRWeeklyOve
 
       {/* Overall Situation */}
       <div className="mb-5">
-        <span 
+        <span
           className="inline-block px-3 py-1 rounded-full text-white text-xs font-medium mb-2"
           style={{ backgroundColor: '#4ADE80' }}
         >
           {t('page.heartRate.overallSituation')}
         </span>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {overviewText}
-        </p>
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: '#F8F9FA',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)'
+          }}
+        >
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {overviewText}
+          </p>
+        </div>
       </div>
 
       {/* Anomaly Alert */}
@@ -66,14 +73,22 @@ export function HRWeeklyOverviewCard({ data, className, isLoading }: HRWeeklyOve
         <span className="inline-block px-3 py-1 rounded-full bg-amber-400 text-white text-xs font-medium mb-2">
           {t('page.heartRate.anomalyAlert')}
         </span>
-        <p className="text-sm text-slate-600 leading-relaxed">
-          {highlightsText}
-        </p>
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: '#F8F9FA',
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)'
+          }}
+        >
+          <p className="text-sm text-slate-600 leading-relaxed">
+            {highlightsText}
+          </p>
+        </div>
       </div>
 
       {/* Suggestions */}
       {weeklySummary?.suggestions && weeklySummary.suggestions.length > 0 && (
-        <div className="mb-5 pt-4 border-t border-slate-100">
+        <div className="pt-4 border-t border-slate-100">
           <ul className="space-y-2">
             {weeklySummary.suggestions.map((suggestion, index) => (
               <li
@@ -87,13 +102,6 @@ export function HRWeeklyOverviewCard({ data, className, isLoading }: HRWeeklyOve
           </ul>
         </div>
       )}
-
-      {/* Medical Disclaimer */}
-      <div className="pt-4 border-t border-slate-100">
-        <p className="text-xs text-slate-400 leading-relaxed">
-          {t('page.heartRate.disclaimer')}
-        </p>
-      </div>
     </Card>
   )
 }

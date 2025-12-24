@@ -7,6 +7,7 @@ import { HRDataAnalysisCard } from '@/features/heart-rate/components/HRDataAnaly
 import { HRWeeklyOverviewCard } from '@/features/heart-rate/components/HRWeeklyOverviewCard'
 import { useHRTrendData } from '@/features/heart-rate/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
+import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 
 /**
  * Format Date to YYYY-MM-DD string
@@ -120,7 +121,7 @@ export function HeartRatePage() {
       // Start loading
       setShowLoading(true)
       loadingStartRef.current = Date.now()
-      
+
       // Clear any existing timer
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current)
@@ -130,11 +131,11 @@ export function HeartRatePage() {
       // Data loaded - ensure minimum 1s display time
       const elapsed = Date.now() - loadingStartRef.current
       const remaining = Math.max(0, 1000 - elapsed)
-      
+
       if (loadingTimerRef.current) {
         clearTimeout(loadingTimerRef.current)
       }
-      
+
       loadingTimerRef.current = setTimeout(() => {
         setShowLoading(false)
         loadingTimerRef.current = null
@@ -173,10 +174,9 @@ export function HeartRatePage() {
       <div className="max-w-2xl mx-auto">
         {/* Date Range Picker - Always visible, not affected by loading */}
         <div
-          className="sticky top-0 z-10 py-3 px-4"
+          className="sticky top-0 z-20 py-3 px-4"
           style={{
-            backgroundColor: `${theme.background}CC`,
-            backdropFilter: 'blur(8px)',
+            backgroundColor: theme.background
           }}
         >
           <div className="flex justify-center">
@@ -204,6 +204,7 @@ export function HeartRatePage() {
               <HRStatisticsCard data={data} isLoading={showLoading || isLoading} />
               <HRDataAnalysisCard data={data} isLoading={showLoading || isLoading} />
               <HRWeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
+              <DisclaimerBox />
             </div>
           )}
         </div>
