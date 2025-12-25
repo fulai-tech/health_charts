@@ -24,6 +24,7 @@ import {
   XAxis,
   YAxis,
   ReferenceLine,
+  CartesianGrid,
   Cell,
 } from 'recharts'
 import { Loader2 } from 'lucide-react'
@@ -82,7 +83,6 @@ const ComprehensiveHealthCardInner = ({
     [data?.chartData]
   )
 
-  const targetScore = data?.targetScore ?? 60
   const weeklyAverage = data?.weeklyAverage ?? 72
   const aiSummary = data?.aiSummary ?? "This week's average score is 72. Your overall condition is steadily improving; please continue to maintain your normal routine."
 
@@ -170,12 +170,13 @@ const ComprehensiveHealthCardInner = ({
             margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
             barCategoryGap="25%"
           >
-            {/* Background horizontal reference lines */}
-            <ReferenceLine y={20} stroke="#E5E7EB" strokeDasharray="4 4" strokeWidth={1} />
-            <ReferenceLine y={40} stroke="#E5E7EB" strokeDasharray="4 4" strokeWidth={1} />
-            <ReferenceLine y={60} stroke="#E5E7EB" strokeDasharray="4 4" strokeWidth={1} />
-            <ReferenceLine y={80} stroke="#E5E7EB" strokeDasharray="4 4" strokeWidth={1} />
-            <ReferenceLine y={100} stroke="#E5E7EB" strokeDasharray="4 4" strokeWidth={1} />
+            {/* Background horizontal grid lines - 在柱子下面 */}
+            <CartesianGrid 
+              horizontal={true}
+              vertical={false}
+              strokeDasharray="4 4"
+              stroke="#E5E7EB"
+            />
             <XAxis
               dataKey="day"
               tick={{ fontSize: 12, fill: '#94a3b8' }}
@@ -191,20 +192,7 @@ const ComprehensiveHealthCardInner = ({
               ticks={[0, 20, 40, 60, 80, 100]}
               width={30}
             />
-            {/* Target/Average reference line with arrow markers */}
-            <ReferenceLine
-              y={targetScore}
-              stroke={TARGET_LINE_COLOR}
-              strokeDasharray="6 4"
-              strokeWidth={1.5}
-              label={{
-                position: 'left',
-                value: '▶',
-                fill: TARGET_LINE_COLOR,
-                fontSize: 10,
-                dx: -5,
-              }}
-            />
+            {/* Bar 柱子 - 在灰色参考线之上 */}
             <Bar
               dataKey="score"
               radius={[20, 20, 4, 4]}
@@ -217,6 +205,20 @@ const ComprehensiveHealthCardInner = ({
                 />
               ))}
             </Bar>
+            {/* Target/Average reference line with arrow markers - 在柱子之上 */}
+            <ReferenceLine
+              y={weeklyAverage}
+              stroke={TARGET_LINE_COLOR}
+              strokeDasharray="6 4"
+              strokeWidth={1.5}
+              label={{
+                position: 'left',
+                value: '▶',
+                fill: TARGET_LINE_COLOR,
+                fontSize: 10,
+                dx: -5,
+              }}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
