@@ -32,7 +32,28 @@ export function HomePage() {
   }
 
   const handleTestClick = () => {
+    // @ts-ignore
+    // 优先调用原生方法（如果 App 注入了 AppBridge）
+    if (window.AppBridge?.invoke) {
+      try {
+        // 调用原生弹窗或原生跳转
+        // @ts-ignore
+
+        window.AppBridge.invoke('showNativeDialog', {
+          message: 'hello world',
+          source: 'home',
+          timestamp: Date.now()
+        })
+        return
+      } catch (error) {
+        console.error('Failed to invoke AppBridge:', error)
+      }
+    }
+
+    // Fallback: Web 端弹窗（App 未注入时的降级方案）
     alert('hello world')
+
+    // 发送自定义事件（用于监听/埋点）
     window.dispatchEvent(
       new CustomEvent('test-button-click', { detail: { source: 'home', label: 'hello-world' } })
     )
