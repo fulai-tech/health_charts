@@ -31,6 +31,13 @@ export function HomePage() {
     i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en')
   }
 
+  const handleTestClick = () => {
+    alert('hello world')
+    window.dispatchEvent(
+      new CustomEvent('test-button-click', { detail: { source: 'home', label: 'hello-world' } })
+    )
+  }
+
   return (
     <div className="min-h-screen bg-[#F1EFEE] p-6">
       <div className="max-w-2xl mx-auto">
@@ -89,7 +96,15 @@ export function HomePage() {
             </div>
           </div>
         ))}
-
+        {/* Test button for X5 intercept */}
+        <button
+          onClick={handleTestClick}
+          className="test-button mt-4 w-full py-3 bg-slate-800 text-white rounded-2xl shadow-sm hover:shadow-md transition-all"
+          id="test-button"
+          data-action="test-button-click"
+        >
+          Test Button (alert hello world)
+        </button>
         {/* URL Parameters Info */}
         <div className="p-4 bg-white/50 rounded-2xl border border-slate-200">
           <h3 className="text-sm font-semibold text-slate-600 mb-2">URL Parameters</h3>
