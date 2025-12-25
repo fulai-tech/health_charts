@@ -118,14 +118,14 @@ export function HomePage() {
           </div>
         ))}
         {/* Test button for X5 intercept */}
-        <button
+        {/* <button
           onClick={handleTestClick}
           className="test-button mt-4 w-full py-3 bg-slate-800 text-white rounded-2xl shadow-sm hover:shadow-md transition-all"
           id="test-button"
           data-action="test-button-click"
         >
           Test Button (alert hello world)
-        </button>
+        </button> */}
         {/* URL Parameters Info */}
         <div className="p-4 bg-white/50 rounded-2xl border border-slate-200">
           <h3 className="text-sm font-semibold text-slate-600 mb-2">URL Parameters</h3>
