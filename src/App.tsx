@@ -17,6 +17,9 @@ import { HRTrendWidgetPage } from '@/pages/widget/HRTrendWidgetPage'
 import { GlucosePage } from '@/pages/details/GlucosePage'
 import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
 
+// Healthy Page
+import { HealthyPage } from '@/pages/details/HealthyPage'
+
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
@@ -62,6 +65,9 @@ function App() {
 
           {/* Blood Glucose */}
           <Route path="/details/glucose" element={<GlucosePage />} />
+
+          {/* Healthy (Comprehensive Health) */}
+          <Route path="/details/healthy" element={<HealthyPage />} />
 
           {/* ============================================ */}
           {/* Widget Routes (for iframe embedding) */}

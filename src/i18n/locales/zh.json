@@ -24,6 +24,8 @@
     "time": "次",
     "good": "良好",
     "inAverage": "平均",
+    "daily": "每日",
+    "weekly": "每周",
     "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
   },
   "vitals": {
@@ -37,7 +39,12 @@
     "heartRate": "心率",
     "glucose": "血糖",
     "fasting": "空腹",
-    "postMeal": "餐后"
+    "postMeal": "餐后",
+    "bloodSugar": "血糖",
+    "bloodOxygen": "血氧",
+    "sleep": "睡眠",
+    "emotion": "情绪",
+    "nutrition": "营养"
   },
   "units": {
     "mmHg": "mmHg",
@@ -172,5 +179,28 @@
       "defaultOverview": "本周您的血糖水平整体处于正常范围内。继续保持良好的饮食和运动习惯！",
       "defaultHighlights": "趋势图显示您的血糖在本周中有一些波动。请注意饮食，尤其是餐后，以保持血糖水平稳定。"
     }
+  },
+  "healthy": {
+    "comprehensiveHealth": "综合健康数据",
+    "aiGenerated": "AI 生成",
+    "bpDescription": "过去{{period}}您的平均收缩压为 ",
+    "bpDescriptionCont": "，平均舒张压为 ",
+    "hrDescription": "过去{{period}}您的平均心率为 ",
+    "hrDescriptionCont": "，静息心率模式正常。",
+    "heartRateLabel": "心率",
+    "bsDescription": "过去{{period}}您的平均血糖为 ",
+    "bsDescriptionCont": "，处于正常范围内。",
+    "spo2Description": "过去{{period}}您的平均血氧为 ",
+    "spo2DescriptionCont": "，保持健康的氧气水平。",
+    "sleepDescription": "过去{{period}}您的平均睡眠时长为 ",
+    "sleepDescriptionCont": "，睡眠质量良好。",
+    "sleepTime": "睡眠时长",
+    "emotionDescription": "过去{{period}}您的情绪状态为 ",
+    "emotionDescriptionCont": "，呈现积极趋势。",
+    "positive": "积极",
+    "neutral": "中性",
+    "negative": "消极",
+    "nutritionDescription": "过去{{period}}您的营养摄入为 ",
+    "nutritionDescriptionCont": "，处于推荐水平内。"
   }
 }
