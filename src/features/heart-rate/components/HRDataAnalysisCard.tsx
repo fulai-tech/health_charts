@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { BarChart3, Loader2 } from 'lucide-react'
-import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { BarChart3 } from 'lucide-react'
+import { DataAnalysisCard } from '@/components/common/DataAnalysisCard'
+import { VITAL_COLORS } from '@/config/theme'
 import type { HRDomainModel } from '../types'
 
 interface HRDataAnalysisCardProps {
@@ -20,51 +20,53 @@ export function HRDataAnalysisCard({ data, className, isLoading }: HRDataAnalysi
   const dataAnalysis = data?.weeklySummary?.dataAnalysis ?? []
 
   // If no analysis data, show default messages
-  const analysisItems = dataAnalysis.length > 0
-    ? dataAnalysis
-    : [
-        { content: t('page.heartRate.defaultAnalysis1', { avg: data?.summary?.avgValue ?? '--' }) },
-        { content: t('page.heartRate.defaultAnalysis2', { max: data?.summary?.maxValue ?? '--', maxDay: data ? t(data.summary.maxWeekdayKey) : '--' }) },
-        { content: t('page.heartRate.defaultAnalysis3', { min: data?.summary?.minValue ?? '--', minDay: data ? t(data.summary.minWeekdayKey) : '--' }) },
-      ]
+  // Note: The original code used an array of objects { content: string }, but DataAnalysisCard expects string[].
+  // We need to map if necessary, or constructs simple strings.
+  // The original component code: 
+  // const analysisItems = dataAnalysis.length > 0 ? dataAnalysis : [ ...default objects... ]
+  // Wait, let's check if dataAnalysis from API is string[] or object[]. 
+  // In `adapter.ts` for sleep it was string[]. Let's assume consistent here or check types if needed.
+  // Based on Sleep implementation, it seems to be string[].
+  // However, the original HRDataAnalysisCard used `item.content` in the map loop:
+  // `{analysisItems.map((item, index) => ( ... {item.content} ... ))}`
+  // This implies `dataAnalysis` might be object[] OR the default fallback was constructed as objects.
+  // Let's check `src/features/heart-rate/types.ts` to be sure, or just assume the default fallback structure in previous file:
+  // `[ { content: ... }, ... ]`
+  // So I should convert these to simple strings for the common component.
+
+  const defaultAnalysis = [
+    t('page.heartRate.defaultAnalysis1', { avg: data?.summary?.avgValue ?? '--' }),
+    t('page.heartRate.defaultAnalysis2', { max: data?.summary?.maxValue ?? '--', maxDay: data ? t(data.summary.maxWeekdayKey) : '--' }),
+    t('page.heartRate.defaultAnalysis3', { min: data?.summary?.minValue ?? '--', minDay: data ? t(data.summary.minWeekdayKey) : '--' }),
+  ]
+
+  // If dataAnalysis is present, we assume it matches the structure expected. 
+  // If the previous code used `item.content`, then `dataAnalysis` elements likely have `.content`?
+  // Or maybe `dataAnalysis` IS strings but the fallback was objects?
+  // Let's assume for now we pass strings. If `dataAnalysis` items are objects, this will break.
+  // Let's check `types.ts` if possible. But I can't read it alongside write_to_file.
+  // I will check the original file content again... 
+  // Original: `const analysisItems = dataAnalysis.length > 0 ? dataAnalysis : [ { content: ... } ]`
+  // And usage: `{item.content}`.
+  // This suggests `dataAnalysis` elements HAVE a `content` property.
+  // The common component expects `string[]`.
+  // So I MUST map the `content` property if it exists, or handle it.
+  // To be safe and compliant with the common component interface `items: string[]`, I should transform the data.
+
+  // Let's optimistically assume I need to map it.
+
+  const formattedItems = (dataAnalysis.length > 0 ? dataAnalysis : defaultAnalysis).map((item: any) => {
+    return typeof item === 'string' ? item : item.content
+  })
 
   return (
-    <Card className={`${className} relative overflow-hidden`}>
-      {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
-        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
-      >
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
-      </div>
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <BarChart3 className="w-5 h-5" style={{ color: themeColor }} />
-        <h3 className="text-base font-semibold text-slate-800">
-          {t('page.heartRate.dataAnalysis')}
-        </h3>
-      </div>
-
-      {/* Analysis Items */}
-      <ul className="space-y-3">
-        {analysisItems.map((item, index) => (
-          <li
-            key={index}
-            className="flex items-start gap-3 rounded-xl px-4 py-3"
-            style={{ backgroundColor: '#F8F8F8' }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"
-              style={{ backgroundColor: themeColor }}
-            />
-            <p className="text-sm text-slate-600 leading-relaxed">
-              {item.content}
-            </p>
-          </li>
-        ))}
-      </ul>
-    </Card>
+    <DataAnalysisCard
+      titleKey="page.heartRate.dataAnalysis"
+      Icon={BarChart3}
+      items={formattedItems}
+      themeColor={themeColor}
+      className={className}
+      isLoading={isLoading}
+    />
   )
 }
