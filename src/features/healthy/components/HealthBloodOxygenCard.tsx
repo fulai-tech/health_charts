@@ -26,6 +26,8 @@ import {
 import { ChevronRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { LazyChart } from '@/components/charts/LazyChart'
+import { CHART_CONFIG } from '@/config/chartConfig'
 import type { BloodOxygenCardData } from '../types'
 
 /** SpO2 Icon */
@@ -83,9 +85,8 @@ const HealthBloodOxygenCardInner = ({
     >
       {/* Loading overlay */}
       <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -113,8 +114,8 @@ const HealthBloodOxygenCardInner = ({
       {/* Chart with Value Label */}
       <div className="relative">
         {/* Chart Area */}
-        <div className="h-28 relative">
-          <ResponsiveContainer width="100%" height="100%">
+        <LazyChart height={112}>
+          <ResponsiveContainer width="100%" height={112}>
             <BarChart
               data={chartData}
               margin={{ top: 10, right: 15, left: 15, bottom: 0 }}
@@ -125,6 +126,7 @@ const HealthBloodOxygenCardInner = ({
                 dataKey="value"
                 radius={[3, 3, 0, 0]}
                 maxBarSize={12}
+                {...CHART_CONFIG.animation}
               >
                 {chartData.map((_, index) => (
                   <Cell
@@ -135,60 +137,60 @@ const HealthBloodOxygenCardInner = ({
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </LazyChart>
 
-          {/* CSS Reference Line with Arrows */}
-          <div 
-            className="absolute left-0 right-0 flex items-center pointer-events-none"
-            style={{ top: 'calc(10px + 112px * 0.5)' }}
-          >
-            {/* Left Arrow */}
-            <div 
-              style={{
-                width: 0,
-                height: 0,
-                borderTop: '5px solid transparent',
-                borderBottom: '5px solid transparent',
-                borderRight: '6px solid #A78BFA',
-                marginLeft: '4px',
-              }}
-            />
-            {/* Dashed Line */}
-            <div 
-              className="flex-1 mx-0"
-              style={{
-                height: '1px',
-                backgroundImage: 'linear-gradient(to right, #A78BFA 50%, transparent 50%)',
-                backgroundSize: '8px 1px',
-              }}
-            />
-            {/* Right Arrow */}
-            <div 
-              style={{
-                width: 0,
-                height: 0,
-                borderTop: '5px solid transparent',
-                borderBottom: '5px solid transparent',
-                borderLeft: '6px solid #A78BFA',
-                marginRight: '4px',
-              }}
-            />
-          </div>
+        {/* CSS Reference Line with Arrows */}
+        <div
+          className="absolute left-0 right-0 flex items-center pointer-events-none"
+          style={{ top: 'calc(10px + 112px * 0.5)' }}
+        >
+          {/* Left Arrow */}
+          <div
+            style={{
+              width: 0,
+              height: 0,
+              borderTop: '5px solid transparent',
+              borderBottom: '5px solid transparent',
+              borderRight: '6px solid #A78BFA',
+              marginLeft: '4px',
+            }}
+          />
+          {/* Dashed Line */}
+          <div
+            className="flex-1 mx-0"
+            style={{
+              height: '1px',
+              backgroundImage: 'linear-gradient(to right, #A78BFA 50%, transparent 50%)',
+              backgroundSize: '8px 1px',
+            }}
+          />
+          {/* Right Arrow */}
+          <div
+            style={{
+              width: 0,
+              height: 0,
+              borderTop: '5px solid transparent',
+              borderBottom: '5px solid transparent',
+              borderLeft: '6px solid #A78BFA',
+              marginRight: '4px',
+            }}
+          />
+        </div>
 
-          {/* Value Label - Positioned on Reference Line */}
-          <div 
-            className="absolute left-1/2 -translate-x-1/2 z-10"
-            style={{ top: 'calc(10px + 112px * 0.5 - 14px)' }}
+        {/* Value Label - Positioned on Reference Line */}
+        <div
+          className="absolute left-1/2 -translate-x-1/2 z-10"
+          style={{ top: 'calc(10px + 112px * 0.5 - 14px)' }}
+        >
+          <div
+            className="px-4 py-1.5 rounded-full text-white text-sm font-medium whitespace-nowrap"
+            style={{ backgroundColor: '#A78BFA' }}
           >
-            <div
-              className="px-4 py-1.5 rounded-full text-white text-sm font-medium whitespace-nowrap"
-              style={{ backgroundColor: '#A78BFA' }}
-            >
-              SpO2: {avgSpO2}%
-            </div>
+            SpO2: {avgSpO2}%
           </div>
         </div>
       </div>
-    </Card>
+    </Card >
   )
 }
 

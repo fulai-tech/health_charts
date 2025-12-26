@@ -24,16 +24,19 @@ async function fetchHealthyData(viewType: ViewType): Promise<HealthyDomainModel>
       view_type: viewType,
     })
 
-    if (response.data.code !== 0) {
-      console.error('API error:', response.data.msg)
+    console.log('[Healthy API] Response code:', response.data.code, 'msg:', response.data.msg)
+
+    // Backend returns code: 200 for success
+    if (response.data.code !== 200) {
+      console.error('[Healthy API] Unexpected code:', response.data.code)
       throw new Error(response.data.msg || 'Failed to fetch healthy data')
     }
 
     return transformHealthyApiResponse(response.data)
   } catch (error) {
-    console.error('Failed to fetch healthy data:', error)
+    console.error('[Healthy API] Failed to fetch healthy data:', error)
     // Fallback to mock data in case of error (for development)
-    console.warn('Using mock data as fallback')
+    console.warn('[Healthy API] Using mock data as fallback')
     return generateMockHealthyData()
   }
 }

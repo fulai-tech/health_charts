@@ -178,6 +178,31 @@
       "defaultInsight": "Your blood glucose is generally within the normal range. Keep maintaining a balanced diet and regular exercise habits for stable blood sugar levels.",
       "defaultOverview": "Your blood glucose levels are generally within the normal range this week. Keep up the good work with your diet and exercise habits!",
       "defaultHighlights": "The trend chart shows some fluctuations in your blood glucose levels during the week. Pay attention to your diet, especially after meals, to maintain stable blood sugar levels."
+    },
+    "sleep": {
+      "title": "Sleep Details",
+      "trendyReport": "Trendy Report",
+      "weeksAverageSleep": "Week's average sleep",
+      "sleepStructure": "Sleep Structure",
+      "deepSleep": "Deep Sleep",
+      "lightSleep": "Light Sleep",
+      "remSleep": "REM Sleep",
+      "awake": "Awake",
+      "standard": "Standard",
+      "dataAnalysis": "Data Analysis",
+      "compareWithLastWeek": "Compare With Last Week",
+      "avgSleepTime": "Avg. sleep time",
+      "avgWakeTime": "Avg. wake time",
+      "sameAsLastWeek": "Same as last week",
+      "weeklyOverview": "Weekly Overview",
+      "overallSituation": "Overall situation",
+      "needsAttention": "Needs attention",
+      "defaultInsight": "Your sleep schedule has been consistent this week. Maintaining a regular sleep routine is beneficial for your overall health and well-being.",
+      "defaultOverview": "Your sleep quality this week has been generally good. You have maintained a consistent sleep schedule, which is beneficial for your overall health.",
+      "defaultHighlights": "The trend chart shows your sleep patterns have been relatively stable throughout the week. However, pay attention to your REM sleep ratio as it may affect your sleep quality and dream patterns.",
+      "defaultAnalysis1": "The average blood oxygen saturation this week was 97%, the same as last week.",
+      "defaultAnalysis2": "Your blood oxygen level remained at a high level (98%) from Tuesday to Thursday this week.",
+      "defaultAnalysis3": "On Friday, a blood oxygen level of 94% was recorded, slightly below the lower limit of the normal range."
     }
   },
   "healthy": {

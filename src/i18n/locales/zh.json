@@ -178,6 +178,31 @@
       "defaultInsight": "您的血糖水平整体处于正常范围内。请继续保持均衡的饮食和规律的运动习惯，以维持稳定的血糖水平。",
       "defaultOverview": "本周您的血糖水平整体处于正常范围内。继续保持良好的饮食和运动习惯！",
       "defaultHighlights": "趋势图显示您的血糖在本周中有一些波动。请注意饮食，尤其是餐后，以保持血糖水平稳定。"
+    },
+    "sleep": {
+      "title": "睡眠详情",
+      "trendyReport": "趋势报告",
+      "weeksAverageSleep": "本周平均睡眠",
+      "sleepStructure": "睡眠结构",
+      "deepSleep": "深度睡眠",
+      "lightSleep": "浅睡眠",
+      "remSleep": "快速眼动",
+      "awake": "清醒",
+      "standard": "标准",
+      "dataAnalysis": "数据分析",
+      "compareWithLastWeek": "与上周对比",
+      "avgSleepTime": "平均入睡时间",
+      "avgWakeTime": "平均起床时间",
+      "sameAsLastWeek": "与上周持平",
+      "weeklyOverview": "周报概览",
+      "overallSituation": "整体情况",
+      "needsAttention": "需要注意",
+      "defaultInsight": "本周您的睡眠作息比较规律。保持规律的睡眠习惯对您的整体健康非常有益。",
+      "defaultOverview": "本周您的睡眠质量整体良好。您保持了较为规律的睡眠作息，这对您的整体健康非常有益。",
+      "defaultHighlights": "趋势图显示您本周的睡眠模式相对稳定。但请注意您的快速眼动睡眠比例，这可能会影响您的睡眠质量和梦境模式。",
+      "defaultAnalysis1": "本周平均血氧饱和度为 97%，与上周持平。",
+      "defaultAnalysis2": "血氧水平在本周二至周四保持较高水平（98%）。",
+      "defaultAnalysis3": "周五记录到血氧水平为 94%，略低于正常范围下限。"
     }
   },
   "healthy": {

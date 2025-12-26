@@ -325,4 +325,100 @@ export type IndicatorDetailData =
   | HRDetailData
   | GlucoseDetailData
   | SpO2DetailData
+  | SleepDetailData
+
+/** Sleep trend chart data point */
+export interface SleepTrendChartDataPoint {
+  date: string
+  label: string
+  total: number
+  total_text: string
+  deep: number
+  deep_text: string
+  light: number
+  light_text: string
+  rem: number
+  rem_text: string
+  awake: number
+  awake_text: string
+}
+
+/** Sleep stage data */
+export interface SleepStageData {
+  type: 'deep' | 'light' | 'rem' | 'awake'
+  label: string
+  percent: number
+  reference: string
+  evaluation: 'normal' | 'high' | 'low'
+  evaluation_text: string
+  color: string
+}
+
+/** Sleep detail response */
+export interface SleepDetailData {
+  indicator_type: 'sleep'
+  title: string
+  overview: {
+    average: number
+    average_text: string
+    previous_average: number
+    previous_average_text: string
+    change: {
+      value: number
+      value_text: string
+      trend: 'up' | 'dn' | 'same'
+    }
+    max: number
+    max_text: string
+    max_label: string
+    min: number
+    min_text: string
+    min_label: string
+  }
+  trend_chart: {
+    chart_data: SleepTrendChartDataPoint[]
+    y_axis_range: {
+      min: number
+      max: number
+    }
+    stage_colors: {
+      deep: string
+      light: string
+      rem: string
+      awake: string
+    }
+  }
+  sleep_structure: {
+    has_data: boolean
+    stages: SleepStageData[]
+  }
+  sleep_routine: {
+    has_data: boolean
+    avg_sleep_time: {
+      minutes: number
+      time_text: string
+      change: {
+        value: number
+        trend: 'up' | 'dn' | 'same'
+        text: string
+      }
+    }
+    avg_wake_time: {
+      minutes: number
+      time_text: string
+      change: {
+        value: number
+        trend: 'up' | 'dn' | 'same'
+        text: string
+      }
+    }
+    insight: string | null
+  }
+  weekly_summary: {
+    overview: string | null
+    highlights: string | null
+    suggestions: string[]
+    data_analysis: string[]
+  }
+}
 

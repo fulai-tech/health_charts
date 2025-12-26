@@ -20,6 +20,8 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell } from 'recharts
 import { Heart, ChevronRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
+import { LazyChart } from '@/components/charts/LazyChart'
+import { CHART_CONFIG } from '@/config/chartConfig'
 import type { BloodPressureCardData } from '../types'
 
 // Theme colors
@@ -75,9 +77,8 @@ const HealthBloodPressureCardInner = ({
     >
       {/* Loading overlay */}
       <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -105,9 +106,8 @@ const HealthBloodPressureCardInner = ({
       </div>
 
       {/* Chart Area with Custom Reference Lines */}
-      <div className="relative h-56">
-        {/* Bar Chart - Two bars per group */}
-        <ResponsiveContainer width="100%" height="100%">
+      <LazyChart height={224}>
+        <ResponsiveContainer width="100%" height={224}>
           <BarChart
             data={chartData}
             margin={{ top: 10, right: 10, left: 10, bottom: 0 }}
@@ -116,23 +116,25 @@ const HealthBloodPressureCardInner = ({
           >
             <XAxis dataKey="day" hide />
             <YAxis domain={[40, 180]} hide />
-            
+
             {/* Systolic Bar (taller) */}
             <Bar
               dataKey="systolic"
               radius={[4, 4, 4, 4]}
               maxBarSize={16}
+              {...CHART_CONFIG.animation}
             >
               {chartData.map((_, index) => (
                 <Cell key={`systolic-${index}`} fill={BAR_COLOR} />
               ))}
             </Bar>
-            
+
             {/* Diastolic Bar (shorter) */}
             <Bar
               dataKey="diastolic"
               radius={[4, 4, 4, 4]}
               maxBarSize={16}
+              {...CHART_CONFIG.animation}
             >
               {chartData.map((_, index) => (
                 <Cell key={`diastolic-${index}`} fill={BAR_COLOR} />
@@ -142,12 +144,12 @@ const HealthBloodPressureCardInner = ({
         </ResponsiveContainer>
 
         {/* Custom SBP Reference Line with Badge */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center"
           style={{ top: '35%' }}
         >
           {/* Left Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -156,19 +158,19 @@ const HealthBloodPressureCardInner = ({
             }}
           />
           {/* Dashed Line */}
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: SBP_COLOR }}
           />
           {/* Center Badge */}
-          <div 
+          <div
             className="absolute left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-white text-sm font-semibold whitespace-nowrap z-10"
             style={{ backgroundColor: SBP_COLOR }}
           >
             SBP: {avgSystolic}mmHg
           </div>
           {/* Right Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -179,12 +181,12 @@ const HealthBloodPressureCardInner = ({
         </div>
 
         {/* Custom DBP Reference Line with Badge */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center"
           style={{ top: '65%' }}
         >
           {/* Left Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -193,19 +195,19 @@ const HealthBloodPressureCardInner = ({
             }}
           />
           {/* Dashed Line */}
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: DBP_COLOR }}
           />
           {/* Center Badge */}
-          <div 
+          <div
             className="absolute left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full text-white text-sm font-semibold whitespace-nowrap z-10"
             style={{ backgroundColor: DBP_COLOR }}
           >
             DBP: {avgDiastolic}mmHg
           </div>
           {/* Right Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -214,7 +216,7 @@ const HealthBloodPressureCardInner = ({
             }}
           />
         </div>
-      </div>
+      </LazyChart>
     </Card>
   )
 }

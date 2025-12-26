@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next'
 import { Smile, ChevronRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
+import { LazyChart } from '@/components/charts/LazyChart'
 import type { EmotionCardData } from '../types'
 
 /** Emotion theme colors */
@@ -85,9 +86,8 @@ const HealthEmotionCardInner = ({
     >
       {/* Loading overlay */}
       <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -115,38 +115,38 @@ const HealthEmotionCardInner = ({
       </div>
 
       {/* Chart Area with Reference Lines */}
-      <div className="relative h-56">
+      <LazyChart height={224}>
         {/* Custom CSS Bar Chart - 柱状图区域 */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center justify-between px-4"
           style={{ top: '8px', height: '180px' }}
         >
           {chartData.map((item, index) => (
-            <div 
+            <div
               key={index}
               className="flex flex-col gap-1"
               style={{ height: '100%', width: '3%' }}
             >
               {/* Top segment (positive - yellow) - 全圆角 */}
-              <div 
+              <div
                 className="w-full rounded-md transition-all duration-500 ease-out"
-                style={{ 
+                style={{
                   backgroundColor: EMOTION_COLORS.positive,
                   flex: item.positive,
                 }}
               />
               {/* Middle segment (neutral - light blue) - 全圆角 */}
-              <div 
+              <div
                 className="w-full rounded-md transition-all duration-500 ease-out"
-                style={{ 
+                style={{
                   backgroundColor: EMOTION_COLORS.neutral,
                   flex: item.neutral,
                 }}
               />
               {/* Bottom segment (negative - blue) - 全圆角 */}
-              <div 
+              <div
                 className="w-full rounded-md transition-all duration-500 ease-out"
-                style={{ 
+                style={{
                   backgroundColor: EMOTION_COLORS.negative,
                   flex: item.negative,
                 }}
@@ -156,11 +156,11 @@ const HealthEmotionCardInner = ({
         </div>
 
         {/* Reference Line 1 (Positive - Yellow) - 在黄色区域中间 */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center pointer-events-none"
           style={{ top: 'calc(8px + 180px * 0.18)' }}
         >
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '4px solid transparent',
@@ -168,11 +168,11 @@ const HealthEmotionCardInner = ({
               borderLeft: `6px solid ${EMOTION_COLORS.positive}`,
             }}
           />
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: EMOTION_COLORS.positive }}
           />
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '4px solid transparent',
@@ -183,11 +183,11 @@ const HealthEmotionCardInner = ({
         </div>
 
         {/* Reference Line 2 (Neutral - Light Blue) - 在浅蓝区域中间 */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center pointer-events-none"
           style={{ top: 'calc(8px + 180px * 0.52)' }}
         >
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '4px solid transparent',
@@ -195,11 +195,11 @@ const HealthEmotionCardInner = ({
               borderLeft: `6px solid ${EMOTION_COLORS.neutral}`,
             }}
           />
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: EMOTION_COLORS.neutral }}
           />
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '4px solid transparent',
@@ -210,11 +210,11 @@ const HealthEmotionCardInner = ({
         </div>
 
         {/* Reference Line 3 (Negative - Blue) - 在蓝色区域中间 */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center pointer-events-none"
           style={{ top: 'calc(8px + 180px * 0.85)' }}
         >
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '4px solid transparent',
@@ -222,11 +222,11 @@ const HealthEmotionCardInner = ({
               borderLeft: `6px solid ${EMOTION_COLORS.negative}`,
             }}
           />
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: EMOTION_COLORS.negative }}
           />
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '4px solid transparent',
@@ -266,7 +266,7 @@ const HealthEmotionCardInner = ({
             </span>
           </div>
         </div>
-      </div>
+      </LazyChart>
     </Card>
   )
 }

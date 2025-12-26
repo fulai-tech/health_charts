@@ -26,6 +26,8 @@ import {
 import { Apple, ChevronRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { LazyChart } from '@/components/charts/LazyChart'
+import { CHART_CONFIG } from '@/config/chartConfig'
 import type { NutritionCardData } from '../types'
 
 /** Nutrition theme color - coral/red */
@@ -78,9 +80,8 @@ const HealthNutritionCardInner = ({
     >
       {/* Loading overlay */}
       <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -107,8 +108,8 @@ const HealthNutritionCardInner = ({
 
       {/* Chart with Value Label */}
       <div className="relative">
-        <div className="h-20">
-          <ResponsiveContainer width="100%" height="100%">
+        <LazyChart height={80}>
+          <ResponsiveContainer width="100%" height={80}>
             <LineChart
               data={chartData}
               margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
@@ -128,10 +129,11 @@ const HealthNutritionCardInner = ({
                 strokeWidth={2}
                 dot={false}
                 activeDot={{ r: 4, fill: NUTRITION_COLOR }}
+                {...CHART_CONFIG.animation}
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
+        </LazyChart>
 
         {/* Value Label */}
         <div className="flex justify-center mt-3">

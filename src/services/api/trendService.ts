@@ -7,6 +7,7 @@ import type {
   HRDetailData,
   GlucoseDetailData,
   SpO2DetailData,
+  SleepDetailData,
 } from './types'
 
 /**
@@ -115,3 +116,13 @@ export async function getSpO2Detail(
 ): Promise<SpO2DetailData> {
   return getIndicatorDetail<SpO2DetailData>('blood_oxygen', dateRange)
 }
+
+/**
+ * Get sleep detail
+ */
+export async function getSleepDetail(
+  dateRange?: { start_date: string; end_date: string }
+): Promise<SleepDetailData> {
+  return getIndicatorDetail<SleepDetailData>('sleep', dateRange)
+}
+

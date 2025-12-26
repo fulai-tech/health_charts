@@ -7,5 +7,7 @@ export {
   getHRDetail,
   getGlucoseDetail,
   getSpO2Detail,
+  getSleepDetail,
 } from './trendService'
+
 

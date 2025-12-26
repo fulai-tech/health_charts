@@ -57,12 +57,15 @@ function getTrend(change: { value: number; trend: string } | null): TrendDirecti
 export function transformHealthyApiResponse(response: ApiHealthyResponse): HealthyDomainModel {
   const { overview, indicators } = response.data
 
-  // Transform overview chart data
-  const healthScoreData: HealthScoreDataPoint[] = overview.chart_data.map((item) => ({
-    day: item.label,
-    score: item.score ?? 0,
-    date: new Date(item.date),
-  }))
+  // Transform overview chart data - filter out null scores
+  const healthScoreData: HealthScoreDataPoint[] = overview.chart_data
+    .filter((item) => item.score !== null)
+    .map((item) => ({
+      day: item.label,
+      score: item.score ?? 0,
+      date: new Date(item.date),
+    }))
+  const healthScoreChartData = healthScoreData.length > 0 ? healthScoreData : undefined
 
   // Extract indicators by position
   const bpIndicator = indicators[0] as ApiBPIndicator
@@ -85,18 +88,22 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
     x: idx,
     value: item.value,
   })) || []
+  // If chart data is empty, set to undefined so component can use placeholder
+  const hrChartData = hrData.length > 0 ? hrData : undefined
 
   // Transform blood sugar chart data
   const bloodSugarData: BloodSugarDataPoint[] = glucoseIndicator?.chart?.map((item, idx) => ({
     x: idx,
     value: item.value,
   })) || []
+  const bloodSugarChartData = bloodSugarData.length > 0 ? bloodSugarData : undefined
 
   // Transform SpO2 chart data
   const spo2Data: SpO2MiniDataPoint[] = spo2Indicator?.chart?.map((item) => ({
     day: getTimeLabel(item.time),
     value: item.value,
   })) || []
+  const spo2ChartData = spo2Data.length > 0 ? spo2Data : undefined
 
   // Transform sleep chart data
   const sleepData: SleepDataPoint[] = sleepIndicator?.chart_data?.map((item) => ({
@@ -108,6 +115,7 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
     awakePercent: item.awake_percent,
     remPercent: item.rem_percent,
   })) || []
+  const sleepChartData = sleepData.length > 0 ? sleepData : undefined
 
   // Transform emotion chart data
   const emotionData: EmotionDataPoint[] = emotionIndicator?.chart_data?.map((item) => ({
@@ -116,12 +124,14 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
     neutral: item.neutral,
     negative: item.negative,
   })) || []
+  const emotionChartData = emotionData.length > 0 ? emotionData : undefined
 
   // Transform nutrition chart data
   const nutritionData: NutritionDataPoint[] = nutritionIndicator?.chart_data?.map((item, idx) => ({
     x: idx,
     value: item.value,
   })) || []
+  const nutritionChartData = nutritionData.length > 0 ? nutritionData : undefined
 
   // Calculate average sleep time
   const avgSleepMinutes = sleepIndicator?.statistic?.average ?? 0
@@ -130,7 +140,7 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
 
   return {
     comprehensiveHealth: {
-      chartData: healthScoreData,
+      chartData: healthScoreChartData,
       weeklyAverage: overview.average_score ?? 0,
       aiSummary: overview.ai_insight || '',
       targetScore: 60,
@@ -158,7 +168,7 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
       reference: hrIndicator?.reference,
       status: hrIndicator?.status,
       periodDescription: '12 weeks',
-      chartData: hrData,
+      chartData: hrChartData,
       referenceLine: hrIndicator?.avg ?? 70,
     },
     bloodSugar: {
@@ -170,7 +180,7 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
       status: glucoseIndicator?.status,
       unit: 'mmol/L',
       periodDescription: '12 weeks',
-      chartData: bloodSugarData,
+      chartData: bloodSugarChartData,
     },
     bloodOxygen: {
       avgSpO2: spo2Indicator?.avg ?? 0,
@@ -180,27 +190,27 @@ export function transformHealthyApiResponse(response: ApiHealthyResponse): Healt
       reference: spo2Indicator?.reference,
       status: spo2Indicator?.status,
       periodDescription: '12 weeks',
-      chartData: spo2Data,
+      chartData: spo2ChartData,
       referenceLine: 95,
     },
     sleep: {
       avgSleepTime: { hours: avgSleepHours, minutes: avgSleepMins },
       label: sleepIndicator?.statistic?.label,
       periodDescription: '12 weeks',
-      chartData: sleepData,
+      chartData: sleepChartData,
     },
     emotion: {
       dominantEmotion: 'positive',
       label: emotionIndicator?.statistic?.label,
       periodDescription: '12 weeks',
-      chartData: emotionData,
+      chartData: emotionChartData,
     },
     nutrition: {
       avgValue: nutritionIndicator?.statistic?.average ?? 0,
       label: nutritionIndicator?.statistic?.label,
       unit: '/ minute',
       periodDescription: '12 weeks',
-      chartData: nutritionData,
+      chartData: nutritionChartData,
       referenceLine: 70,
     },
   }
@@ -228,43 +238,43 @@ export function generateMockHealthyData(): HealthyDomainModel {
     diastolic: 75 + Math.random() * 15,
   }))
 
-  // Heart rate mini chart data
-  const hrData: HRMiniDataPoint[] = Array.from({ length: 20 }, (_, i) => ({
+  // Heart rate mini chart data - 12 points with larger variation
+  const hrData: HRMiniDataPoint[] = Array.from({ length: 12 }, (_, i) => ({
     x: i,
-    value: 70 + Math.sin(i * 0.5) * 15 + Math.random() * 10,
+    value: 74 + Math.sin(i * 0.6) * 30 + Math.random() * 20,
   }))
 
-  // Blood sugar data
-  const bloodSugarData: BloodSugarDataPoint[] = Array.from({ length: 15 }, (_, i) => ({
+  // Blood sugar data - 12 points with larger variation
+  const bloodSugarData: BloodSugarDataPoint[] = Array.from({ length: 12 }, (_, i) => ({
     x: i,
-    value: 5.5 + Math.sin(i * 0.4) * 2 + Math.random() * 1,
+    value: 6.5 + Math.sin(i * 0.5) * 2.5 + Math.random() * 1.5,
   }))
 
-  // SpO2 data
-  const spo2Data: SpO2MiniDataPoint[] = Array.from({ length: 20 }, (_, i) => ({
+  // SpO2 data - 12 points with larger variation
+  const spo2Data: SpO2MiniDataPoint[] = Array.from({ length: 12 }, (_, i) => ({
     day: `D${i + 1}`,
-    value: 94 + Math.random() * 4,
+    value: 95 + Math.sin(i * 0.5) * 3 + Math.random() * 2,
   }))
 
-  // Sleep data
-  const sleepData: SleepDataPoint[] = Array.from({ length: 14 }, (_, i) => ({
+  // Sleep data - 12 points with larger variation
+  const sleepData: SleepDataPoint[] = Array.from({ length: 12 }, (_, i) => ({
     day: `D${i + 1}`,
-    hours: 6 + Math.random() * 3,
-    quality: 60 + Math.random() * 30,
+    hours: 7 + Math.sin(i * 0.4) * 2 + Math.random() * 1.5,
+    quality: 65 + Math.sin(i * 0.4) * 20 + Math.random() * 15,
   }))
 
-  // Emotion data
-  const emotionData: EmotionDataPoint[] = Array.from({ length: 14 }, (_, i) => ({
+  // Emotion data - 12 points with larger variation
+  const emotionData: EmotionDataPoint[] = Array.from({ length: 12 }, (_, i) => ({
     day: `D${i + 1}`,
-    positive: 30 + Math.random() * 40,
-    neutral: 20 + Math.random() * 30,
-    negative: 10 + Math.random() * 20,
+    positive: 35 + Math.sin(i * 0.5) * 25 + Math.random() * 15,
+    neutral: 25 + Math.random() * 20,
+    negative: 15 + Math.random() * 15,
   }))
 
-  // Nutrition data
-  const nutritionData: NutritionDataPoint[] = Array.from({ length: 15 }, (_, i) => ({
+  // Nutrition data - 12 points with larger variation
+  const nutritionData: NutritionDataPoint[] = Array.from({ length: 12 }, (_, i) => ({
     x: i,
-    value: 70 + Math.sin(i * 0.3) * 20 + Math.random() * 15,
+    value: 75 + Math.sin(i * 0.4) * 25 + Math.random() * 20,
   }))
 
   return {

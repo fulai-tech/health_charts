@@ -160,7 +160,7 @@ export interface HealthScoreDataPoint {
 /** Comprehensive health data summary */
 export interface ComprehensiveHealthData {
   /** Chart data points */
-  chartData: HealthScoreDataPoint[]
+  chartData?: HealthScoreDataPoint[]
   /** Weekly average score */
   weeklyAverage: number
   /** AI generated summary text */
@@ -242,7 +242,7 @@ export interface HeartRateCardData {
   /** Period description */
   periodDescription: string
   /** Mini chart data */
-  chartData: HRMiniDataPoint[]
+  chartData?: HRMiniDataPoint[]
   /** Reference line value */
   referenceLine: number
 }
@@ -278,7 +278,7 @@ export interface BloodSugarCardData {
   /** Period description */
   periodDescription: string
   /** Mini chart data */
-  chartData: BloodSugarDataPoint[]
+  chartData?: BloodSugarDataPoint[]
 }
 
 // ============================================
@@ -310,7 +310,7 @@ export interface BloodOxygenCardData {
   /** Period description */
   periodDescription: string
   /** Mini chart data */
-  chartData: SpO2MiniDataPoint[]
+  chartData?: SpO2MiniDataPoint[]
   /** Reference line value */
   referenceLine: number
 }
@@ -349,7 +349,7 @@ export interface SleepCardData {
   /** Period description */
   periodDescription: string
   /** Mini chart data */
-  chartData: SleepDataPoint[]
+  chartData?: SleepDataPoint[]
 }
 
 // ============================================
@@ -380,7 +380,7 @@ export interface EmotionCardData {
   /** Period description */
   periodDescription: string
   /** Mini chart data */
-  chartData: EmotionDataPoint[]
+  chartData?: EmotionDataPoint[]
 }
 
 // ============================================
@@ -406,7 +406,7 @@ export interface NutritionCardData {
   /** Period description */
   periodDescription: string
   /** Mini chart data */
-  chartData: NutritionDataPoint[]
+  chartData?: NutritionDataPoint[]
   /** Reference line value */
   referenceLine: number
 }

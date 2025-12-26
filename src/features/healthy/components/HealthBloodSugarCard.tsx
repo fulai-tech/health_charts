@@ -25,6 +25,8 @@ import {
 import { Droplets, ChevronRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
+import { LazyChart } from '@/components/charts/LazyChart'
+import { CHART_CONFIG } from '@/config/chartConfig'
 import type { BloodSugarCardData } from '../types'
 
 // Theme color - yellow/gold
@@ -89,9 +91,8 @@ const HealthBloodSugarCardInner = ({
     >
       {/* Loading overlay */}
       <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -119,9 +120,8 @@ const HealthBloodSugarCardInner = ({
       </div>
 
       {/* Chart Area with Reference Line */}
-      <div className="relative h-52">
-        {/* Area Chart */}
-        <ResponsiveContainer width="100%" height="100%">
+      <LazyChart height={208}>
+        <ResponsiveContainer width="100%" height={208}>
           <AreaChart
             data={chartData}
             margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
@@ -141,17 +141,18 @@ const HealthBloodSugarCardInner = ({
               fill="url(#bloodSugarGradient)"
               dot={{ fill: '#CBD5E1', stroke: '#CBD5E1', strokeWidth: 2, r: 4 }}
               activeDot={{ r: 5, fill: BS_COLOR }}
+              {...CHART_CONFIG.animation}
             />
           </AreaChart>
         </ResponsiveContainer>
 
         {/* Custom Reference Line with Badge */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center"
           style={{ top: '46%' }}
         >
           {/* Left Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -160,19 +161,19 @@ const HealthBloodSugarCardInner = ({
             }}
           />
           {/* Dashed Line */}
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: BS_COLOR }}
           />
           {/* Center Badge */}
-          <div 
+          <div
             className="absolute left-1/2 -translate-x-1/2 px-5 py-2 rounded-full text-white text-sm font-semibold whitespace-nowrap z-10"
             style={{ backgroundColor: BS_COLOR }}
           >
             POCT: {poctValue} {unit}
           </div>
           {/* Right Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -181,7 +182,7 @@ const HealthBloodSugarCardInner = ({
             }}
           />
         </div>
-      </div>
+      </LazyChart>
     </Card>
   )
 }

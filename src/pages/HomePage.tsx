@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon } from 'lucide-react'
 import { VITAL_COLORS } from '@/config/theme'
 
 /** Healthy dashboard color - green */
@@ -15,6 +15,7 @@ const routes = [
       { path: '/details/spo2', label: 'Blood Oxygen (SpO2)', icon: Droplets, color: VITAL_COLORS.spo2 },
       { path: '/details/heart-rate', label: 'Heart Rate', icon: Activity, color: VITAL_COLORS.heartRate },
       { path: '/details/glucose', label: 'Blood Glucose', icon: Pill, color: VITAL_COLORS.glucose },
+      { path: '/details/sleep', label: 'Sleep', icon: Moon, color: VITAL_COLORS.sleep },
     ],
   },
   {

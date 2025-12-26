@@ -20,6 +20,9 @@ import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
 
+// Sleep Page
+import { SleepPage } from '@/pages/details/SleepPage'
+
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
@@ -68,6 +71,9 @@ function App() {
 
           {/* Healthy (Comprehensive Health) */}
           <Route path="/details/healthy" element={<HealthyPage />} />
+
+          {/* Sleep */}
+          <Route path="/details/sleep" element={<SleepPage />} />
 
           {/* ============================================ */}
           {/* Widget Routes (for iframe embedding) */}

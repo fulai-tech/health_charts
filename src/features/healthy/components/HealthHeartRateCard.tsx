@@ -25,6 +25,8 @@ import {
 import { Heart, ChevronRight, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
+import { LazyChart } from '@/components/charts/LazyChart'
+import { CHART_CONFIG } from '@/config/chartConfig'
 import type { HeartRateCardData } from '../types'
 
 // Theme color - coral/salmon pink
@@ -54,12 +56,12 @@ const HealthHeartRateCardInner = ({
     { x: 0, value: 68 },
     { x: 1, value: 70 },
     { x: 2, value: 76 },
-    { x: 10, value: 78 },
-    { x: 11, value: 88 },
-    { x: 12, value: 90 },
-    { x: 13, value: 85 },
-    { x: 14, value: 75 },
-    { x: 15, value: 68 },
+    { x: 3, value: 78 },
+    { x: 4, value: 88 },
+    { x: 5, value: 90 },
+    { x: 6, value: 85 },
+    { x: 7, value: 75 },
+    { x: 8, value: 68 },
   ]
 
   const chartData = useMemo(
@@ -70,9 +72,13 @@ const HealthHeartRateCardInner = ({
   const avgHeartRate = data?.avgHeartRate ?? 74
   const periodDescription = data?.periodDescription ?? '12 weeks'
 
-  // Log missing data
+  // Log data source for debugging
   if (!data) {
     console.log('⚠️ HealthHeartRateCard: No data provided, using dummy data')
+  } else if (!data.chartData || data.chartData.length === 0) {
+    console.log('⚠️ HealthHeartRateCard: Empty chartData from API, using placeholder')
+  } else {
+    console.log('✅ HealthHeartRateCard: Using API data, points:', data.chartData.length)
   }
 
   return (
@@ -82,9 +88,8 @@ const HealthHeartRateCardInner = ({
     >
       {/* Loading overlay */}
       <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -112,14 +117,13 @@ const HealthHeartRateCardInner = ({
       </div>
 
       {/* Chart Area with Reference Line */}
-      <div className="relative h-52">
-        {/* Line Chart */}
-        <ResponsiveContainer width="100%" height="100%">
+      <LazyChart height={208}>
+        <ResponsiveContainer width="100%" height={208}>
           <LineChart
             data={chartData}
             margin={{ top: 20, right: 10, left: 10, bottom: 20 }}
           >
-            <YAxis hide domain={[20, 110]} />
+            <YAxis hide domain={['dataMin - 10', 'dataMax + 10']} />
             <Line
               type="linear"
               dataKey="value"
@@ -127,17 +131,18 @@ const HealthHeartRateCardInner = ({
               strokeWidth={2}
               dot={{ fill: '#CBD5E1', stroke: '#CBD5E1', strokeWidth: 2, r: 4 }}
               activeDot={{ r: 5, fill: HR_COLOR }}
+              {...CHART_CONFIG.animation}
             />
           </LineChart>
         </ResponsiveContainer>
 
         {/* Custom Reference Line with Badge */}
-        <div 
+        <div
           className="absolute left-0 right-0 flex items-center"
           style={{ top: '40%' }}
         >
           {/* Left Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -146,19 +151,19 @@ const HealthHeartRateCardInner = ({
             }}
           />
           {/* Dashed Line */}
-          <div 
+          <div
             className="flex-1 border-t-2 border-dashed"
             style={{ borderColor: HR_COLOR }}
           />
           {/* Center Badge */}
-          <div 
+          <div
             className="absolute left-1/2 -translate-x-1/2 px-5 py-2 rounded-full text-white text-sm font-semibold whitespace-nowrap z-10"
             style={{ backgroundColor: HR_COLOR }}
           >
             {t('healthy.heartRateLabel', 'Heart rate')}: {avgHeartRate} / minute
           </div>
           {/* Right Arrow */}
-          <div 
+          <div
             className="w-0 h-0"
             style={{
               borderTop: '5px solid transparent',
@@ -167,7 +172,7 @@ const HealthHeartRateCardInner = ({
             }}
           />
         </div>
-      </div>
+      </LazyChart>
     </Card>
   )
 }

@@ -12,6 +12,8 @@ export const VITAL_COLORS = {
   heartRate: '#F87171',
   /** Blood Glucose - Yellow/Gold */
   glucose: '#E9C46A',
+  /** Sleep - Purple */
+  sleep: '#A78BFA',
 } as const
 
 export const CHART_COLORS = {
