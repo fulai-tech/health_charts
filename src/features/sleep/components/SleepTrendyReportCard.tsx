@@ -33,7 +33,7 @@ interface CustomTooltipProps {
     label?: string
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+const CustomTooltip = memo(({ active, payload, label }: CustomTooltipProps) => {
     const { t } = useTranslation()
     if (!active || !payload || payload.length === 0) return null
 
@@ -65,18 +65,15 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
             )}
         </div>
     )
-}
+})
 
 const SLEEP_THEME_COLOR = '#A78BFA'
 
-// Custom bar shape that applies small rounded corners to the topmost visible segment
-const RoundedTopBar = (props: any) => {
+const RoundedTopBar = memo((props: any) => {
     const { fill, x, y, width, height, payload, dataKey } = props
 
-    // Stack order from bottom to top (must match Bar order in chart)
     const stackOrder = ['deep', 'light', 'rem', 'awake']
 
-    // Find the topmost segment with data > 0 for this day
     let topKey = null
     for (let i = stackOrder.length - 1; i >= 0; i--) {
         const key = stackOrder[i]
@@ -86,12 +83,11 @@ const RoundedTopBar = (props: any) => {
         }
     }
 
-    // Apply small rounded corners only to the topmost segment
     const isTop = dataKey === topKey
     const radius = isTop ? [3, 3, 0, 0] : [0, 0, 0, 0]
 
     return <Rectangle {...props} radius={radius} />
-}
+})
 
 const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyReportCardProps) => {
     const { t } = useTranslation()
@@ -127,10 +123,12 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
         [data?.chartData, t]
     )
 
-    const animationDuration = getOptimizedAnimationDuration(800)
+    const animationDuration = getOptimizedAnimationDuration(300)
 
-    // Calculate max for Y-axis (convert minutes to hours and add buffer)
-    const maxMinutes = Math.max(...chartData.map(d => (d.deep || 0) + (d.light || 0) + (d.rem || 0) + (d.awake || 0)))
+    const maxMinutes = useMemo(
+        () => Math.max(...chartData.map(d => (d.deep || 0) + (d.light || 0) + (d.rem || 0) + (d.awake || 0))),
+        [chartData]
+    )
     const maxHours = Math.ceil(maxMinutes / 60) + 1
 
     return (

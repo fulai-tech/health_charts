@@ -15,7 +15,7 @@ import {
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { cn, getOptimizedAnimationDuration } from '@/lib/utils'
-import { useMemo } from 'react'
+import { useMemo, memo } from 'react'
 
 export type ChartType = 'line' | 'area' | 'range' | 'mixed'
 
@@ -71,14 +71,13 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
   label?: string
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+const CustomTooltip = memo(({ active, payload, label }: CustomTooltipProps) => {
   const { t } = useTranslation()
 
   if (!active || !payload || payload.length === 0) {
     return null
   }
 
-  // Filter out range bar from tooltip (it's just visual)
   const filteredPayload = payload.filter(
     (item) => item.dataKey !== 'range' && item.value !== undefined
   )
@@ -111,7 +110,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       ))}
     </div>
   )
-}
+})
 
 /**
  * VitalTrendChart - Recharts wrapper for health vital visualization
@@ -125,7 +124,7 @@ export function VitalTrendChart({
   height = 200,
   className,
   showGrid = true,
-  animationDuration = 800,
+  animationDuration = 300,
   domainPadding = 5,
   yDomain,
 }: VitalTrendChartProps) {
@@ -160,13 +159,13 @@ export function VitalTrendChart({
 
   const renderChart = () => {
     if (type === 'mixed') {
-      const transformedData = data.map((point) => ({
+      const transformedData = useMemo(() => data.map((point) => ({
         ...point,
         rangeBase: point.min ?? point.range?.[0] ?? 0,
         rangeHeight:
           (point.max ?? point.range?.[1] ?? 0) -
           (point.min ?? point.range?.[0] ?? 0),
-      }))
+      })), [data])
 
       return (
         <ComposedChart {...commonProps} data={transformedData}>
@@ -185,6 +184,8 @@ export function VitalTrendChart({
             stackId="range"
             fill="transparent"
             animationDuration={optimizedAnimationDuration}
+            animationEasing="linear"
+            isAnimationActive={true}
           />
           <Bar
             dataKey="rangeHeight"
@@ -192,6 +193,8 @@ export function VitalTrendChart({
             fill={`${color}40`}
             radius={[4, 4, 4, 4]}
             animationDuration={optimizedAnimationDuration}
+            animationEasing="linear"
+            isAnimationActive={true}
           >
             {transformedData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={`${color}40`} />
@@ -205,6 +208,8 @@ export function VitalTrendChart({
             dot={{ fill: color, strokeWidth: 0, r: 4 }}
             activeDot={{ r: 6, stroke: color, strokeWidth: 2, fill: '#fff' }}
             animationDuration={optimizedAnimationDuration}
+            animationEasing="linear"
+            isAnimationActive={true}
           />
         </ComposedChart>
       )
@@ -236,6 +241,8 @@ export function VitalTrendChart({
             strokeWidth={2}
             fill={`url(#gradient-${color})`}
             animationDuration={optimizedAnimationDuration}
+            animationEasing="linear"
+            isAnimationActive={true}
           />
         </AreaChart>
       )
@@ -262,6 +269,8 @@ export function VitalTrendChart({
             dot={{ fill: color, strokeWidth: 0, r: 3 }}
             activeDot={{ r: 5, stroke: color, strokeWidth: 2, fill: '#fff' }}
             animationDuration={optimizedAnimationDuration}
+            animationEasing="linear"
+            isAnimationActive={true}
           />
           <Line
             type="monotone"
@@ -277,6 +286,8 @@ export function VitalTrendChart({
               fill: '#fff',
             }}
             animationDuration={optimizedAnimationDuration}
+            animationEasing="linear"
+            isAnimationActive={true}
           />
         </LineChart>
       )
@@ -302,6 +313,8 @@ export function VitalTrendChart({
           dot={{ fill: color, strokeWidth: 0, r: 3 }}
           activeDot={{ r: 5, stroke: color, strokeWidth: 2, fill: '#fff' }}
           animationDuration={optimizedAnimationDuration}
+          animationEasing="linear"
+          isAnimationActive={true}
         />
       </LineChart>
     )

@@ -30,6 +30,16 @@ const SleepStructureCardInner = ({ data, className, isLoading }: SleepStructureC
 
     const stages = data?.sleepStructure?.stages ?? []
 
+    // Placeholder stages to prevent layout shift during loading
+    const placeholderStages = [
+        { type: 'deep', percent: 0, reference: '', status: 'normal', statusText: '' },
+        { type: 'light', percent: 0, reference: '', status: 'normal', statusText: '' },
+        { type: 'rem', percent: 0, reference: '', status: 'normal', statusText: '' },
+        { type: 'awake', percent: 0, reference: '', status: 'normal', statusText: '' },
+    ]
+
+    const displayStages = stages.length > 0 ? stages : placeholderStages
+
     const getStageLabel = (type: string) => {
         switch (type) {
             case 'deep':
@@ -88,7 +98,7 @@ const SleepStructureCardInner = ({ data, className, isLoading }: SleepStructureC
             </div>
 
             <div className="space-y-3">
-                {stages.map((stage) => {
+                {displayStages.map((stage) => {
                     const color = getStageColor(stage.type)
                     const statusTextColor = getStatusTextColor(stage.status)
                     const hasWarning = stage.status !== 'normal' && stage.statusText
@@ -102,10 +112,10 @@ const SleepStructureCardInner = ({ data, className, isLoading }: SleepStructureC
                             {/* Header row */}
                             <div className="flex items-center justify-between mb-2">
                                 <span className="font-semibold text-sm text-slate-800">
-                                    {getStageLabel(stage.type)} ({stage.percent}%)
+                                    {getStageLabel(stage.type)} {stage.percent > 0 ? `(${stage.percent}%)` : ''}
                                 </span>
                                 <span className="text-xs text-slate-400">
-                                    {t('page.sleep.standard')}: {stage.reference}
+                                    {stage.reference ? `${t('page.sleep.standard')}: ${stage.reference}` : ''}
                                 </span>
                             </div>
 
@@ -134,7 +144,7 @@ const SleepStructureCardInner = ({ data, className, isLoading }: SleepStructureC
                             )}
 
                             {/* Normal status text */}
-                            {stage.status === 'normal' && (
+                            {stage.status === 'normal' && stage.percent > 0 && (
                                 <p className="text-xs text-slate-500">
                                     Normal
                                 </p>
@@ -142,12 +152,6 @@ const SleepStructureCardInner = ({ data, className, isLoading }: SleepStructureC
                         </div>
                     )
                 })}
-
-                {stages.length === 0 && (
-                    <p className="text-center text-slate-400 py-4">
-                        {t('common.noData')}
-                    </p>
-                )}
             </div>
         </Card>
     )

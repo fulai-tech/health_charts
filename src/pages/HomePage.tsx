@@ -1,30 +1,27 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon } from 'lucide-react'
-import { VITAL_COLORS } from '@/config/theme'
-
-/** Healthy dashboard color - green */
-const HEALTHY_COLOR = '#10B981'
+import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme'
 
 const routes = [
   {
     category: 'Details Pages',
     items: [
-      { path: '/details/healthy', label: 'Healthy Dashboard', icon: LayoutDashboard, color: HEALTHY_COLOR },
-      { path: '/details/blood-pressure', label: 'Blood Pressure', icon: Heart, color: VITAL_COLORS.bp },
-      { path: '/details/spo2', label: 'Blood Oxygen (SpO2)', icon: Droplets, color: VITAL_COLORS.spo2 },
-      { path: '/details/heart-rate', label: 'Heart Rate', icon: Activity, color: VITAL_COLORS.heartRate },
-      { path: '/details/glucose', label: 'Blood Glucose', icon: Pill, color: VITAL_COLORS.glucose },
-      { path: '/details/sleep', label: 'Sleep', icon: Moon, color: VITAL_COLORS.sleep },
+      { path: '/details/healthy', label: 'Healthy Dashboard', icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
+      { path: '/details/blood-pressure', label: 'Blood Pressure', icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
+      { path: '/details/spo2', label: 'Blood Oxygen (SpO2)', icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
+      { path: '/details/heart-rate', label: 'Heart Rate', icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
+      { path: '/details/glucose', label: 'Blood Glucose', icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
+      { path: '/details/sleep', label: 'Sleep', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
     ],
   },
   {
     category: 'Widget Pages (for iframe embedding)',
     items: [
-      { path: '/widget/blood-pressure/trend', label: 'BP Trend Widget', icon: Heart, color: VITAL_COLORS.bp },
-      { path: '/widget/spo2/trend', label: 'SpO2 Trend Widget', icon: Droplets, color: VITAL_COLORS.spo2 },
-      { path: '/widget/heart-rate/trend', label: 'HR Trend Widget', icon: Activity, color: VITAL_COLORS.heartRate },
-      { path: '/widget/glucose/trend', label: 'Glucose Trend Widget', icon: Pill, color: VITAL_COLORS.glucose },
+      { path: '/widget/blood-pressure/trend', label: 'BP Trend Widget', icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
+      { path: '/widget/spo2/trend', label: 'SpO2 Trend Widget', icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
+      { path: '/widget/heart-rate/trend', label: 'HR Trend Widget', icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
+      { path: '/widget/glucose/trend', label: 'Glucose Trend Widget', icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
     ],
   },
 ]
@@ -98,7 +95,7 @@ export function HomePage() {
                   >
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${route.color}20` }}
+                      style={{ backgroundColor: route.alphaColor }}
                     >
                       <Icon className="w-6 h-6" style={{ color: route.color }} />
                     </div>

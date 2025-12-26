@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Activity, Info, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES, STATUS_COLORS } from '@/config/theme'
 import { getChartAnimationProps } from '@/lib/utils'
 import type { HRDomainModel } from '../types'
 
@@ -10,15 +10,6 @@ interface HRStatisticsCardProps {
   data?: HRDomainModel
   className?: string
   isLoading?: boolean
-}
-
-// Status colors for Heart Rate
-const STAT_COLORS: Record<string, string> = {
-  normal: '#4ADE80',     // Green
-  high: '#FBBF24',       // Yellow - 偏高
-  too_high: '#F87171',   // Red - 过高
-  slow: '#60A5FA',       // Blue - 过缓
-  low: '#60A5FA',        // Blue - 过低 (alias)
 }
 
 // Status order for display
@@ -52,7 +43,7 @@ export function HRStatisticsCard({ data, className, isLoading }: HRStatisticsCar
       label: t(STAT_LABELS[type] || `status.${type}`),
       count: found?.count || 0,
       percent: found?.percent || 0,
-      color: STAT_COLORS[type] || '#94A3B8',
+      color: STATUS_COLORS.heartRate[type as keyof typeof STATUS_COLORS.heartRate] || '#94A3B8',
     }
   })
 

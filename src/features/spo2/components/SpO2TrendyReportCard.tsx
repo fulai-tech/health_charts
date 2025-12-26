@@ -12,9 +12,10 @@ import {
 } from 'recharts'
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, CHART_COLORS, UI_STYLES } from '@/config/theme'
+import { VITAL_COLORS, CHART_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
 import { getChartAnimationProps } from '@/lib/utils'
 import type { SpO2DomainModel } from '../types'
+import { memo, useMemo } from 'react'
 
 interface SpO2TrendyReportCardProps {
   data?: SpO2DomainModel
@@ -40,7 +41,7 @@ interface CustomTooltipProps {
   }>
 }
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
   const { t } = useTranslation()
 
   if (!active || !payload || payload.length === 0) return null
@@ -59,7 +60,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
       </p>
     </div>
   )
-}
+})
 
 /**
  * SpO2 Trendy Report Card
@@ -69,8 +70,7 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
   const themeColor = VITAL_COLORS.spo2
   const animationProps = getChartAnimationProps()
 
-  // Placeholder data when no real data
-  const placeholderChartData = [
+  const placeholderChartData = useMemo(() => [
     { name: 'Mon', weekdayKey: 'weekday.mon', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
     { name: 'Tues', weekdayKey: 'weekday.tue', range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
     { name: 'Wed', weekdayKey: 'weekday.wed', range: [96, 99] as [number, number], avg: 98, max: 99, min: 96 },
@@ -78,35 +78,38 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
     { name: 'Fri', weekdayKey: 'weekday.fri', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
     { name: 'Sat', weekdayKey: 'weekday.sat', range: [97, 99] as [number, number], avg: 98, max: 99, min: 97 },
     { name: 'Sun', weekdayKey: 'weekday.sun', range: [96, 98] as [number, number], avg: 97, max: 98, min: 96 },
-  ]
+  ], [])
 
-  // Prepare chart data with range as [min, max] tuple for Area
-  const chartData = data?.chartData?.map((point, index) => ({
-    name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
-    weekdayKey: point.weekdayKey,
-    range: [point.min, point.max] as [number, number],
-    avg: point.avg,
-    max: point.max,
-    min: point.min,
-  })) ?? placeholderChartData
+  const chartData = useMemo(
+    () => data?.chartData?.map((point, index) => ({
+      name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
+      weekdayKey: point.weekdayKey,
+      range: [point.min, point.max] as [number, number],
+      avg: point.avg,
+      max: point.max,
+      min: point.min,
+    })) ?? placeholderChartData,
+    [data?.chartData, placeholderChartData]
+  )
 
-  // Get trend icon and color
-  const getTrendDisplay = () => {
-    if (!data) return null
-    const { trend, changeValue } = data.summary
-    if (changeValue === 0) return null
+  const getTrendDisplay = useMemo(() => {
+    return () => {
+      if (!data) return null
+      const { trend, changeValue } = data.summary
+      if (changeValue === 0) return null
 
-    const isUp = trend === 'up'
-    const Icon = isUp ? ArrowUp : ArrowDown
-    const color = isUp ? '#10B981' : '#EF4444'
+      const isUp = trend === 'up'
+      const Icon = isUp ? ArrowUp : ArrowDown
+      const color = isUp ? UI_COLORS.trend.down : UI_COLORS.trend.up
 
-    return (
-      <span className="flex items-center gap-0.5 text-sm" style={{ color }}>
-        <Icon className="w-3 h-3" />
-        {Math.abs(changeValue)}
-      </span>
-    )
-  }
+      return (
+        <span className="flex items-center gap-0.5 text-sm" style={{ color }}>
+          <Icon className="w-3 h-3" />
+          {Math.abs(changeValue)}
+        </span>
+      )
+    }
+  }, [data, UI_COLORS.trend])
 
   return (
     <Card className={`${className} relative overflow-hidden`}>
@@ -127,7 +130,7 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
       </div>
 
       {/* Summary Box - All stats in one container */}
-      <div className="rounded-xl px-5 py-4 mb-4 mx-1" style={{ backgroundColor: '#F8F8F8' }}>
+      <div className="rounded-xl px-5 py-4 mb-4 mx-1" style={{ backgroundColor: UI_COLORS.background.summaryBox }}>
         {/* Top Row: Average + Normal Range */}
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -195,15 +198,15 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
                 <stop offset="95%" stopColor={themeColor} stopOpacity={0.1} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={UI_COLORS.chart.grid} vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: UI_COLORS.chart.tick }}
               tickLine={false}
               axisLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: UI_COLORS.chart.tick }}
               tickLine={false}
               axisLine={false}
               domain={[data?.yAxisRange?.min ?? 90, data?.yAxisRange?.max ?? 100]}
@@ -221,17 +224,20 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
               dataKey="range"
               stroke="transparent"
               fill="url(#spo2RangeGradient)"
-              {...animationProps}
+              animationDuration={300}
+              animationEasing="linear"
+              isAnimationActive={true}
             />
-            {/* Average Line */}
             <Line
               type="monotone"
               dataKey="avg"
               stroke={CHART_COLORS.spo2.primary}
               strokeWidth={2}
               dot={{ fill: CHART_COLORS.spo2.primary, strokeWidth: 0, r: 4 }}
-              activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: '#fff' }}
-              {...animationProps}
+              activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: UI_COLORS.chart.activeDot.fill }}
+              animationDuration={300}
+              animationEasing="linear"
+              isAnimationActive={true}
             />
           </ComposedChart>
         </ResponsiveContainer>

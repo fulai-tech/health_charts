@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Activity, Info, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES, STATUS_COLORS } from '@/config/theme'
 import { getChartAnimationProps } from '@/lib/utils'
 import type { SpO2DomainModel } from '../types'
 
@@ -10,13 +10,6 @@ interface SpO2StatisticsCardProps {
   data?: SpO2DomainModel
   className?: string
   isLoading?: boolean
-}
-
-// Status colors for SpO2
-const STAT_COLORS: Record<string, string> = {
-  normal: '#4ADE80',    // Green
-  low: '#60A5FA',       // Blue
-  too_low: '#F87171',   // Red
 }
 
 // Status order for display
@@ -48,7 +41,7 @@ export function SpO2StatisticsCard({ data, className, isLoading }: SpO2Statistic
       label: t(STAT_LABELS[type] || `status.${type}`),
       count: found?.count || 0,
       percent: found?.percent || 0,
-      color: STAT_COLORS[type] || '#94A3B8',
+      color: STATUS_COLORS.spo2[type as keyof typeof STATUS_COLORS.spo2] || '#94A3B8',
     }
   })
 

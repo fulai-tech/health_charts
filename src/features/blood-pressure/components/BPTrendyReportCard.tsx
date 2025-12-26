@@ -33,7 +33,7 @@ interface CustomTooltipProps {
   label?: string
 }
 
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+const CustomTooltip = memo(({ active, payload, label }: CustomTooltipProps) => {
   if (!active || !payload || payload.length === 0) return null
 
   const systolicItem = payload.find(p => p.dataKey === 'systolic' && p.name === 'systolic')
@@ -50,7 +50,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       )}
     </div>
   )
-}
+})
 
 const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportCardProps) => {
   const { t } = useTranslation()

@@ -12,9 +12,10 @@ import {
 } from 'recharts'
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
 import { getChartAnimationProps } from '@/lib/utils'
 import type { HRDomainModel } from '../types'
+import { memo, useMemo } from 'react'
 
 interface HRTrendyReportCardProps {
   data?: HRDomainModel
@@ -40,7 +41,7 @@ interface CustomTooltipProps {
   }>
 }
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
   const { t } = useTranslation()
 
   if (!active || !payload || payload.length === 0) return null
@@ -62,18 +63,18 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
       </p>
     </div>
   )
-}
+})
 
 /**
  * HR Trendy Report Card
  */
-export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyReportCardProps) {
+const HRTrendyReportCardInner = ({ data, className, isLoading }: HRTrendyReportCardProps) => {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.heartRate
   const animationProps = getChartAnimationProps()
 
   // Placeholder data when no real data
-  const placeholderChartData = [
+  const placeholderChartData = useMemo(() => [
     { name: 'Mon', weekdayKey: 'weekday.mon', range: [60, 85] as [number, number], avg: 72, max: 85, min: 60 },
     { name: 'Tues', weekdayKey: 'weekday.tue', range: [62, 88] as [number, number], avg: 75, max: 88, min: 62 },
     { name: 'Wed', weekdayKey: 'weekday.wed', range: [58, 82] as [number, number], avg: 70, max: 82, min: 58 },
@@ -81,17 +82,20 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
     { name: 'Fri', weekdayKey: 'weekday.fri', range: [60, 84] as [number, number], avg: 72, max: 84, min: 60 },
     { name: 'Sat', weekdayKey: 'weekday.sat', range: [55, 80] as [number, number], avg: 68, max: 80, min: 55 },
     { name: 'Sun', weekdayKey: 'weekday.sun', range: [58, 83] as [number, number], avg: 70, max: 83, min: 58 },
-  ]
+  ], [])
 
   // Prepare chart data with range as [min, max] tuple for Area
-  const chartData = data?.chartData?.map((point, index) => ({
-    name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
-    weekdayKey: point.weekdayKey,
-    range: [point.min, point.max] as [number, number],
-    avg: point.avg,
-    max: point.max,
-    min: point.min,
-  })) ?? placeholderChartData
+  const chartData = useMemo(
+    () => data?.chartData?.map((point, index) => ({
+      name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
+      weekdayKey: point.weekdayKey,
+      range: [point.min, point.max] as [number, number],
+      avg: point.avg,
+      max: point.max,
+      min: point.min,
+    })) ?? placeholderChartData,
+    [data?.chartData, placeholderChartData]
+  )
 
   // Get trend icon and color
   const getTrendDisplay = () => {
@@ -101,7 +105,7 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
 
     const isUp = trend === 'up'
     const Icon = isUp ? ArrowUp : ArrowDown
-    const color = isUp ? '#EF4444' : '#10B981'
+    const color = isUp ? UI_COLORS.trend.up : UI_COLORS.trend.down
 
     return (
       <span className="flex items-center gap-0.5 text-sm" style={{ color }}>
@@ -130,7 +134,7 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
       </div>
 
       {/* Summary Box - All stats in one container */}
-      <div className="rounded-xl px-5 py-4 mb-4 mx-1" style={{ backgroundColor: '#FFF5F5' }}>
+      <div className="rounded-xl px-5 py-4 mb-4 mx-1" style={{ backgroundColor: UI_COLORS.background.summaryBox }}>
         {/* Top Row: Average + Last Week */}
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -240,3 +244,5 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
     </Card>
   )
 }
+
+export const HRTrendyReportCard = memo(HRTrendyReportCardInner)

@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Info, Activity, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES, STATUS_COLORS } from '@/config/theme'
 import type { BPDomainModel } from '../types'
 import { memo, useMemo } from 'react'
 import { getOptimizedAnimationDuration } from '@/lib/utils'
@@ -11,14 +11,6 @@ interface BPStatisticsCardProps {
   data?: BPDomainModel
   className?: string
   isLoading?: boolean
-}
-
-// Fixed colors: Blue=Normal, Green=Normal High, Red=Too Low, Yellow=Too High
-const STAT_COLORS = {
-  normal: '#91C6FF',
-  high_normal: '#B3EFB2',
-  low_bp: '#FF9393',
-  high_bp: '#FFD024',
 }
 
 const STAT_LABELS: Record<string, string> = {
@@ -48,7 +40,7 @@ const BPStatisticsCardInner = ({ data, className, isLoading }: BPStatisticsCardP
         label: t(STAT_LABELS[type]),
         count: found?.count || 0,
         percent: found?.percent || 0,
-        color: STAT_COLORS[type as keyof typeof STAT_COLORS],
+        color: STATUS_COLORS.bp[type as keyof typeof STATUS_COLORS.bp] || '#94A3B8',
       }
     }),
     [distribution, t]

@@ -12,9 +12,10 @@ import {
 } from 'recharts'
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
 import { getChartAnimationProps } from '@/lib/utils'
 import type { GlucoseDomainModel } from '../types'
+import { memo, useMemo } from 'react'
 
 interface GlucoseTrendyReportCardProps {
   data?: GlucoseDomainModel
@@ -40,7 +41,7 @@ interface CustomTooltipProps {
   }>
 }
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
   const { t } = useTranslation()
 
   if (!active || !payload || payload.length === 0) return null
@@ -59,18 +60,18 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
       </p>
     </div>
   )
-}
+})
 
 /**
  * Glucose Trendy Report Card
  */
-export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseTrendyReportCardProps) {
+const GlucoseTrendyReportCardInner = ({ data, className, isLoading }: GlucoseTrendyReportCardProps) => {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.glucose
   const animationProps = getChartAnimationProps()
 
   // Placeholder data when no real data
-  const placeholderChartData = [
+  const placeholderChartData = useMemo(() => [
     { name: 'Mon', weekdayKey: 'weekday.mon', range: [4.5, 6.5] as [number, number], avg: 5.5, max: 6.5, min: 4.5 },
     { name: 'Tues', weekdayKey: 'weekday.tue', range: [4.8, 7.0] as [number, number], avg: 5.8, max: 7.0, min: 4.8 },
     { name: 'Wed', weekdayKey: 'weekday.wed', range: [4.6, 6.8] as [number, number], avg: 5.6, max: 6.8, min: 4.6 },
@@ -78,17 +79,20 @@ export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseT
     { name: 'Fri', weekdayKey: 'weekday.fri', range: [4.7, 6.9] as [number, number], avg: 5.7, max: 6.9, min: 4.7 },
     { name: 'Sat', weekdayKey: 'weekday.sat', range: [4.5, 6.6] as [number, number], avg: 5.5, max: 6.6, min: 4.5 },
     { name: 'Sun', weekdayKey: 'weekday.sun', range: [4.6, 6.7] as [number, number], avg: 5.6, max: 6.7, min: 4.6 },
-  ]
+  ], [])
 
   // Prepare chart data with range as [min, max] tuple for Area
-  const chartData = data?.chartData?.map((point, index) => ({
-    name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
-    weekdayKey: point.weekdayKey,
-    range: [point.min, point.max] as [number, number],
-    avg: point.avg,
-    max: point.max,
-    min: point.min,
-  })) ?? placeholderChartData
+  const chartData = useMemo(
+    () => data?.chartData?.map((point, index) => ({
+      name: ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index % 7],
+      weekdayKey: point.weekdayKey,
+      range: [point.min, point.max] as [number, number],
+      avg: point.avg,
+      max: point.max,
+      min: point.min,
+    })) ?? placeholderChartData,
+    [data?.chartData, placeholderChartData]
+  )
 
   // Get trend icon and color
   const getTrendDisplay = () => {
@@ -128,7 +132,7 @@ export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseT
       </div>
 
       {/* Summary Box - All stats in one container */}
-      <div className="rounded-xl px-5 py-4 mb-4 mx-1" style={{ backgroundColor: '#FFF9E6' }}>
+      <div className="rounded-xl px-5 py-4 mb-4 mx-1" style={{ backgroundColor: UI_COLORS.background.warning }}>
         {/* Top Row: Average + Normal Range */}
         <div className="flex items-start justify-between mb-4">
           <div>
@@ -241,3 +245,5 @@ export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseT
     </Card>
   )
 }
+
+export const GlucoseTrendyReportCard = memo(GlucoseTrendyReportCardInner)

@@ -13,6 +13,34 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 禁止文本选择，防止误触 */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* 允许文本选择的地方 - 输入框、文本域、可编辑内容 */
+input,
+textarea,
+[contenteditable="true"],
+select {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Tooltip 允许文本选择 */
+.recharts-tooltip-wrapper,
+.recharts-tooltip,
+.tooltip,
+[role="tooltip"],
+[data-tooltip] {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
 }
 
 /* Remove focus outline globally */
@@ -22,6 +50,33 @@ body {
 
 *:focus-visible {
   outline: none;
+}
+
+/* 防止移动端长按选择文本和图片 */
+* {
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  user-drag: none;
+}
+
+/* 允许拖拽的元素 */
+[draggable="true"] {
+  -webkit-user-drag: auto;
+  -moz-user-drag: auto;
+  -o-user-drag: auto;
+  user-drag: auto;
+}
+
+/* 防止双击缩放 */
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }
 
 /* Smooth scrolling */
@@ -92,6 +147,8 @@ html {
   /* Optimize rendering */
   -webkit-perspective: 1000;
   perspective: 1000;
+  /* Reduce repaints */
+  contain: layout style paint;
 }
 
 /* Optimize SVG rendering in charts - All chart types */
@@ -111,6 +168,51 @@ html {
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
   will-change: transform, opacity;
+  /* Improve rendering performance */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  /* Reduce compositing */
+  contain: layout style;
+}
+
+/* Optimize stacked bar chart performance specifically */
+.recharts-bar {
+  /* Reduce repaint overhead */
+  contain: strict;
+  /* Force GPU layer */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Optimize chart tooltip rendering */
+.recharts-tooltip-wrapper {
+  /* Reduce layout thrashing */
+  contain: layout style;
+  /* Force GPU layer */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* Improve z-index stacking */
+  isolation: isolate;
+}
+
+/* Optimize chart axis rendering */
+.recharts-cartesian-axis,
+.recharts-cartesian-axis-ticks,
+.recharts-cartesian-axis-line {
+  /* Reduce repaints */
+  contain: layout style;
+  /* Force GPU layer */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Optimize chart grid rendering */
+.recharts-cartesian-grid {
+  /* Reduce repaints */
+  contain: strict;
+  /* Force GPU layer */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
 
 /* Disable expensive effects on low-end devices via media query */
