@@ -13,6 +13,7 @@ import {
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, CHART_COLORS, UI_STYLES } from '@/config/theme'
+import { getChartAnimationProps } from '@/lib/utils'
 import type { SpO2DomainModel } from '../types'
 
 interface SpO2TrendyReportCardProps {
@@ -66,6 +67,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.spo2
+  const animationProps = getChartAnimationProps()
 
   // Placeholder data when no real data
   const placeholderChartData = [
@@ -109,10 +111,9 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
   return (
     <Card className={`${className} relative overflow-hidden`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -220,6 +221,7 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
               dataKey="range"
               stroke="transparent"
               fill="url(#spo2RangeGradient)"
+              {...animationProps}
             />
             {/* Average Line */}
             <Line
@@ -229,6 +231,7 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
               strokeWidth={2}
               dot={{ fill: CHART_COLORS.spo2.primary, strokeWidth: 0, r: 4 }}
               activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: '#fff' }}
+              {...animationProps}
             />
           </ComposedChart>
         </ResponsiveContainer>

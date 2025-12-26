@@ -5,7 +5,7 @@ import { SpO2TrendyReportCard } from '@/features/spo2/components/SpO2TrendyRepor
 import { SpO2StatisticsCard } from '@/features/spo2/components/SpO2StatisticsCard'
 import { SpO2DataAnalysisCard } from '@/features/spo2/components/SpO2DataAnalysisCard'
 import { SpO2WeeklyOverviewCard } from '@/features/spo2/components/SpO2WeeklyOverviewCard'
-import { useSpO2TrendData } from '@/features/spo2/api'
+import { useSpO2TrendData, usePrefetchSpO2Data } from '@/features/spo2/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 
@@ -39,6 +39,7 @@ function formatDateForDisplay(date: Date): string {
 export function SpO2Page() {
   const { t } = useTranslation()
   const { theme } = useUrlConfig()
+  const { prefetchPreviousWeeks } = usePrefetchSpO2Data()
 
   // Date range state
   const [dateRange, setDateRange] = useState(() => {
@@ -47,6 +48,11 @@ export function SpO2Page() {
     start.setDate(end.getDate() - 6)
     return { start, end }
   })
+
+  // Prefetch previous weeks - runs on mount AND when dateRange changes
+  useEffect(() => {
+    prefetchPreviousWeeks(dateRange.end, 3)
+  }, [dateRange.end, prefetchPreviousWeeks])
 
   // Check if we can go to next period (current end date is already today or later)
   const canGoNext = useMemo(() => {

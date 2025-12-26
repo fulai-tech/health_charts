@@ -202,7 +202,9 @@
       "defaultHighlights": "趋势图显示您本周的睡眠模式相对稳定。但请注意您的快速眼动睡眠比例，这可能会影响您的睡眠质量和梦境模式。",
       "defaultAnalysis1": "本周平均血氧饱和度为 97%，与上周持平。",
       "defaultAnalysis2": "血氧水平在本周二至周四保持较高水平（98%）。",
-      "defaultAnalysis3": "周五记录到血氧水平为 94%，略低于正常范围下限。"
+      "defaultAnalysis3": "周五记录到血氧水平为 94%，略低于正常范围下限。",
+      "highest": "最高",
+      "lowest": "最低"
     }
   },
   "healthy": {

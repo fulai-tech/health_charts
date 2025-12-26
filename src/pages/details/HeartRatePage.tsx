@@ -5,7 +5,7 @@ import { HRTrendyReportCard } from '@/features/heart-rate/components/HRTrendyRep
 import { HRStatisticsCard } from '@/features/heart-rate/components/HRStatisticsCard'
 import { HRDataAnalysisCard } from '@/features/heart-rate/components/HRDataAnalysisCard'
 import { HRWeeklyOverviewCard } from '@/features/heart-rate/components/HRWeeklyOverviewCard'
-import { useHRTrendData } from '@/features/heart-rate/api'
+import { useHRTrendData, usePrefetchHRData } from '@/features/heart-rate/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 
@@ -39,6 +39,7 @@ function formatDateForDisplay(date: Date): string {
 export function HeartRatePage() {
   const { t } = useTranslation()
   const { theme } = useUrlConfig()
+  const { prefetchPreviousWeeks } = usePrefetchHRData()
 
   // Date range state
   const [dateRange, setDateRange] = useState(() => {
@@ -47,6 +48,11 @@ export function HeartRatePage() {
     start.setDate(end.getDate() - 6)
     return { start, end }
   })
+
+  // Prefetch previous weeks - runs on mount AND when dateRange changes
+  useEffect(() => {
+    prefetchPreviousWeeks(dateRange.end, 3)
+  }, [dateRange.end, prefetchPreviousWeeks])
 
   // Check if we can go to next period (current end date is already today or later)
   const canGoNext = useMemo(() => {

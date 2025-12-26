@@ -2,14 +2,10 @@ import { useQuery } from '@tanstack/react-query'
 import { getSleepDetail } from '@/services/api'
 import type { SleepDomainModel } from './types'
 import { adaptSleepData } from './adapter'
+import { usePrefetchData, type DateRange } from '@/lib/usePrefetchData'
 
-/**
- * Date range interface
- */
-export interface DateRange {
-    startDate: string
-    endDate: string
-}
+// Re-export DateRange for backwards compatibility
+export type { DateRange }
 
 /**
  * Query keys for sleep data
@@ -47,3 +43,18 @@ export function useSleepTrendData(dateRange?: DateRange) {
         placeholderData: (previousData) => previousData,
     })
 }
+
+/**
+ * Prefetch hook for sleep data
+ */
+export function usePrefetchSleepData() {
+    return usePrefetchData({
+        featureName: 'Sleep',
+        queryKeyFn: sleepQueryKeys.trend,
+        fetchFn: (dateRange) => getSleepDetail({
+            start_date: dateRange.startDate,
+            end_date: dateRange.endDate
+        })
+    })
+}
+

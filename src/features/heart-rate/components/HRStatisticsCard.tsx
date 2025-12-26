@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 import { Activity, Info, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { getChartAnimationProps } from '@/lib/utils'
 import type { HRDomainModel } from '../types'
 
 interface HRStatisticsCardProps {
@@ -38,6 +39,7 @@ const STAT_LABELS: Record<string, string> = {
 export function HRStatisticsCard({ data, className, isLoading }: HRStatisticsCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.heartRate
+  const animationProps = getChartAnimationProps()
 
   const distribution = data?.summary?.distribution ?? []
   const totalCount = data?.summary?.totalCount ?? 0
@@ -66,10 +68,9 @@ export function HRStatisticsCard({ data, className, isLoading }: HRStatisticsCar
   return (
     <Card className={`${className} relative overflow-hidden`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -121,6 +122,7 @@ export function HRStatisticsCard({ data, className, isLoading }: HRStatisticsCar
                 startAngle={90}
                 endAngle={-270}
                 strokeWidth={0}
+                {...animationProps}
               >
                 {pieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

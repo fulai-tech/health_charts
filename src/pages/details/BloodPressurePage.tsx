@@ -5,7 +5,7 @@ import { BPTrendyReportCard } from '@/features/blood-pressure/components/BPTrend
 import { BPStatisticsCard } from '@/features/blood-pressure/components/BPStatisticsCard'
 import { BPCompareCard } from '@/features/blood-pressure/components/BPCompareCard'
 import { BPWeeklyOverviewCard } from '@/features/blood-pressure/components/BPWeeklyOverviewCard'
-import { useBPTrendData } from '@/features/blood-pressure/api'
+import { useBPTrendData, usePrefetchBPData } from '@/features/blood-pressure/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 
@@ -39,6 +39,7 @@ function formatDateForDisplay(date: Date): string {
 export function BloodPressurePage() {
   const { t } = useTranslation()
   const { theme } = useUrlConfig()
+  const { prefetchPreviousWeeks } = usePrefetchBPData()
 
   // Date range state
   const [dateRange, setDateRange] = useState(() => {
@@ -47,6 +48,12 @@ export function BloodPressurePage() {
     start.setDate(end.getDate() - 6)
     return { start, end }
   })
+
+  // Prefetch previous weeks - runs on mount AND when dateRange changes
+  // This ensures data is always prefetched ahead of user navigation
+  useEffect(() => {
+    prefetchPreviousWeeks(dateRange.end, 3)
+  }, [dateRange.end, prefetchPreviousWeeks]) // Prefetch whenever user navigates to a new week
 
   // Check if we can go to next period (current end date is already today or later)
   const canGoNext = useMemo(() => {

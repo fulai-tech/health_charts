@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { CHART_CONFIG } from '@/config/chartConfig'
 
 /**
  * Utility function to merge Tailwind CSS classes with clsx
@@ -9,24 +10,28 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-let isWebViewCache: boolean | null = null
-
-export function isWebView(): boolean {
-  if (isWebViewCache !== null) {
-    return isWebViewCache
-  }
-
-  const userAgent = navigator.userAgent.toLowerCase()
-  const isAndroid = /android/.test(userAgent)
-  const isIOS = /iphone|ipad|ipod/.test(userAgent)
-  const isTencentX5 = /tbs|qqbrowser|mqqbrowser|micromessenger/.test(userAgent)
-  const isWKWebView = /webkit/.test(userAgent) && !/safari/.test(userAgent)
-
-  isWebViewCache = (isAndroid || isIOS) && (isTencentX5 || isWKWebView)
-  return isWebViewCache
+/**
+ * Get optimized animation duration based on device/environment
+ * Uses CHART_CONFIG which respects the WEBVIEW_MODE toggle in chartConfig.ts
+ * 
+ * @param _defaultDuration - Ignored, uses CHART_CONFIG.animation.animationDuration instead
+ * @returns Optimized animation duration from CHART_CONFIG
+ */
+export function getOptimizedAnimationDuration(_defaultDuration?: number): number {
+  return CHART_CONFIG.animation.animationDuration
 }
 
-export function getOptimizedAnimationDuration(defaultDuration: number): number {
-  return isWebView() ? Math.min(defaultDuration, 300) : defaultDuration
+/**
+ * Get full animation config for Recharts components
+ * Uses CHART_CONFIG which respects the WEBVIEW_MODE toggle
+ * 
+ * @example
+ * ```tsx
+ * <Bar {...getChartAnimationProps()} />
+ * ```
+ */
+export function getChartAnimationProps() {
+  return CHART_CONFIG.animation
 }
+
 

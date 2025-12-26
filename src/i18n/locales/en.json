@@ -202,7 +202,9 @@
       "defaultHighlights": "The trend chart shows your sleep patterns have been relatively stable throughout the week. However, pay attention to your REM sleep ratio as it may affect your sleep quality and dream patterns.",
       "defaultAnalysis1": "The average blood oxygen saturation this week was 97%, the same as last week.",
       "defaultAnalysis2": "Your blood oxygen level remained at a high level (98%) from Tuesday to Thursday this week.",
-      "defaultAnalysis3": "On Friday, a blood oxygen level of 94% was recorded, slightly below the lower limit of the normal range."
+      "defaultAnalysis3": "On Friday, a blood oxygen level of 94% was recorded, slightly below the lower limit of the normal range.",
+      "highest": "Highest",
+      "lowest": "Lowest"
     }
   },
   "healthy": {

@@ -9,7 +9,7 @@ import {
     Tooltip,
     Rectangle,
 } from 'recharts'
-import { TrendingUp, TrendingDown, Minus, Moon, Loader2 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Moon, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
 import type { SleepDomainModel } from '../types'
@@ -129,12 +129,6 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
 
     const animationDuration = getOptimizedAnimationDuration(800)
 
-    const getTrendIcon = (trend: string) => {
-        if (trend === 'up') return <TrendingUp className="w-4 h-4" />
-        if (trend === 'down') return <TrendingDown className="w-4 h-4" />
-        return <Minus className="w-4 h-4" />
-    }
-
     // Calculate max for Y-axis (convert minutes to hours and add buffer)
     const maxMinutes = Math.max(...chartData.map(d => (d.deep || 0) + (d.light || 0) + (d.rem || 0) + (d.awake || 0)))
     const maxHours = Math.ceil(maxMinutes / 60) + 1
@@ -164,29 +158,77 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
                 )}
             </div>
 
-            <div className="flex gap-3 mb-5">
-                <div className="flex-1 p-3 rounded-xl bg-purple-50">
+            {/* Gray box container for stats - matching design mockup */}
+            <div className="bg-gray-100 rounded-xl p-4 mb-4">
+                {/* Week's average sleep label */}
+                <p className="text-sm text-slate-500 mb-2">
+                    {t('page.sleep.weeksAverageSleep')}
+                </p>
+
+                {/* Main value with trend indicator */}
+                <div className="flex items-center gap-3 mb-2">
                     <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold" style={{ color: SLEEP_THEME_COLOR }}>
-                            {data?.summary?.avgDurationText ?? '--'}
+                        <span className="text-3xl font-bold" style={{ color: '#FB923D' }}>
+                            {data?.summary?.avgHours ?? '--'}
+                        </span>
+                        <span className="text-base text-slate-600">hours</span>
+                        <span className="text-3xl font-bold ml-1" style={{ color: '#FB923D' }}>
+                            {data?.summary?.avgMinutes ?? '--'}
+                        </span>
+                        <span className="text-base text-slate-600">minutes</span>
+                    </div>
+
+                    {/* Trend indicator with arrow */}
+                    <div className="flex items-center gap-1">
+                        {data?.summary?.trend === 'down' && (
+                            <TrendingDown className="w-5 h-5 text-cyan-500" />
+                        )}
+                        {data?.summary?.trend === 'up' && (
+                            <TrendingUp className="w-5 h-5 text-orange-500" />
+                        )}
+                        <span className="text-lg font-semibold text-cyan-500">
+                            {data?.summary?.durationChange ?? '--'}
                         </span>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
-                        {t('page.sleep.weeksAverageSleep')}
-                    </p>
                 </div>
-                <div className="flex-1 p-3 rounded-xl bg-purple-50">
-                    <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold" style={{ color: SLEEP_THEME_COLOR }}>
-                            {data?.summary?.trend && getTrendIcon(data.summary.trend)}
-                        </span>
-                        <span className="text-lg font-semibold text-slate-700">
-                            {data?.summary?.durationChangeText ?? '--'}
-                        </span>
+
+                {/* Last week comparison */}
+                <p className="text-sm text-slate-500 mb-4">
+                    {t('time.lastWeek')}: {data?.summary?.lastWeekDurationText ?? '-- hours -- minutes'}
+                </p>
+
+                {/* Highest and Lowest sections */}
+                <div className="flex gap-6">
+                    <div>
+                        <p className="text-sm text-slate-500 mb-1">
+                            {t('page.sleep.highest')}({data?.summary?.highestDay ?? '--'})
+                        </p>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold" style={{ color: '#FB923D' }}>
+                                {data?.summary?.highestHours ?? '--'}
+                            </span>
+                            <span className="text-sm text-slate-600">hours</span>
+                            <span className="text-2xl font-bold ml-1" style={{ color: '#FB923D' }}>
+                                {data?.summary?.highestMinutes ?? '--'}
+                            </span>
+                            <span className="text-sm text-slate-600">minutes</span>
+                        </div>
                     </div>
-                    <p className="text-xs text-slate-500 mt-1">
-                        {t('time.lastWeek')}
-                    </p>
+                    <div>
+                        <p className="text-sm text-slate-500 mb-1">
+                            {t('page.sleep.lowest')}({data?.summary?.lowestDay ?? '--'})
+                        </p>
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-2xl font-bold" style={{ color: '#FB923D' }}>
+                                {data?.summary?.lowestHours ?? '--'}
+                            </span>
+                            <span className="text-sm text-slate-600">hours</span>
+                            <span className="text-2xl font-bold ml-1" style={{ color: '#FB923D' }}>
+                                {data?.summary?.lowestMinutes ?? '--'}
+                            </span>
+                            <span className="text-sm text-slate-600">minutes</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 

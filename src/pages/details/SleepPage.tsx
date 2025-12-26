@@ -6,7 +6,7 @@ import { SleepStructureCard } from '@/features/sleep/components/SleepStructureCa
 import { SleepDataAnalysisCard } from '@/features/sleep/components/SleepDataAnalysisCard'
 import { SleepCompareCard } from '@/features/sleep/components/SleepCompareCard'
 import { SleepWeeklyOverviewCard } from '@/features/sleep/components/SleepWeeklyOverviewCard'
-import { useSleepTrendData } from '@/features/sleep/api'
+import { useSleepTrendData, usePrefetchSleepData } from '@/features/sleep/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 
@@ -40,6 +40,7 @@ function formatDateForDisplay(date: Date): string {
 export function SleepPage() {
     const { t } = useTranslation()
     const { theme } = useUrlConfig()
+    const { prefetchPreviousWeeks } = usePrefetchSleepData()
 
     // Date range state
     const [dateRange, setDateRange] = useState(() => {
@@ -48,6 +49,11 @@ export function SleepPage() {
         start.setDate(end.getDate() - 6)
         return { start, end }
     })
+
+    // Prefetch previous weeks - runs on mount AND when dateRange changes
+    useEffect(() => {
+        prefetchPreviousWeeks(dateRange.end, 3)
+    }, [dateRange.end, prefetchPreviousWeeks])
 
     // Check if we can go to next period (current end date is already today or later)
     const canGoNext = useMemo(() => {

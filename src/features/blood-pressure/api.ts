@@ -2,21 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import { getBPDetail } from '@/services/api'
 import type { BPDomainModel } from './types'
 import { adaptBPData } from './adapter'
+import { usePrefetchData, type DateRange } from '@/lib/usePrefetchData'
 
-/**
- * Date range interface
- */
-export interface DateRange {
-  startDate: string
-  endDate: string
-}
+// Re-export DateRange for backwards compatibility
+export type { DateRange }
 
 /**
  * Query keys for blood pressure data
  */
 export const bpQueryKeys = {
   all: ['blood-pressure'] as const,
-  trend: (dateRange?: DateRange) => 
+  trend: (dateRange?: DateRange) =>
     [...bpQueryKeys.all, 'trend', dateRange?.startDate, dateRange?.endDate] as const,
   details: () => [...bpQueryKeys.all, 'details'] as const,
 }
@@ -32,11 +28,11 @@ export function useBPTrendData(dateRange?: DateRange) {
     queryKey: bpQueryKeys.trend(dateRange),
     queryFn: async () => {
       console.log('[BP API] Fetching with dateRange:', dateRange)
-      
-      const apiDateRange = dateRange 
+
+      const apiDateRange = dateRange
         ? { start_date: dateRange.startDate, end_date: dateRange.endDate }
         : undefined
-      
+
       const result = await getBPDetail(apiDateRange)
       console.log('[BP API] Result:', result)
       return result
@@ -47,3 +43,20 @@ export function useBPTrendData(dateRange?: DateRange) {
     placeholderData: (previousData) => previousData,
   })
 }
+
+/**
+ * Prefetch hook for blood pressure data
+ * Uses the generic usePrefetchData hook
+ */
+export function usePrefetchBPData() {
+  return usePrefetchData({
+    featureName: 'BP',
+    queryKeyFn: bpQueryKeys.trend,
+    fetchFn: (dateRange) => getBPDetail({
+      start_date: dateRange.startDate,
+      end_date: dateRange.endDate
+    })
+  })
+}
+
+

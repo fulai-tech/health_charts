@@ -125,20 +125,38 @@ export interface SleepSummary {
     avgDuration: number
     /** Average duration formatted text */
     avgDurationText: string
+    /** Average hours (extracted from avgDuration) */
+    avgHours: number
+    /** Average minutes (extracted from avgDuration) */
+    avgMinutes: number
     /** Duration change from previous week */
     durationChange: number
     /** Duration change text */
     durationChangeText: string
+    /** Last week's duration text */
+    lastWeekDurationText: string
     /** Trend direction */
     trend: TrendDirection
     /** Maximum duration text */
     maxDurationText: string
     /** Maximum duration day */
     maxDay: string
+    /** Highest hours */
+    highestHours: number
+    /** Highest minutes */
+    highestMinutes: number
+    /** Highest day label */
+    highestDay: string
     /** Minimum duration text */
     minDurationText: string
     /** Minimum duration day */
     minDay: string
+    /** Lowest hours */
+    lowestHours: number
+    /** Lowest minutes */
+    lowestMinutes: number
+    /** Lowest day label */
+    lowestDay: string
 }
 
 /** Complete domain model for sleep feature */

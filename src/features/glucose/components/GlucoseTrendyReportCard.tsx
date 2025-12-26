@@ -13,6 +13,7 @@ import {
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { getChartAnimationProps } from '@/lib/utils'
 import type { GlucoseDomainModel } from '../types'
 
 interface GlucoseTrendyReportCardProps {
@@ -66,6 +67,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseTrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.glucose
+  const animationProps = getChartAnimationProps()
 
   // Placeholder data when no real data
   const placeholderChartData = [
@@ -110,10 +112,9 @@ export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseT
   return (
     <Card className={`${className} relative overflow-hidden`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -222,6 +223,7 @@ export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseT
               stroke="transparent"
               fill="url(#glucoseRangeGradient)"
               name="glucose-range"
+              {...animationProps}
             />
             <Line
               type="monotone"
@@ -231,6 +233,7 @@ export function GlucoseTrendyReportCard({ data, className, isLoading }: GlucoseT
               dot={{ fill: themeColor, strokeWidth: 0, r: 4 }}
               activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: '#fff' }}
               name="glucose-avg"
+              {...animationProps}
             />
           </ComposedChart>
         </ResponsiveContainer>

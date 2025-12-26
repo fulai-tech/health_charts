@@ -13,6 +13,7 @@ import {
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { getChartAnimationProps } from '@/lib/utils'
 import type { HRDomainModel } from '../types'
 
 interface HRTrendyReportCardProps {
@@ -69,6 +70,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.heartRate
+  const animationProps = getChartAnimationProps()
 
   // Placeholder data when no real data
   const placeholderChartData = [
@@ -112,10 +114,9 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
   return (
     <Card className={`${className} relative overflow-hidden`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -221,6 +222,7 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
               stroke="transparent"
               fill="url(#hrRangeGradient)"
               name="hr-range"
+              {...animationProps}
             />
             <Line
               type="monotone"
@@ -230,6 +232,7 @@ export function HRTrendyReportCard({ data, className, isLoading }: HRTrendyRepor
               dot={{ fill: themeColor, strokeWidth: 0, r: 4 }}
               activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: '#fff' }}
               name="hr-avg"
+              {...animationProps}
             />
           </ComposedChart>
         </ResponsiveContainer>
