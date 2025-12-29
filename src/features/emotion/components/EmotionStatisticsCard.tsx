@@ -150,7 +150,7 @@ const EmotionStatisticsCardInner = ({ data, className, isLoading }: EmotionStati
               domain={[0, 100]}
               tickFormatter={(value) => `${value}%`}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip />} cursor={false} />
             <Bar
               dataKey="positivePercent"
               stackId="emotion"
