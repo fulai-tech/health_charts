@@ -211,7 +211,11 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
               axisLine={false}
               domain={[data?.yAxisRange?.min ?? 90, data?.yAxisRange?.max ?? 100]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
+              allowEscapeViewBox={{ x: false, y: false }}
+            />
             <ReferenceLine
               y={data?.averageLine ?? 97}
               stroke={themeColor}

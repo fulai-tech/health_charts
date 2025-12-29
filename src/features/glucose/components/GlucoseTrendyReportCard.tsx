@@ -213,7 +213,11 @@ const GlucoseTrendyReportCardInner = ({ data, className, isLoading }: GlucoseTre
               axisLine={false}
               domain={[data?.yAxisRange?.min ?? 3, data?.yAxisRange?.max ?? 10]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
+              allowEscapeViewBox={{ x: false, y: false }}
+            />
             <ReferenceLine
               y={data?.averageLine ?? 5.5}
               stroke={themeColor}

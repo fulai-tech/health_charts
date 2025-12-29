@@ -4,7 +4,7 @@ import { Info, Loader2, type LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
 import { getChartAnimationProps } from '@/lib/utils'
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState, useCallback } from 'react'
 
 /**
  * Distribution item data structure
@@ -56,6 +56,8 @@ export interface DistributionCardProps {
     isLoading?: boolean
     /** Whether to show info icon (default: true) */
     showInfo?: boolean
+    /** Info content to display in modal (optional, can be string or React node) */
+    infoContent?: string | React.ReactNode
 }
 
 /**
@@ -83,9 +85,21 @@ const DistributionCardInner = ({
     className = '',
     isLoading = false,
     showInfo = true,
+    infoContent,
 }: DistributionCardProps) => {
     const { t } = useTranslation()
     const animationProps = getChartAnimationProps()
+
+    // Info modal state
+    const [showInfoModal, setShowInfoModal] = useState(false)
+
+    const handleInfoClick = useCallback(() => {
+        setShowInfoModal(true)
+    }, [])
+
+    const handleCloseModal = useCallback(() => {
+        setShowInfoModal(false)
+    }, [])
 
     // Prepare pie chart data - only items with percent > 0
     const pieData = useMemo(() => {
@@ -127,7 +141,12 @@ const DistributionCardInner = ({
             <div className="flex items-center gap-2 mb-4">
                 {Icon && <Icon className="w-5 h-5" style={{ color: themeColor }} />}
                 <h3 className="text-base font-semibold text-slate-800">{title}</h3>
-                {showInfo && <Info className="w-4 h-4 text-slate-400 ml-auto" />}
+                {showInfo && (
+                    <Info
+                        className="w-4 h-4 text-slate-400 ml-auto cursor-pointer hover:text-slate-600 transition-colors"
+                        onClick={handleInfoClick}
+                    />
+                )}
             </div>
 
             <div className="flex items-center justify-between">
@@ -262,6 +281,72 @@ const DistributionCardInner = ({
                     </div>
                 )}
             </div>
+
+            {/* Info Modal */}
+            {showInfoModal && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                    onClick={handleCloseModal}
+                >
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Modal Header */}
+                        <div className="px-6 pt-6 pb-4">
+                            <h3 className="text-xl font-bold text-slate-800 text-center">
+                                {t('common.illustrate')}
+                            </h3>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="px-6 pb-6 max-h-96 overflow-y-auto">
+                            <div className="bg-slate-50 rounded-2xl p-4">
+                                {infoContent ? (
+                                    typeof infoContent === 'string' ? (
+                                        <div className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+                                            {infoContent}
+                                        </div>
+                                    ) : (
+                                        infoContent
+                                    )
+                                ) : (
+                                    <div className="space-y-3">
+                                        {items.map((item) => (
+                                            <div key={item.type} className="flex items-start gap-3">
+                                                <span
+                                                    className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5"
+                                                    style={{ backgroundColor: item.color }}
+                                                />
+                                                <div className="flex-1">
+                                                    <p className="text-sm font-medium text-slate-800">
+                                                        {item.label}
+                                                    </p>
+                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                        {item.percent}% ({item.count || 0} {t('common.times')})
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 pb-6">
+                            <button
+                                onClick={handleCloseModal}
+                                className="w-full py-3 rounded-full font-semibold text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+                                style={{ backgroundColor: themeColor }}
+                            >
+                                {t('common.close')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </Card>
     )
 }

@@ -189,7 +189,11 @@ const EmotionTrendyReportCardInner = ({ data, className, isLoading }: EmotionTre
               axisLine={false}
               domain={[data?.yAxisRange?.min ?? 0, data?.yAxisRange?.max ?? 100]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
+              allowEscapeViewBox={{ x: false, y: false }}
+            />
             <Line
               type="monotone"
               dataKey="score"

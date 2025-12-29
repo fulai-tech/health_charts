@@ -270,7 +270,11 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
                             domain={[0, maxHours * 60]}
                             tickFormatter={(value) => `${Math.round(value / 60)}h`}
                         />
-                        <Tooltip content={<CustomTooltip />} />
+                        <Tooltip
+                            content={<CustomTooltip />}
+                            wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
+                            allowEscapeViewBox={{ x: false, y: false }}
+                        />
                         <Bar
                             dataKey="deep"
                             stackId="sleep"

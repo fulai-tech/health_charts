@@ -26,6 +26,8 @@
     "inAverage": "平均",
     "daily": "每日",
     "weekly": "每周",
+    "illustrate": "说明",
+    "close": "关闭",
     "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
   },
   "vitals": {
@@ -103,7 +105,8 @@
       "weeklyOverview": "周报概览",
       "overallSituation": "整体情况",
       "needsAttention": "需要注意",
-      "defaultInsight": "您的血压整体处于理想范围内。虽然与上周相比，收缩压略有上升，但仍处于正常波动范围内。"
+      "defaultInsight": "您的血压整体处于理想范围内。虽然与上周相比，收缩压略有上升，但仍处于正常波动范围内。",
+      "bpClassification": "血压分类标准（单位：mmHg）\n\n低血压：收缩压 <90 / 舒张压 <60\n\n正常血压：收缩压 <120 / 舒张压 <80\n\n正常高值（需注意）：收缩压 120-129 / 舒张压 80-89\n\n高血压（1级）：收缩压 ≥130 mmHg"
     },
     "spo2": {
       "title": "血氧详情",

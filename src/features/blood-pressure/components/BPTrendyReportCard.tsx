@@ -81,10 +81,9 @@ const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportC
   return (
     <Card className={`${className} relative`}>
       {/* Loading overlay */}
-      <div 
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${
-          isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         style={{ backgroundColor: UI_STYLES.loadingOverlay }}
       >
         <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -169,7 +168,11 @@ const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportC
               axisLine={false}
               domain={[60, 160]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
+              allowEscapeViewBox={{ x: false, y: false }}
+            />
             <Area
               type="monotone"
               dataKey="systolic"

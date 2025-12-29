@@ -52,6 +52,10 @@ const BPStatisticsCardInner = ({ data, className, isLoading }: BPStatisticsCardP
     [items]
   )
 
+  const infoContent = useMemo(() => {
+    return t('page.bloodPressure.bpClassification')
+  }, [t])
+
   return (
     <DistributionCard
       title={t('page.bloodPressure.bpStatistics')}
@@ -64,6 +68,7 @@ const BPStatisticsCardInner = ({ data, className, isLoading }: BPStatisticsCardP
       highlightLabel={`/ ${totalCount} ${t('common.times')}`}
       highlightDescription={t('page.bloodPressure.normalResults')}
       gridColumns={2}
+      infoContent={infoContent}
       className={className}
       isLoading={isLoading}
     />

@@ -212,7 +212,11 @@ const HRTrendyReportCardInner = ({ data, className, isLoading }: HRTrendyReportC
               axisLine={false}
               domain={[data?.yAxisRange?.min ?? 50, data?.yAxisRange?.max ?? 120]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={<CustomTooltip />}
+              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
+              allowEscapeViewBox={{ x: false, y: false }}
+            />
             <ReferenceLine
               y={data?.averageLine ?? 72}
               stroke={themeColor}
