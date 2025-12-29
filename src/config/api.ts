@@ -9,7 +9,7 @@ export const API_CONFIG = {
 
   /** Auth endpoints */
   auth: {
-    deviceLogin: '/auth/device/login',
+    deviceLogin: '/auth/app/login',
   },
 
   /** Trend review endpoints */
@@ -20,8 +20,8 @@ export const API_CONFIG = {
 
   /** Device credentials (for demo/testing) */
   device: {
-    deviceId: 'FL-DEVICE-001',
-    deviceSecret: 'device_secret_key_123',
+    username: 'fulai001',
+    password: '123456',
   },
 } as const
 

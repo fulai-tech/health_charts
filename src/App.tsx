@@ -23,6 +23,9 @@ import { HealthyPage } from '@/pages/details/HealthyPage'
 // Sleep Page
 import { SleepPage } from '@/pages/details/SleepPage'
 
+// Emotion Page
+import { EmotionPage } from '@/pages/details/EmotionPage'
+
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
@@ -74,6 +77,9 @@ function App() {
 
           {/* Sleep */}
           <Route path="/details/sleep" element={<SleepPage />} />
+
+          {/* Emotion */}
+          <Route path="/details/emotion" element={<EmotionPage />} />
 
           {/* ============================================ */}
           {/* Widget Routes (for iframe embedding) */}

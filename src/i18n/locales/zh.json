@@ -205,6 +205,32 @@
       "defaultAnalysis3": "周五记录到血氧水平为 94%，略低于正常范围下限。",
       "highest": "最高",
       "lowest": "最低"
+    },
+    "emotion": {
+      "title": "情绪详情",
+      "trendyReport": "趋势报告",
+      "weeksAverage": "本周平均情绪",
+      "points": "分",
+      "score": "情绪分数",
+      "statistics": "情绪统计",
+      "distribution": "情绪分布",
+      "dataAnalysis": "数据分析",
+      "weeklyOverview": "周报概览",
+      "overallSituation": "整体情况",
+      "needsAttention": "需要注意",
+      "diary": "情绪日记",
+      "positive": "积极",
+      "neutral": "中性",
+      "negative": "消极",
+      "defaultOverview": "本周您的情绪整体处于积极状态。继续保持良好的心态和生活习惯！",
+      "defaultHighlights": "趋势图显示您的情绪在本周中有一些波动。这是正常的，可能会受到工作压力、睡眠质量和社交活动的影响。",
+      "defaultAnalysis1": "您的情绪以积极为主，整体状态良好",
+      "defaultAnalysis2": "情绪波动在正常范围内，情绪调节能力较强",
+      "defaultAnalysis3": "建议继续保持积极的生活态度，适当进行放松训练",
+      "demoMode": "演示模式",
+      "toggleDemoMode": "切换演示模式",
+      "demoModeOn": "使用假数据",
+      "demoModeOff": "使用后端数据"
     }
   },
   "healthy": {
@@ -228,6 +254,10 @@
     "neutral": "中性",
     "negative": "消极",
     "nutritionDescription": "过去{{period}}您的营养摄入为 ",
-    "nutritionDescriptionCont": "，处于推荐水平内。"
+    "nutritionDescriptionCont": "，处于推荐水平内。",
+    "demoMode": "演示模式",
+    "toggleDemoMode": "切换演示模式",
+    "demoModeOn": "使用假数据",
+    "demoModeOff": "使用后端数据"
   }
 }

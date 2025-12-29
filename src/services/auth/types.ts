@@ -2,10 +2,10 @@
  * Authentication Types
  */
 
-/** Device login request */
+/** Device login request (updated to username/password) */
 export interface DeviceLoginRequest {
-  deviceId: string
-  deviceSecret: string
+  username: string
+  password: string
 }
 
 /** User info in auth response */

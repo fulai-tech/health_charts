@@ -205,6 +205,32 @@
       "defaultAnalysis3": "On Friday, a blood oxygen level of 94% was recorded, slightly below the lower limit of the normal range.",
       "highest": "Highest",
       "lowest": "Lowest"
+    },
+    "emotion": {
+      "title": "Emotion Details",
+      "trendyReport": "Trendy Report",
+      "weeksAverage": "Week's average emotion",
+      "points": "pts",
+      "score": "Emotion score",
+      "statistics": "Emotion Statistics",
+      "distribution": "Emotion Distribution",
+      "dataAnalysis": "Data Analysis",
+      "weeklyOverview": "Weekly Overview",
+      "overallSituation": "Overall situation",
+      "needsAttention": "Needs attention",
+      "diary": "Emotion Diary",
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative",
+      "defaultOverview": "Your emotional state has been generally positive this week. Keep maintaining a good mindset and healthy lifestyle habits!",
+      "defaultHighlights": "The trend chart shows some fluctuations in your emotions during the week. This is normal and can be influenced by work stress, sleep quality, and social activities.",
+      "defaultAnalysis1": "Your emotions are predominantly positive, with an overall good state",
+      "defaultAnalysis2": "Emotional fluctuations are within normal range, showing good emotional regulation ability",
+      "defaultAnalysis3": "It is recommended to continue maintaining a positive attitude and practice relaxation techniques",
+      "demoMode": "Demo Mode",
+      "toggleDemoMode": "Toggle demo mode",
+      "demoModeOn": "Using dummy data",
+      "demoModeOff": "Using backend data"
     }
   },
   "healthy": {
@@ -228,6 +254,10 @@
     "neutral": "Neutral",
     "negative": "Negative",
     "nutritionDescription": "Your nutrition intake over the past {{period}} was ",
-    "nutritionDescriptionCont": ", within recommended levels."
+    "nutritionDescriptionCont": ", within recommended levels.",
+    "demoMode": "Demo Mode",
+    "toggleDemoMode": "Toggle demo mode",
+    "demoModeOn": "Using dummy data",
+    "demoModeOff": "Using backend data"
   }
 }

@@ -6,6 +6,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/services/api/client'
 import { transformHealthyApiResponse, generateMockHealthyData } from './adapter'
+import { isDemoModeEnabled } from './demoMode'
 import type { HealthyDomainModel, ViewType, ApiHealthyResponse } from './types'
 
 /** Query keys for healthy feature */
@@ -19,6 +20,12 @@ export const healthyQueryKeys = {
  * @param viewType - 'day' for daily view, 'week' for weekly view
  */
 async function fetchHealthyData(viewType: ViewType): Promise<HealthyDomainModel> {
+  // Check if demo mode is enabled
+  if (isDemoModeEnabled()) {
+    console.log('🎭 [Demo Mode] Using dummy data instead of backend API')
+    return generateMockHealthyData()
+  }
+
   try {
     const response = await apiClient.post<ApiHealthyResponse>('/trend-review/overview', {
       view_type: viewType,

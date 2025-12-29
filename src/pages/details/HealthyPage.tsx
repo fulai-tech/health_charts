@@ -30,6 +30,7 @@ import {
   HealthSleepCard,
   HealthEmotionCard,
   HealthNutritionCard,
+  DemoModeToggle,
 } from '@/features/healthy'
 
 /**
@@ -199,6 +200,11 @@ export function HealthyPage() {
               onNext={handleNext}
               disableNext={!canGoNext}
             />
+          </div>
+
+          {/* Demo Mode Toggle */}
+          <div className="flex justify-center mt-3">
+            <DemoModeToggle />
           </div>
         </div>
 

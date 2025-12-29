@@ -53,8 +53,8 @@ class AuthService {
    */
   async login(request?: DeviceLoginRequest): Promise<StoredAuthData> {
     const loginData: DeviceLoginRequest = request || {
-      deviceId: API_CONFIG.device.deviceId,
-      deviceSecret: API_CONFIG.device.deviceSecret,
+      username: API_CONFIG.device.username,
+      password: API_CONFIG.device.password,
     }
 
     const response = await axios.post<DeviceLoginResponse>(
