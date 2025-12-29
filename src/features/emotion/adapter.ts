@@ -214,7 +214,7 @@ export function getDummyEmotionData(): EmotionDomainModel {
         timeLabel: '20:22',
         content: '今天出门买菜时不小心把钱包落在了超市，回家才发现。正着急的时候，超市打来电话说有人捡到交给了服务台。真是太感谢那位好心人了，世界还是好人多啊！',
         emotionTags: ['庆幸'],
-        imageUrl: '/src/assets/images/emotion/wallet.png',
+        imageUrl: '/images/emotion/wallet.png',
       },
       {
         diaryId: 'dummy-2',
@@ -224,7 +224,7 @@ export function getDummyEmotionData(): EmotionDomainModel {
         timeLabel: '15:30',
         content: '今天参加了社区组织的老年人联谊会，见到了好多老朋友。大家一起聊天、下棋、唱歌，度过了愉快的下午。活动结束后还一起合影留念，真希望这样的活动能多举办几次。',
         emotionTags: ['开心'],
-        imageUrl: '/src/assets/images/emotion/meeting.png',
+        imageUrl: '/images/emotion/meeting.png',
       },
       {
         diaryId: 'dummy-3',
@@ -234,7 +234,7 @@ export function getDummyEmotionData(): EmotionDomainModel {
         timeLabel: '19:33',
         content: '今天孩子们都回来了，我特意做了他们爱吃的红烧肉。小孙子讲了很多学校的事情，女儿也分享了工作上的趣事。一家人围坐在一起吃饭聊天，这种温馨的感觉真好。',
         emotionTags: ['开心'],
-        imageUrl: '/src/assets/images/emotion/daughter.png',
+        imageUrl: '/images/emotion/daughter.png',
       },
     ],
   }
