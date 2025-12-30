@@ -1,20 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from 'recharts'
 import { BarChart3, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES, EMOTION_COLORS } from '@/config/theme'
-import { getChartAnimationProps } from '@/lib/utils'
 import type { EmotionDomainModel } from '../types'
 import { memo, useMemo } from 'react'
+import { StackedBarChart, type BarLayer } from '@/components/charts/StackedBarChart'
 
 interface EmotionStatisticsCardProps {
   data?: EmotionDomainModel
@@ -70,7 +60,6 @@ const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
  */
 const EmotionStatisticsCardInner = ({ data, className, isLoading }: EmotionStatisticsCardProps) => {
   const { t } = useTranslation()
-  const animationProps = getChartAnimationProps()
 
   // Prepare chart data
   const chartData = useMemo(
@@ -83,6 +72,13 @@ const EmotionStatisticsCardInner = ({ data, className, isLoading }: EmotionStati
     })) ?? [],
     [data?.compositionData]
   )
+
+  // Configure layers for StackedBarChart
+  const chartLayers: BarLayer[] = [
+    { dataKey: 'positivePercent', color: EMOTION_COLORS.positive, label: t('page.emotion.positive') },
+    { dataKey: 'neutralPercent', color: EMOTION_COLORS.neutral, label: t('page.emotion.neutral') },
+    { dataKey: 'negativePercent', color: EMOTION_COLORS.negative, label: t('page.emotion.negative') },
+  ]
 
   return (
     <Card className={`${className} relative overflow-hidden`}>
@@ -103,86 +99,17 @@ const EmotionStatisticsCardInner = ({ data, className, isLoading }: EmotionStati
         </h3>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 mb-3">
-        <div className="flex items-center gap-1.5">
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: EMOTION_COLORS.positive }}
-          />
-          <span className="text-xs text-slate-500">{t('page.emotion.positive')}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: EMOTION_COLORS.neutral }}
-          />
-          <span className="text-xs text-slate-500">{t('page.emotion.neutral')}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: EMOTION_COLORS.negative }}
-          />
-          <span className="text-xs text-slate-500">{t('page.emotion.negative')}</span>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <div className="h-48 -mx-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-            barCategoryGap="40%"
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={false}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-              allowEscapeViewBox={{ x: false, y: false }}
-            />
-            <Bar
-              dataKey="positivePercent"
-              stackId="emotion"
-              fill={EMOTION_COLORS.positive}
-              radius={[0, 0, 0, 0]}
-              barSize={12}
-              {...animationProps}
-            />
-            <Bar
-              dataKey="neutralPercent"
-              stackId="emotion"
-              fill={EMOTION_COLORS.neutral}
-              radius={[0, 0, 0, 0]}
-              barSize={12}
-              {...animationProps}
-            />
-            <Bar
-              dataKey="negativePercent"
-              stackId="emotion"
-              fill={EMOTION_COLORS.negative}
-              radius={[4, 4, 0, 0]}
-              barSize={12}
-              {...animationProps}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      <StackedBarChart
+        data={chartData}
+        layers={chartLayers}
+        xAxisKey="name"
+        yAxisDomain={[0, 100]}
+        yAxisFormatter={(value) => `${value}%`}
+        legendShape="square"
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        stackId="emotion"
+        height={224}
+      />
     </Card>
   )
 }

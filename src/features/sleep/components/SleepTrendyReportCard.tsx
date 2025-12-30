@@ -1,20 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import {
-    ResponsiveContainer,
-    ComposedChart,
-    Bar,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Rectangle,
-} from 'recharts'
 import { TrendingUp, TrendingDown, Moon, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
 import type { SleepDomainModel } from '../types'
 import { memo, useMemo } from 'react'
-import { getOptimizedAnimationDuration } from '@/lib/utils'
+import { StackedBarChart, type BarLayer } from '@/components/charts/StackedBarChart'
 
 interface SleepTrendyReportCardProps {
     data?: SleepDomainModel
@@ -69,26 +59,6 @@ const CustomTooltip = memo(({ active, payload, label }: CustomTooltipProps) => {
 
 const SLEEP_THEME_COLOR = '#A78BFA'
 
-const RoundedTopBar = memo((props: any) => {
-    const { fill, x, y, width, height, payload, dataKey } = props
-
-    const stackOrder = ['deep', 'light', 'rem', 'awake']
-
-    let topKey = null
-    for (let i = stackOrder.length - 1; i >= 0; i--) {
-        const key = stackOrder[i]
-        if (payload[key] && payload[key] > 0) {
-            topKey = key
-            break
-        }
-    }
-
-    const isTop = dataKey === topKey
-    const radius = isTop ? [3, 3, 0, 0] : [0, 0, 0, 0]
-
-    return <Rectangle {...props} radius={radius} />
-})
-
 const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyReportCardProps) => {
     const { t } = useTranslation()
 
@@ -123,13 +93,19 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
         [data?.chartData, t]
     )
 
-    const animationDuration = getOptimizedAnimationDuration(300)
-
     const maxMinutes = useMemo(
         () => Math.max(...chartData.map(d => (d.deep || 0) + (d.light || 0) + (d.rem || 0) + (d.awake || 0))),
         [chartData]
     )
     const maxHours = Math.ceil(maxMinutes / 60) + 1
+
+    // Configure layers for StackedBarChart
+    const chartLayers: BarLayer[] = [
+        { dataKey: 'deep', color: stageColors.deep, label: t('page.sleep.deepSleep') },
+        { dataKey: 'light', color: stageColors.light, label: t('page.sleep.lightSleep') },
+        { dataKey: 'rem', color: stageColors.rem, label: t('page.sleep.remSleep') },
+        { dataKey: 'awake', color: stageColors.awake, label: t('page.sleep.awake') },
+    ]
 
     return (
         <Card className={`${className} relative`}>
@@ -230,86 +206,17 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
                 </div>
             </div>
 
-            <div className="flex items-center gap-4 mb-2 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: stageColors.deep }} />
-                    <span className="text-xs text-slate-500">{t('page.sleep.deepSleep')}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: stageColors.light }} />
-                    <span className="text-xs text-slate-500">{t('page.sleep.lightSleep')}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: stageColors.rem }} />
-                    <span className="text-xs text-slate-500">{t('page.sleep.remSleep')}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: stageColors.awake }} />
-                    <span className="text-xs text-slate-500">{t('page.sleep.awake')}</span>
-                </div>
-            </div>
-
-            <div className="h-44 -mx-2">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                    <ComposedChart
-                        data={chartData}
-                        margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-                        barCategoryGap="40%"
-                    >
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                        <XAxis
-                            dataKey="name"
-                            tick={{ fontSize: 11, fill: '#94a3b8' }}
-                            tickLine={false}
-                            axisLine={false}
-                        />
-                        <YAxis
-                            tick={{ fontSize: 11, fill: '#94a3b8' }}
-                            tickLine={false}
-                            axisLine={false}
-                            domain={[0, maxHours * 60]}
-                            tickFormatter={(value) => `${Math.round(value / 60)}h`}
-                        />
-                        <Tooltip
-                            content={<CustomTooltip />}
-                            wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-                            allowEscapeViewBox={{ x: false, y: false }}
-                        />
-                        <Bar
-                            dataKey="deep"
-                            stackId="sleep"
-                            fill={stageColors.deep}
-                            barSize={12}
-                            shape={<RoundedTopBar />}
-                            animationDuration={animationDuration}
-                        />
-                        <Bar
-                            dataKey="light"
-                            stackId="sleep"
-                            fill={stageColors.light}
-                            barSize={12}
-                            shape={<RoundedTopBar />}
-                            animationDuration={animationDuration}
-                        />
-                        <Bar
-                            dataKey="rem"
-                            stackId="sleep"
-                            fill={stageColors.rem}
-                            barSize={12}
-                            shape={<RoundedTopBar />}
-                            animationDuration={animationDuration}
-                        />
-                        <Bar
-                            dataKey="awake"
-                            stackId="sleep"
-                            fill={stageColors.awake}
-                            barSize={12}
-                            shape={<RoundedTopBar />}
-                            animationDuration={animationDuration}
-                        />
-                    </ComposedChart>
-                </ResponsiveContainer>
-            </div>
+            <StackedBarChart
+                data={chartData}
+                layers={chartLayers}
+                xAxisKey="name"
+                yAxisDomain={[0, maxHours * 60]}
+                yAxisFormatter={(value) => `${Math.round(value / 60)}h`}
+                legendShape="circle"
+                renderTooltip={(props) => <CustomTooltip {...props} />}
+                stackId="sleep"
+                height={224}
+            />
         </Card>
     )
 }
