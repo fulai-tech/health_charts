@@ -1,20 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts'
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES, UI_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { EmotionFaceIcon } from '@/components/common/EmotionFaceIcon'
-import { getChartAnimationProps } from '@/lib/utils'
 import type { EmotionDomainModel } from '../types'
 import { memo, useMemo } from 'react'
+import { TrendLineChart } from '@/components/charts/TrendLineChart'
 
 interface EmotionTrendyReportCardProps {
   data?: EmotionDomainModel
@@ -61,7 +52,6 @@ const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
  */
 const EmotionTrendyReportCardInner = ({ data, className, isLoading }: EmotionTrendyReportCardProps) => {
   const { t } = useTranslation()
-  const animationProps = getChartAnimationProps()
 
   // Prepare chart data
   const chartData = useMemo(
@@ -163,50 +153,24 @@ const EmotionTrendyReportCardInner = ({ data, className, isLoading }: EmotionTre
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="h-44 -mx-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="emotionLineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={EMOTION_COLORS.primary} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={EMOTION_COLORS.primary} stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              domain={[data?.yAxisRange?.min ?? 0, data?.yAxisRange?.max ?? 100]}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-              allowEscapeViewBox={{ x: false, y: false }}
-            />
-            <Line
-              type="monotone"
-              dataKey="score"
-              stroke={EMOTION_COLORS.primary}
-              strokeWidth={2}
-              dot={{ fill: EMOTION_COLORS.primary, strokeWidth: 0, r: 4 }}
-              activeDot={{ r: 6, stroke: EMOTION_COLORS.primary, strokeWidth: 2, fill: '#fff' }}
-              connectNulls={false}
-              {...animationProps}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <TrendLineChart
+        data={chartData}
+        lines={[
+          {
+            dataKey: 'score',
+            color: EMOTION_COLORS.primary,
+            label: t('page.emotion.score'),
+            showArea: true,
+            gradientId: 'emotionLineGradient',
+            legendShape: 'circle',
+          },
+        ]}
+        xAxisKey="name"
+        yAxisDomain={[data?.yAxisRange?.min ?? 0, data?.yAxisRange?.max ?? 100]}
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        showLegend={false}
+        height={224}
+      />
     </Card>
   )
 }

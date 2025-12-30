@@ -1,21 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ReferenceLine,
-  Tooltip,
-} from 'recharts'
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, CHART_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
-import { getChartAnimationProps } from '@/lib/utils'
 import type { SpO2DomainModel } from '../types'
 import { memo, useMemo } from 'react'
+import { TrendLineChart } from '@/components/charts/TrendLineChart'
 
 interface SpO2TrendyReportCardProps {
   data?: SpO2DomainModel
@@ -68,7 +57,6 @@ const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
 export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyReportCardProps) {
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.spo2
-  const animationProps = getChartAnimationProps()
 
   const placeholderChartData = useMemo(() => [
     { name: 'Mon', weekdayKey: 'weekday.mon', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
@@ -170,82 +158,28 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 mb-2">
-        <div className="flex items-center gap-1.5">
-          <span
-            className="w-3 h-3 rounded"
-            style={{ backgroundColor: `${themeColor}40` }}
-          />
-          <span className="text-xs text-slate-500">{t('page.spo2.range')}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-4 h-0.5" style={{ backgroundColor: themeColor }} />
-          <span className="text-xs text-slate-500">{t('page.spo2.mean')}</span>
-        </div>
-      </div>
-
-      {/* Chart */}
-      <div className="h-44 -mx-2">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="spo2RangeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={themeColor} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={themeColor} stopOpacity={0.1} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke={UI_COLORS.chart.grid} vertical={false} />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 11, fill: UI_COLORS.chart.tick }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: UI_COLORS.chart.tick }}
-              tickLine={false}
-              axisLine={false}
-              domain={[data?.yAxisRange?.min ?? 90, data?.yAxisRange?.max ?? 100]}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-              allowEscapeViewBox={{ x: false, y: false }}
-            />
-            <ReferenceLine
-              y={data?.averageLine ?? 97}
-              stroke={themeColor}
-              strokeDasharray="4 4"
-              strokeWidth={1.5}
-            />
-            {/* Range Area using [min, max] tuple */}
-            <Area
-              type="monotone"
-              dataKey="range"
-              stroke="transparent"
-              fill="url(#spo2RangeGradient)"
-              animationDuration={300}
-              animationEasing="linear"
-              isAnimationActive={true}
-            />
-            <Line
-              type="monotone"
-              dataKey="avg"
-              stroke={CHART_COLORS.spo2.primary}
-              strokeWidth={2}
-              dot={{ fill: CHART_COLORS.spo2.primary, strokeWidth: 0, r: 4 }}
-              activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: UI_COLORS.chart.activeDot.fill }}
-              animationDuration={300}
-              animationEasing="linear"
-              isAnimationActive={true}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      <TrendLineChart
+        data={chartData}
+        lines={[
+          {
+            dataKey: 'avg',
+            areaDataKey: 'range',
+            color: themeColor,
+            label: t('page.spo2.mean'),
+            showArea: true,
+            gradientId: 'spo2RangeGradient',
+            legendShape: 'line',
+          },
+        ]}
+        xAxisKey="name"
+        yAxisDomain={[data?.yAxisRange?.min ?? 90, data?.yAxisRange?.max ?? 100]}
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        referenceLine={{
+          value: data?.averageLine ?? 97,
+          color: themeColor,
+        }}
+        height={224}
+      />
     </Card>
   )
 }

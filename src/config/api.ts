@@ -18,6 +18,11 @@ export const API_CONFIG = {
     indicatorDetail: '/trend-review/indicator-detail',
   },
 
+  /** Current status endpoints (for daily reports) */
+  currentStatus: {
+    dimensionDetail: '/current-status/dimension-detail',
+  },
+
   /** Device credentials (for demo/testing) */
   device: {
     username: 'fulai001',

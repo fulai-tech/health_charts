@@ -262,5 +262,31 @@
     "toggleDemoMode": "Toggle demo mode",
     "demoModeOn": "Using dummy data",
     "demoModeOff": "Using backend data"
+  },
+  "daily": {
+    "todayScore": "Today's score",
+    "todayEmotionScore": "Today's emotion score",
+    "aiAnalysis": "AI Analysis",
+    "aiHealthInsights": "AI health related insights",
+    "personalizedSuggestions": "Personalized suggestions",
+    "emotionProportion": "Emotional proportion analysis",
+    "emotionDistribution": "Emotion distribution",
+    "asMain": "as main",
+    "sleepStructure": "Sleep structure diagram",
+    "sleepDistribution": "Sleep distribution",
+    "sleepQuality": "Sleep quality indicators",
+    "totalDuration": "Total sleep duration",
+    "deepSleep": "Deep sleep",
+    "totalHours": "Total hours",
+    "coreIndicators": "Core indicator Analysis",
+    "reference": "Reference",
+    "latest": "Latest",
+    "weekAvg": "7d Avg"
+  },
+  "sleep": {
+    "deep": "Deep sleep",
+    "light": "Light sleep",
+    "rem": "REM",
+    "awake": "Awake"
   }
 }

@@ -21,6 +21,14 @@ const routes = [
     ],
   },
   {
+    category: 'Daily Report Pages',
+    items: [
+      { path: '/daily/healthy', label: 'Healthy Daily Report', icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
+      { path: '/daily/emotion', label: 'Emotion Daily Report', icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+      { path: '/daily/sleep', label: 'Sleep Daily Report', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
+    ],
+  },
+  {
     category: 'Widget Pages (for iframe embedding)',
     items: [
       { path: '/widget/blood-pressure/trend', label: 'BP Trend Widget', icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },

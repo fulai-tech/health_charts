@@ -1,21 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { BPDomainModel } from '../types'
 import { memo, useMemo } from 'react'
-import { getOptimizedAnimationDuration } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
+import { TrendLineChart } from '@/components/charts/TrendLineChart'
 
 interface BPTrendyReportCardProps {
   data?: BPDomainModel
@@ -76,8 +65,6 @@ const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportC
     [data?.chartData]
   )
 
-  const animationDuration = getOptimizedAnimationDuration(800)
-
   return (
     <Card className={`${className} relative`}>
       {/* Loading overlay */}
@@ -128,90 +115,31 @@ const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportC
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-2">
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColor }} />
-          <span className="text-xs text-slate-500">{t('vitals.sbp')}</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-full bg-emerald-400" />
-          <span className="text-xs text-slate-500">{t('vitals.dbp')}</span>
-        </div>
-      </div>
-
-      <div className="h-44 -mx-2">
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-          <ComposedChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-          >
-            <defs>
-              <linearGradient id="sbpGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={themeColor} stopOpacity={0.4} />
-                <stop offset="95%" stopColor={themeColor} stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="dbpGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="#10B981" stopOpacity={0.05} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="name"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              domain={[60, 160]}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-              allowEscapeViewBox={{ x: false, y: false }}
-            />
-            <Area
-              type="monotone"
-              dataKey="systolic"
-              stroke="transparent"
-              fill="url(#sbpGradient)"
-              name="systolic-area"
-              animationDuration={animationDuration}
-            />
-            <Area
-              type="monotone"
-              dataKey="diastolic"
-              stroke="transparent"
-              fill="url(#dbpGradient)"
-              name="diastolic-area"
-              animationDuration={animationDuration}
-            />
-            <Line
-              type="monotone"
-              dataKey="systolic"
-              stroke={themeColor}
-              strokeWidth={2}
-              dot={{ fill: themeColor, strokeWidth: 0, r: 4 }}
-              activeDot={{ r: 6, stroke: themeColor, strokeWidth: 2, fill: '#fff' }}
-              name="systolic"
-              animationDuration={animationDuration}
-            />
-            <Line
-              type="monotone"
-              dataKey="diastolic"
-              stroke="#10B981"
-              strokeWidth={2}
-              dot={{ fill: '#10B981', strokeWidth: 0, r: 4 }}
-              activeDot={{ r: 6, stroke: '#10B981', strokeWidth: 2, fill: '#fff' }}
-              name="diastolic"
-              animationDuration={animationDuration}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      <TrendLineChart
+        data={chartData}
+        lines={[
+          {
+            dataKey: 'systolic',
+            color: themeColor,
+            label: t('vitals.sbp'),
+            showArea: true,
+            gradientId: 'sbpGradient',
+            legendShape: 'circle',
+          },
+          {
+            dataKey: 'diastolic',
+            color: '#10B981',
+            label: t('vitals.dbp'),
+            showArea: true,
+            gradientId: 'dbpGradient',
+            legendShape: 'circle',
+          },
+        ]}
+        xAxisKey="name"
+        yAxisDomain={[50, 150]}
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        height={224}
+      />
     </Card>
   )
 }

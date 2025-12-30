@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>完美睡眠图 (动态缓冲优化版)</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-main: #555;
+            --line-light: #f0f0f0;
+            --tooltip-bg: rgba(40, 40, 45, 0.95);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .chart-container {
+            width: 820px;
+            padding: 40px;
+            background: #fff;
+            user-select: none;
+        }
+
+        .chart-layout {
+            display: flex;
+        }
+
+        .y-axis {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-right: 20px;
+            padding-bottom: 30px;
+            width: 60px;
+            text-align: right;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .y-label {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .canvas-area {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        canvas {
+            display: block;
+            cursor: crosshair;
+        }
+
+        .x-axis {
+            display: flex;
+            justify-content: space-between;
+            margin-left: 80px;
+            margin-top: 10px;
+            color: #aaa;
+            font-size: 13px;
+            border-top: 1px solid var(--line-light);
+            padding-top: 12px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: var(--tooltip-bg);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: opacity 0.1s, transform 0.1s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chart-container">
+    <div class="chart-layout">
+        <div class="y-axis">
+            <div class="y-label">Awake</div>
+            <div class="y-label">REM</div>
+            <div class="y-label">Light</div>
+            <div class="y-label">Deep</div>
+        </div>
+
+        <div class="canvas-area" id="canvasContainer">
+            <canvas id="sleepChart"></canvas>
+            <div id="tooltip" class="tooltip"></div>
+        </div>
+    </div>
+
+    <div class="x-axis">
+        <span>20:00</span>
+        <span>00:00</span>
+        <span>04:00</span>
+        <span>08:00</span>
+    </div>
+</div>
+
+<script>
+    // --- 1. 参数配置 ---
+    const CONFIG = {
+        rowHeight: 50,       
+        blockHeight: 40,     
+        baseRadius: 12,      
+        lineWidth: 6,        
+        paddingY: 10,
+        
+        // 定义缓冲策略
+        bufferLong: 5,   // 长连接的缓冲区 (px)
+        bufferShort: 1   // 短连接(相邻)的缓冲区 (px)
+    };
+
+    const STAGES = { AWAKE: 0, REM: 1, LIGHT: 2, DEEP: 3 };
+
+    const COLORS = {
+        [STAGES.AWAKE]: '#FF9800', 
+        [STAGES.REM]:   '#B39DDB', 
+        [STAGES.LIGHT]: '#7E57C2', 
+        [STAGES.DEEP]:  '#512DA8'  
+    };
+
+    // --- 2. 数据处理 ---
+    const rawData = [
+        { stage: STAGES.AWAKE, start: "20:00", end: "21:00" },
+        { stage: STAGES.LIGHT, start: "21:00", end: "22:15" }, 
+        { stage: STAGES.DEEP,  start: "22:15", end: "23:00" }, // Light -> Deep (短连接)
+        { stage: STAGES.LIGHT, start: "23:00", end: "23:45" }, // Deep -> Light (短连接)
+        { stage: STAGES.REM,   start: "23:45", end: "00:30" }, 
+        { stage: STAGES.LIGHT, start: "00:30", end: "01:15" }, 
+        { stage: STAGES.DEEP,  start: "01:15", end: "02:30" }, 
+        { stage: STAGES.LIGHT, start: "02:30", end: "03:00" }, 
+        { stage: STAGES.REM,   start: "03:00", end: "03:45" }, 
+        { stage: STAGES.DEEP,  start: "03:45", end: "04:45" }, // REM -> Deep (中长连接)
+        { stage: STAGES.LIGHT, start: "04:45", end: "05:30" },
+        { stage: STAGES.REM,   start: "05:30", end: "06:45" }, 
+        { stage: STAGES.LIGHT, start: "06:45", end: "07:30" },
+        { stage: STAGES.AWAKE, start: "07:30", end: "08:00" }  // Light -> Awake (长连接)
+    ];
+
+    const START_TIME = "20:00";
+    const TOTAL_MINUTES = 12 * 60; 
+
+    function parseTime(t) {
+        let [h, m] = t.split(':').map(Number);
+        let [sh, sm] = START_TIME.split(':').map(Number);
+        let min = h * 60 + m;
+        let startMin = sh * 60 + sm;
+        if (min < startMin) min += 24 * 60;
+        return min - startMin;
+    }
+
+    const chartData = rawData.map((d, i, arr) => {
+        const item = {
+            ...d,
+            startMin: parseTime(d.start),
+            endMin: parseTime(d.end),
+            radii: { tl: CONFIG.baseRadius, tr: CONFIG.baseRadius, br: CONFIG.baseRadius, bl: CONFIG.baseRadius }
+        };
+        item.duration = item.endMin - item.startMin;
+        
+        const prev = arr[i - 1];
+        const next = arr[i + 1];
+
+        // 智能圆角
+        if (prev) {
+            if (prev.stage < d.stage) item.radii.tl = 0; 
+            else if (prev.stage > d.stage) item.radii.bl = 0; 
+        }
+        if (next) {
+            if (next.stage < d.stage) item.radii.tr = 0; 
+            else if (next.stage > d.stage) item.radii.br = 0; 
+        }
+        return item;
+    });
+
+    // --- 3. 绘图逻辑 ---
+    const canvas = document.getElementById('sleepChart');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvasContainer');
+    const tooltip = document.getElementById('tooltip');
+
+    function getY(stage) {
+        return CONFIG.paddingY + (stage * CONFIG.rowHeight) + (CONFIG.rowHeight / 2);
+    }
+
+    function drawComplexRect(ctx, x, y, w, h, radii, color) {
+        ctx.beginPath();
+        ctx.fillStyle = color;
+        ctx.moveTo(x + radii.tl, y);
+        ctx.lineTo(x + w - radii.tr, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radii.tr);
+        ctx.lineTo(x + w, y + h - radii.br);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radii.br, y + h);
+        ctx.lineTo(x + radii.bl, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radii.bl);
+        ctx.lineTo(x, y + radii.tl);
+        ctx.quadraticCurveTo(x, y, x + radii.tl, y);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    function initAndDraw() {
+        const rect = container.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 2;
+        
+        const totalHeight = (CONFIG.rowHeight * 4) + (CONFIG.paddingY * 2);
+        
+        canvas.width = rect.width * dpr;
+        canvas.height = totalHeight * dpr;
+        canvas.style.width = `${rect.width}px`;
+        canvas.style.height = `${totalHeight}px`;
+        
+        ctx.scale(dpr, dpr);
+        const scaleX = rect.width / TOTAL_MINUTES;
+
+        ctx.clearRect(0, 0, rect.width, totalHeight);
+
+        // 网格
+        ctx.beginPath();
+        ctx.strokeStyle = '#f0f0f0';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([6, 6]);
+        for(let i=0; i<4; i++) {
+            let lineY = getY(i);
+            ctx.moveTo(0, lineY);
+            ctx.lineTo(rect.width, lineY);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // === 核心逻辑：垂直连接线 ===
+        chartData.forEach((d, i) => {
+            if (i === chartData.length - 1) return;
+            const nextD = chartData[i+1];
+            if (d.stage === nextD.stage) return;
+
+            const x = d.endMin * scaleX;
+            const yStart = getY(d.stage);
+            const yEnd = getY(nextD.stage);
+            
+            const totalDist = Math.abs(yEnd - yStart);
+            const halfBlock = CONFIG.blockHeight / 2;
+
+            // 【动态缓冲区策略】
+            // 判断两个阶段是否相邻（绝对值差为1）
+            const isAdjacent = Math.abs(d.stage - nextD.stage) === 1;
+            
+            // 如果相邻，使用极短缓冲区(1px)，否则使用标准缓冲区(5px)
+            const bufferSize = isAdjacent ? CONFIG.bufferShort : CONFIG.bufferLong;
+            
+            // 计算保持纯色的距离 = (半个块高[被遮挡部分]) + (缓冲区[露出部分])
+            let solidPixels = halfBlock + bufferSize;
+
+            // 安全限制：防止总距离过短时交叉
+            if (solidPixels * 2 > totalDist) {
+                solidPixels = totalDist * 0.45; // 限制在45%以内，至少留10%给渐变
+            }
+
+            const stop1 = solidPixels / totalDist;
+            const stop2 = 1 - (solidPixels / totalDist);
+
+            const grad = ctx.createLinearGradient(0, yStart, 0, yEnd);
+            grad.addColorStop(0, COLORS[d.stage]);
+            grad.addColorStop(stop1, COLORS[d.stage]);     
+            grad.addColorStop(stop2, COLORS[nextD.stage]); 
+            grad.addColorStop(1, COLORS[nextD.stage]);
+
+            ctx.beginPath();
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = CONFIG.lineWidth;
+            ctx.lineCap = 'butt'; 
+            ctx.moveTo(x, yStart);
+            ctx.lineTo(x, yEnd);
+            ctx.stroke();
+        });
+
+        // === 水平色块 ===
+        chartData.forEach(d => {
+            const x = d.startMin * scaleX;
+            const w = d.duration * scaleX;
+            const y = getY(d.stage) - (CONFIG.blockHeight / 2);
+            
+            let drawX = x;
+            let drawW = w;
+            const overlap = CONFIG.lineWidth / 2; 
+
+            if (d.radii.tl === 0 || d.radii.bl === 0) {
+                drawX -= overlap;
+                drawW += overlap;
+            }
+            if (d.radii.tr === 0 || d.radii.br === 0) {
+                drawW += overlap;
+            }
+
+            drawComplexRect(ctx, drawX, y, drawW, CONFIG.blockHeight, d.radii, COLORS[d.stage]);
+        });
+
+        canvas.scaleX = scaleX;
+    }
+
+    // --- 交互部分 ---
+    function handleMouseMove(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const scaleX = canvas.scaleX;
+        
+        initAndDraw(); 
+
+        if (x < 0 || x > rect.width) {
+            tooltip.style.opacity = 0;
+            return;
+        }
+
+        const height = canvas.height / (window.devicePixelRatio||2);
+        ctx.beginPath();
+        ctx.strokeStyle = '#FF9800'; 
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([5, 4]);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        ctx.fillStyle = '#FF9800';
+        ctx.beginPath();
+        ctx.moveTo(x - 5, 0);
+        ctx.lineTo(x + 5, 0);
+        ctx.lineTo(x, 6);
+        ctx.fill();
+
+        const minHover = x / scaleX;
+        const item = chartData.find(d => minHover >= d.startMin && minHover < d.endMin);
+
+        if (item) {
+            const stageName = Object.keys(STAGES).find(key => STAGES[key] === item.stage);
+            const h = Math.floor(item.duration / 60);
+            const m = item.duration % 60;
+            const durStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+
+            tooltip.innerHTML = `
+                <div style="font-weight:700;margin-bottom:4px;">${item.start} - ${item.end}</div>
+                <div style="display:flex;align-items:center;">
+                    <span class="status-dot" style="background:${COLORS[item.stage]}"></span>
+                    ${stageName} · ${durStr}
+                </div>
+            `;
+            
+            tooltip.style.opacity = 1;
+            let topPos = getY(item.stage) - CONFIG.blockHeight - 10;
+            let leftPos = x + 15;
+            
+            if (leftPos + 140 > rect.width) leftPos = x - 155; 
+            if (topPos < 5) topPos = getY(item.stage) + CONFIG.blockHeight + 10; 
+
+            tooltip.style.left = `${leftPos}px`;
+            tooltip.style.top = `${topPos}px`;
+        } else {
+            tooltip.style.opacity = 0;
+        }
+    }
+
+    window.addEventListener('resize', initAndDraw);
+    canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', () => {
+        tooltip.style.opacity = 0;
+        initAndDraw();
+    });
+
+    initAndDraw();
+
+</script>
+
+</body>
+</html>
