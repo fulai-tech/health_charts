@@ -27,6 +27,9 @@ import { SleepPage } from '@/pages/details/SleepPage'
 // Emotion Page
 import { EmotionPage } from '@/pages/details/EmotionPage'
 
+// Nutrition Page
+import { NutritionPage } from '@/features/nutrition/pages/NutritionPage'
+
 // Daily Report Pages (lazy loaded)
 const EmotionDailyPage = lazy(() => import('@/pages/daily/EmotionDailyPage'))
 const SleepDailyPage = lazy(() => import('@/pages/daily/SleepDailyPage'))
@@ -95,6 +98,9 @@ function App() {
 
             {/* Emotion */}
             <Route path="/details/emotion" element={<EmotionPage />} />
+
+            {/* Nutrition */}
+            <Route path="/details/nutrition" element={<NutritionPage />} />
 
             {/* ============================================ */}
             {/* Daily Report Pages */}

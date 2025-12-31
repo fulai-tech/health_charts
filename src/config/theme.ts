@@ -18,6 +18,8 @@ export const VITAL_COLORS = {
   glucose: 'rgb(233, 196, 106)',
   /** 睡眠 - 紫色，用于睡眠相关组件的图标、标题、高亮显示 */
   sleep: 'rgb(167, 139, 250)',
+  /** 营养 - 橙色，用于营养相关组件的图标、标题、高亮显示 */
+  nutrition: 'rgb(251, 146, 61)',
 } as const
 
 /**
@@ -35,6 +37,8 @@ export const VITAL_COLORS_ALPHA = {
   glucose: 'rgba(233, 196, 106, 0.125)',
   /** 睡眠半透明 - 紫色，用于图标背景 */
   sleep: 'rgba(167, 139, 250, 0.125)',
+  /** 营养半透明 - 橙色，用于图标背景 */
+  nutrition: 'rgba(251, 146, 61, 0.125)',
 } as const
 
 /**

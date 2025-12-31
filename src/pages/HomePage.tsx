@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme'
 
 // Emotion color (not in VITAL_COLORS yet)
@@ -18,6 +18,7 @@ const routes = [
       { path: '/details/glucose', label: 'Blood Glucose', icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
       { path: '/details/sleep', label: 'Sleep', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
       { path: '/details/emotion', label: 'Emotion', icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+      { path: '/details/nutrition', label: 'Nutrition', icon: Utensils, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition },
     ],
   },
   {
