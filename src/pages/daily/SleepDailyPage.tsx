@@ -17,7 +17,7 @@ import {
     toggleDemoMode,
     type SleepDailyData,
 } from '@/daily/sleep'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 
 export default function SleepDailyPage() {
     const { t } = useTranslation()
@@ -39,7 +39,7 @@ export default function SleepDailyPage() {
 
     return (
         <div className="min-h-screen pb-20" style={{ backgroundColor: '#F1EFEE' }}>
-            <div className="max-w-2xl mx-auto">
+            <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
                 <div className="p-4 space-y-4">
                     {/* Demo mode toggle */}
                     <div className="flex items-center justify-end gap-2">

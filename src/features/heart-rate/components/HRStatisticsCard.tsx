@@ -49,6 +49,8 @@ export function HRStatisticsCard({ data, className, isLoading }: HRStatisticsCar
       title={t('page.heartRate.statistics')}
       icon={Activity}
       themeColor={themeColor}
+      pieChartSize="medium"
+      donutThickness={12}
       items={items}
       centerValue={totalCount}
       centerLabel={t('page.heartRate.totalTests')}

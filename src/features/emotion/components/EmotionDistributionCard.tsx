@@ -50,6 +50,7 @@ const EmotionDistributionCardInner = ({ data, className, isLoading }: EmotionDis
       title={t('page.emotion.distribution')}
       icon={PieChartIcon}
       themeColor={themeColor}
+      pieChartSize={"medium"}
       items={items}
       centerValue={dominantEmotion || t('page.emotion.neutral')}
       centerLabel="as main"

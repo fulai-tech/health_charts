@@ -20,4 +20,7 @@ export {
 } from './demoMode'
 
 // Components
-export { CoreIndicatorCard } from './components/CoreIndicatorCard'
+export { BloodPressureIndicatorCard } from './components/BloodPressureIndicatorCard'
+export { HeartRateIndicatorCard } from './components/HeartRateIndicatorCard'
+export { BloodGlucoseIndicatorCard } from './components/BloodGlucoseIndicatorCard'
+export { BloodOxygenIndicatorCard } from './components/BloodOxygenIndicatorCard'

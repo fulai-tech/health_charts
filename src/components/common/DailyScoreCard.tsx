@@ -7,7 +7,8 @@
 
 import { memo, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, TrendingDown } from 'lucide-react'
+import { UI_STYLES } from '@/config/theme'
 
 export interface DailyScoreCardProps {
     /** Score value (null shows '--') */
@@ -121,68 +122,35 @@ const DailyScoreCardInner = ({
 
     return (
         <div
-            className={`rounded-2xl p-5 shadow-sm ${className}`}
+            className={`py-5 shadow-sm ${className}`}
             style={{
                 background: `linear-gradient(135deg, ${bgColor} 0%, ${endColor} 100%)`,
+                borderRadius: UI_STYLES.cardBorderRadius,
+                paddingLeft: UI_STYLES.cardPaddingX,
+                paddingRight: UI_STYLES.cardPaddingX,
             }}
         >
-            <div className="flex items-start justify-between">
-                {/* Left: Score and info */}
-                <div className="flex-1">
+            {/* Top row: Left box (Title + Score) and Right box (Circle) */}
+            <div className="flex items-stretch gap-3 mb-4">
+                {/* Left box: Title and Score */}
+                <div className="flex-1 flex flex-col justify-center">
                     {/* Title */}
-                    <div className="flex items-center gap-1.5 mb-3">
+                    <div className="flex items-center gap-1.5 mb-2">
                         <Sparkles className="w-4 h-4 text-white" />
                         <span className="text-white text-sm font-medium">{title}</span>
                     </div>
 
                     {/* Score */}
-                    <div className="flex items-baseline gap-1 mb-3">
+                    <div className="flex items-baseline gap-1">
                         <span className="text-5xl font-bold text-white drop-shadow-sm">
                             {score !== null ? score : '--'}
                         </span>
                         <span className="text-white/80 text-lg">/{maxScore}</span>
-                        {levelLabel && (
-                            <span className="ml-2 text-white text-sm font-medium">{levelLabel}</span>
-                        )}
                     </div>
-
-                    {/* Percentile message */}
-                    {percentileMessage && (
-                        <div className="inline-flex items-center gap-1.5 bg-white/30 backdrop-blur-sm rounded-full px-3 py-1.5 mb-3">
-                            <span className="text-white text-xs font-medium">✓</span>
-                            <span className="text-white text-xs font-medium">{percentileMessage}</span>
-                        </div>
-                    )}
-
-                    {/* AI Analysis section */}
-                    {aiTags.length > 0 && (
-                        <div className="mt-3">
-                            <div className="flex items-center gap-1.5 mb-2">
-                                <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                                <span className="text-white text-xs font-medium">
-                                    {t('daily.aiAnalysis', 'AI Analysis')}
-                                </span>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {aiTags.map((tag, index) => (
-                                    <span
-                                        key={index}
-                                        className="px-3 py-1.5 rounded-full text-xs font-medium shadow-sm"
-                                        style={{
-                                            backgroundColor: tagBgColor || 'rgba(255,255,255,0.35)',
-                                            color: 'white',
-                                        }}
-                                    >
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
 
-                {/* Right: Circular progress */}
-                <div className="ml-4">
+                {/* Right box: Circular progress */}
+                <div className="flex items-center justify-center">
                     <CircularProgress
                         percentage={percentage}
                         color={themeColor}
@@ -192,6 +160,39 @@ const DailyScoreCardInner = ({
                     />
                 </div>
             </div>
+
+            {/* Percentile message - full width */}
+            {percentileMessage && (
+                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md rounded-full px-3 py-2 mb-4">
+                    <TrendingDown className="w-3.5 h-3.5 text-white" />
+                    <span className="text-white text-xs font-medium">{percentileMessage}</span>
+                </div>
+            )}
+
+            {/* AI Analysis section */}
+            {aiTags.length > 0 && (
+                <div>
+                    <div className="flex items-center gap-1.5 mb-2">
+                        <Sparkles className="w-3.5 h-3.5 text-white/90" />
+                        <span className="text-white text-xs font-medium">
+                            {t('daily.aiAnalysis', 'AI Analysis')}
+                        </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {aiTags.map((tag, index) => (
+                            <span
+                                key={index}
+                                className="px-3 py-1.5 rounded-full text-xs font-medium border border-white/40 bg-white/10"
+                                style={{
+                                    color: 'white',
+                                }}
+                            >
+                                {tag}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

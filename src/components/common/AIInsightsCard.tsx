@@ -7,6 +7,7 @@
 
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { UI_STYLES } from '@/config/theme'
 
 export interface AIInsightsCardProps {
     /** List of insight messages */
@@ -31,15 +32,19 @@ const AIInsightsCardInner = ({
     const themeColorTransparent = themeColor.replace('rgb(', 'rgba(').replace(')', ', 0.8)')
 
     return (
-        <div className={`${className}`}>
+        <div className={`${className} py-6`} style={{
+            backgroundColor: '#ffddb8ff',
+            borderRadius: UI_STYLES.cardBorderRadius,
+            paddingLeft: UI_STYLES.cardPaddingX,
+            paddingRight: UI_STYLES.cardPaddingX,
+        }}>
             {/* Header badge */}
             <div
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-white text-sm font-medium mb-4"
                 style={{
-                    background: `linear-gradient(90deg, ${themeColor} 0%, ${themeColorTransparent} 100%)`,
+                    background: `#FE760C`,
                 }}
             >
-                <span>✨</span>
                 <span>{t('daily.aiHealthInsights', 'AI health related insights')}</span>
             </div>
 

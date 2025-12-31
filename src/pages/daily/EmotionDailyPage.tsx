@@ -16,7 +16,7 @@ import {
     toggleDemoMode,
     type EmotionDailyData,
 } from '@/daily/emotion'
-import { EMOTION_COLORS } from '@/config/theme'
+import { EMOTION_COLORS, UI_STYLES } from '@/config/theme'
 
 export default function EmotionDailyPage() {
     const { t } = useTranslation()
@@ -40,7 +40,7 @@ export default function EmotionDailyPage() {
 
     return (
         <div className="min-h-screen pb-20" style={{ backgroundColor: '#F1EFEE' }}>
-            <div className="max-w-2xl mx-auto">
+            <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
                 <div className="p-4 space-y-4">
                     {/* Demo mode toggle */}
                     <div className="flex items-center justify-end gap-2">

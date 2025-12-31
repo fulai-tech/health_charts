@@ -47,6 +47,8 @@ export function SpO2StatisticsCard({ data, className, isLoading }: SpO2Statistic
       title={t('page.spo2.statistics')}
       icon={Activity}
       themeColor={themeColor}
+      donutThickness={12}
+      pieChartSize={"small"}
       items={items}
       centerValue={totalCount}
       centerLabel={t('common.times')}

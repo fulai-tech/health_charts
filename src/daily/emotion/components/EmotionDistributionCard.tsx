@@ -2,12 +2,12 @@
  * EmotionDistributionCard
  * 
  * Displays emotion distribution as a pie chart with main emotion highlight.
+ * Refactored to use the common DistributionCard component.
  */
 
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
-import { Info } from 'lucide-react'
+import { DistributionCard, type DistributionItem } from '@/components/common/DistributionCard'
 import { EMOTION_COLORS } from '@/config/theme'
 import type { EmotionDistributionItem } from '../types'
 
@@ -20,12 +20,14 @@ export interface EmotionDistributionCardProps {
     items: EmotionDistributionItem[]
     /** Additional class names */
     className?: string
+    /** Loading state */
+    isLoading?: boolean
 }
 
 /**
  * Get color for emotion type
  */
-const getEmotionColor = (type: string): string => {
+export const getEmotionColor = (type: string): string => {
     const typeUpper = type.toUpperCase()
     const colorMap: Record<string, string> = {
         HAPPY: EMOTION_COLORS.happy,
@@ -40,90 +42,52 @@ const getEmotionColor = (type: string): string => {
     return colorMap[typeUpper] || '#94a3b8'
 }
 
+/**
+ * Transform EmotionDistributionItem[] to DistributionItem[]
+ */
+export const transformEmotionItems = (items: EmotionDistributionItem[]): DistributionItem[] => {
+    return items.map((item) => ({
+        type: item.type,
+        label: item.label,
+        percent: item.percent,
+        count: item.count,
+        color: getEmotionColor(item.type),
+    }))
+}
+
 const EmotionDistributionCardInner = ({
     mainEmotion,
     mainEmotionLabel,
     items,
     className = '',
+    isLoading = false,
 }: EmotionDistributionCardProps) => {
     const { t } = useTranslation()
 
-    // Prepare pie data
-    const pieData = useMemo(() => {
-        return items.map((item) => ({
-            name: item.label,
-            value: item.percent,
-            color: getEmotionColor(item.type),
-        }))
-    }, [items])
+    // Transform emotion items to distribution items
+    const distributionItems = useMemo(() => transformEmotionItems(items), [items])
 
-    // Split items into two columns
-    const leftItems = items.filter((_, i) => i % 2 === 0)
-    const rightItems = items.filter((_, i) => i % 2 === 1)
+    // Orange bar icon element
+    const orangeBarIcon = (
+        <span className="w-1.5 h-4 rounded-full bg-orange-400" />
+    )
 
     return (
-        <div className={`bg-white rounded-2xl p-5 shadow-sm ${className}`}>
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-4">
-                <span className="w-1.5 h-4 rounded-full bg-orange-400" />
-                <h3 className="text-base font-semibold text-slate-800">
-                    {t('daily.emotionDistribution', 'Emotion distribution')}
-                </h3>
-                <Info className="w-4 h-4 text-slate-400 cursor-pointer" />
-            </div>
-
-            <div className="flex items-center gap-6">
-                {/* Legend grid */}
-                <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-2">
-                    {items.slice(0, 8).map((item) => (
-                        <div key={item.type} className="flex items-center gap-2">
-                            <span
-                                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                                style={{ backgroundColor: getEmotionColor(item.type) }}
-                            />
-                            <span className="text-sm text-slate-600">{item.label}</span>
-                            <span className="text-sm font-medium text-slate-800">
-                                {item.percent}%
-                            </span>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Pie chart with center label - large for 2-column layout */}
-                <div className="relative w-48 h-48 flex-shrink-0">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                            <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={75}
-                                outerRadius={95}
-                                paddingAngle={2}
-                                dataKey="value"
-                            >
-                                {pieData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Pie>
-                        </PieChart>
-                    </ResponsiveContainer>
-
-                    {/* Center label */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span
-                            className="text-xl font-bold"
-                            style={{ color: getEmotionColor(mainEmotion) }}
-                        >
-                            {mainEmotionLabel}
-                        </span>
-                        <span className="text-xs text-slate-400">
-                            {t('daily.asMain', 'as main')}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <DistributionCard
+            title={t('daily.emotionDistribution', 'Emotion distribution')}
+            iconElement={orangeBarIcon}
+            themeColor={EMOTION_COLORS.primary}
+            items={distributionItems}
+            donutThickness={12}
+            centerValue={mainEmotionLabel}
+            centerLabel={t('daily.asMain', 'as main')}
+            centerValueColor={getEmotionColor(mainEmotion)}
+            itemLayout="grid-2col"
+            pieChartSize="medium"
+            showInfo={true}
+            className={className}
+            isLoading={isLoading}
+        />
     )
 }
 

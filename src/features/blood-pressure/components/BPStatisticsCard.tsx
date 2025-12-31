@@ -61,6 +61,7 @@ const BPStatisticsCardInner = ({ data, className, isLoading }: BPStatisticsCardP
       title={t('page.bloodPressure.bpStatistics')}
       icon={Activity}
       themeColor={themeColor}
+      pieChartSize={"medium"}
       items={items}
       centerValue={t('common.good')}
       centerLabel={t('common.inAverage')}

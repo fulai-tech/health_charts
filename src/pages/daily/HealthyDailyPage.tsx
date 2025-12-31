@@ -9,13 +9,16 @@ import { DailyScoreCard } from '@/components/common/DailyScoreCard'
 import { AIInsightsCard } from '@/components/common/AIInsightsCard'
 import { SuggestionsList } from '@/components/common/SuggestionsList'
 import {
-    CoreIndicatorCard,
+    BloodPressureIndicatorCard,
+    HeartRateIndicatorCard,
+    BloodGlucoseIndicatorCard,
+    BloodOxygenIndicatorCard,
     generateHealthyDemoData,
     isDemoModeEnabled,
     toggleDemoMode,
     type HealthyDailyData,
 } from '@/daily/healthy'
-import { VITAL_COLORS, HEALTH_COLORS } from '@/config/theme'
+import { VITAL_COLORS, HEALTH_COLORS, UI_STYLES } from '@/config/theme'
 
 export default function HealthyDailyPage() {
     const { t } = useTranslation()
@@ -37,7 +40,7 @@ export default function HealthyDailyPage() {
 
     return (
         <div className="min-h-screen pb-20" style={{ backgroundColor: '#F1EFEE' }}>
-            <div className="max-w-2xl mx-auto">
+            <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
                 <div className="p-4 space-y-4">
                     {/* Demo mode toggle */}
                     <div className="flex items-center justify-end gap-2">
@@ -73,10 +76,7 @@ export default function HealthyDailyPage() {
                         </h3>
 
                         {/* Blood Pressure */}
-                        <CoreIndicatorCard
-                            type="bloodPressure"
-                            title={t('vitals.bloodPressure', 'Blood pressure')}
-                            color={VITAL_COLORS.bp}
+                        <BloodPressureIndicatorCard
                             latest={data.indicators.bloodPressure.latest}
                             avg={data.indicators.bloodPressure.avg}
                             max={data.indicators.bloodPressure.max}
@@ -87,10 +87,7 @@ export default function HealthyDailyPage() {
                         />
 
                         {/* Heart Rate */}
-                        <CoreIndicatorCard
-                            type="heartRate"
-                            title={t('vitals.heartRate', 'Heart rate')}
-                            color={VITAL_COLORS.heartRate}
+                        <HeartRateIndicatorCard
                             latest={data.indicators.heartRate.latest}
                             avg={data.indicators.heartRate.avg}
                             max={data.indicators.heartRate.max}
@@ -101,10 +98,7 @@ export default function HealthyDailyPage() {
                         />
 
                         {/* Blood Glucose (POCT) */}
-                        <CoreIndicatorCard
-                            type="bloodGlucose"
-                            title={t('vitals.bloodGlucose', 'POCT')}
-                            color="#F59E0B"
+                        <BloodGlucoseIndicatorCard
                             latest={data.indicators.bloodGlucose.latest}
                             avg={data.indicators.bloodGlucose.avg}
                             max={data.indicators.bloodGlucose.max}
@@ -115,10 +109,7 @@ export default function HealthyDailyPage() {
                         />
 
                         {/* Blood Oxygen */}
-                        <CoreIndicatorCard
-                            type="bloodOxygen"
-                            title={t('vitals.spo2', 'SpO2')}
-                            color={VITAL_COLORS.spo2}
+                        <BloodOxygenIndicatorCard
                             latest={data.indicators.bloodOxygen.latest}
                             avg={data.indicators.bloodOxygen.avg}
                             max={data.indicators.bloodOxygen.max}

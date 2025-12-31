@@ -96,7 +96,13 @@ export const CHART_COLORS = {
  */
 export const UI_STYLES = {
   /** 加载遮罩背景颜色 - 半透明黑色，用于卡片加载时的遮罩层 */
-  loadingOverlay: 'rgba(0, 0, 0, 0.27)',
+  loadingOverlay: 'rgba(0, 0, 0, 0)',
+  /** 卡片圆角 - 30px，用于所有卡片组件的统一圆角 */
+  cardBorderRadius: '30px',
+  /** 卡片内边距 - 20px，用于所有卡片组件的统一内边距 */
+  cardPaddingX: '25px',
+  /** 页面最大宽度 - max-w-2xl (672px)，用于 daily 和 details 页面的内容容器 */
+  pageMaxWidth: 'max-w-xl',
 } as const
 
 /**
@@ -210,16 +216,16 @@ export const EMOTION_COLORS = {
   neutral: 'rgb(178, 237, 181)',
   /** 消极情绪 - 蓝色 #579EFF，用于显示消极情绪状态 */
   negative: 'rgb(87, 158, 255)',
-  /** 开心 - 黄色 #FCD34D */
-  happy: 'rgb(252, 211, 77)',
+  /** 开心 - 黄色 #FBD026 */
+  happy: 'rgb(251, 211, 77)',
   /** 惊讶/庆幸 - 橙色 #FB923C */
   surprised: 'rgb(251, 146, 60)',
-  /** 平静 - 绿色 #6EE7B7 */
-  calm: 'rgb(110, 231, 183)',
+  /** 平静 - 绿色 #B2EEB3 */
+  calm: 'rgb(178, 237, 181)',
   /** 悲伤 - 灰色 #94A3B8 */
   sad: 'rgb(148, 163, 184)',
-  /** 生气 - 蓝色 #60A5FA */
-  angry: 'rgb(96, 165, 250)',
+  /** 生气 - 蓝色 #569FFF */
+  angry: 'rgb(87, 158, 255)',
   /** 恐惧 - 青色 #22D3EE */
   fearful: 'rgb(34, 211, 238)',
   /** 厌恶/憎恨 - 紫色 #A78BFA */

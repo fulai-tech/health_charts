@@ -33,7 +33,7 @@ const LAYOUT = {
   paddingBottom: 30,
   paddingLeft: 60,
   paddingRight: 20,
-  blockHeight: 40,
+  blockHeight: 40,      // 色块的高度
   baseRadius: 12,
   lineWidth: 6,
   bufferLong: 5,
@@ -90,16 +90,16 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
-  
+
   const [hoveredData, setHoveredData] = useState<{ x: number, y: number, segment: SleepSegment, duration: number } | null>(null)
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
   // 1. 数据预处理
   const processedData = useMemo(() => {
     if (!data || data.length === 0) return []
-    
+
     const baseDate = new Date('2024-01-01')
-    const sorted = [...data].sort((a, b) => 
+    const sorted = [...data].sort((a, b) =>
       timeToTimestamp(a.start, baseDate) - timeToTimestamp(b.start, baseDate)
     )
 
@@ -107,7 +107,7 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
       const startTime = timeToTimestamp(segment.start, baseDate)
       const endTime = timeToTimestamp(segment.end, baseDate)
       const stageInfo = STAGES.find(s => s.key === segment.stage)!
-      
+
       const prevSeg = index > 0 ? sorted[index - 1] : null
       const nextSeg = index < sorted.length - 1 ? sorted[index + 1] : null
       const prevStage = prevSeg ? STAGES.find(s => s.key === prevSeg.stage) : null
@@ -141,7 +141,7 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
 
     const dpr = window.devicePixelRatio || 1
     const { width, height: cssHeight } = canvasSize
-    
+
     canvas.width = width * dpr
     canvas.height = cssHeight * dpr
     ctx.scale(dpr, dpr)
@@ -149,149 +149,160 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
 
     // --- 绘图区域参数计算 ---
     const drawWidth = width - LAYOUT.paddingLeft - LAYOUT.paddingRight
-    
-    // 提取时间边界 (修复点：只在这里声明一次)
+
     const minTime = processedData[0].startTime
     const maxTime = processedData[processedData.length - 1].endTime
     const totalTime = maxTime - minTime
 
     const getX = (t: number) => LAYOUT.paddingLeft + ((t - minTime) / totalTime) * drawWidth
-    
+
     const availableHeight = cssHeight - LAYOUT.paddingTop - LAYOUT.paddingBottom
     const rowHeight = availableHeight / STAGES.length
     const getYCenter = (order: number) => LAYOUT.paddingTop + (order * rowHeight) + (rowHeight / 2)
 
-    // --- Step A: 背景网格和文字 ---
+    // --- Step A: 背景网格和文字 (共享边界线方案) ---
     ctx.font = '12px sans-serif'
     ctx.textBaseline = 'middle'
-    
-    STAGES.forEach((stage) => {
-        const yCenter = getYCenter(stage.order)
-        
-        ctx.fillStyle = '#64748b'
-        ctx.textAlign = 'right'
-        ctx.fillText(stage.label, LAYOUT.paddingLeft - 15, yCenter)
 
-        ctx.beginPath()
-        ctx.strokeStyle = '#e2e8f0'
-        ctx.setLineDash([4, 4])
-        ctx.lineWidth = 1
-        ctx.moveTo(LAYOUT.paddingLeft, yCenter)
-        ctx.lineTo(width - LAYOUT.paddingRight, yCenter)
-        ctx.stroke()
+    // 1. 先画所有的水平虚线 (共 N+1 条)
+    // 这样每个区间就被两条线完美包围,且相邻区间共享中间那条线
+    ctx.beginPath()
+    ctx.strokeStyle = '#e2e8f0'
+    ctx.setLineDash([4, 4])
+    ctx.lineWidth = 1
+
+    // 从 0 循环到 STAGES.length,画出每一行的边界
+    for (let i = 0; i <= STAGES.length; i++) {
+      // 计算边界线的 Y 坐标
+      // 0 是第一行的顶线,1 是第一行的底线/第二行的顶线...
+      const yLine = LAYOUT.paddingTop + (i * rowHeight)
+
+      ctx.moveTo(LAYOUT.paddingLeft, yLine)
+      ctx.lineTo(width - LAYOUT.paddingRight, yLine)
+    }
+    ctx.stroke()
+    ctx.setLineDash([]) // 重置虚线设置
+
+    // 2. 再画文字 (保持在行中间)
+    STAGES.forEach((stage) => {
+      const yCenter = getYCenter(stage.order)
+
+      ctx.fillStyle = '#64748b'
+      ctx.textAlign = 'right'
+      ctx.fillText(stage.label, LAYOUT.paddingLeft - 15, yCenter)
     })
-    ctx.setLineDash([])
 
     // --- Step B: 连接线 (Silk Gradient) ---
     processedData.forEach((item) => {
-        if (item.prevConnected && item.prevStageInfo) {
-            const boundaryX = getX(item.startTime)
-            const currY = getYCenter(item.stageInfo.order)
-            const prevY = getYCenter(item.prevStageInfo.order)
-            
-            const currColor = colors[item.stage] || colors.light
-            const prevColor = colors[item.prevStageInfo.key] || colors.light
+      if (item.prevConnected && item.prevStageInfo) {
+        const boundaryX = getX(item.startTime)
+        const currY = getYCenter(item.stageInfo.order)
+        const prevY = getYCenter(item.prevStageInfo.order)
 
-            const totalDist = Math.abs(currY - prevY)
-            const halfBlock = LAYOUT.blockHeight / 2
-            
-            if (totalDist > 1) {
-                const isAdjacent = Math.abs(item.stageInfo.order - item.prevStageInfo.order) === 1
-                const bufferSize = isAdjacent ? LAYOUT.bufferShort : LAYOUT.bufferLong
-                let solidPixels = halfBlock + bufferSize
-                if (solidPixels * 2 > totalDist) solidPixels = totalDist * 0.45
+        const currColor = colors[item.stage] || colors.light
+        const prevColor = colors[item.prevStageInfo.key] || colors.light
 
-                const isGoingDown = currY > prevY
-                const topY = Math.min(prevY, currY)
-                const bottomY = Math.max(prevY, currY)
-                const topColor = isGoingDown ? prevColor : currColor
-                const bottomColor = isGoingDown ? currColor : prevColor
+        const totalDist = Math.abs(currY - prevY)
+        const halfBlock = LAYOUT.blockHeight / 2
 
-                const grad = ctx.createLinearGradient(0, topY, 0, bottomY)
-                const stop1 = solidPixels / totalDist
-                const stop2 = 1 - stop1
-                
-                grad.addColorStop(0, topColor)
-                grad.addColorStop(stop1, topColor)
-                grad.addColorStop(stop2, bottomColor)
-                grad.addColorStop(1, bottomColor)
+        if (totalDist > 1) {
+          const isAdjacent = Math.abs(item.stageInfo.order - item.prevStageInfo.order) === 1
+          const bufferSize = isAdjacent ? LAYOUT.bufferShort : LAYOUT.bufferLong
+          let solidPixels = halfBlock + bufferSize
+          if (solidPixels * 2 > totalDist) solidPixels = totalDist * 0.45
 
-                ctx.fillStyle = grad
-                ctx.fillRect(
-                    boundaryX - LAYOUT.lineWidth / 2, 
-                    topY, 
-                    LAYOUT.lineWidth, 
-                    bottomY - topY
-                )
-            }
+          const isGoingDown = currY > prevY
+          const topY = Math.min(prevY, currY)
+          const bottomY = Math.max(prevY, currY)
+          const topColor = isGoingDown ? prevColor : currColor
+          const bottomColor = isGoingDown ? currColor : prevColor
+
+          const grad = ctx.createLinearGradient(0, topY, 0, bottomY)
+          const stop1 = solidPixels / totalDist
+          const stop2 = 1 - stop1
+
+          grad.addColorStop(0, topColor)
+          grad.addColorStop(stop1, topColor)
+          grad.addColorStop(stop2, bottomColor)
+          grad.addColorStop(1, bottomColor)
+
+          ctx.fillStyle = grad
+          ctx.fillRect(
+            boundaryX - LAYOUT.lineWidth / 2,
+            topY,
+            LAYOUT.lineWidth,
+            bottomY - topY
+          )
         }
+      }
     })
 
     // --- Step C: 色块 ---
+    // 逻辑不变，因为色块是基于 yCenter 居中绘制的。
+    // 只要 LAYOUT.trackHeight >= LAYOUT.blockHeight，色块就会自然地显示在两条平行线中间。
     processedData.forEach((item) => {
-        const xStart = getX(item.startTime)
-        const xEnd = getX(item.endTime)
-        const yCenter = getYCenter(item.stageInfo.order)
-        const blockW = Math.max(xEnd - xStart, 1)
-        
-        let drawX = xStart
-        let drawW = blockW
-        const overlap = LAYOUT.lineWidth / 2
+      const xStart = getX(item.startTime)
+      const xEnd = getX(item.endTime)
+      const yCenter = getYCenter(item.stageInfo.order)
+      const blockW = Math.max(xEnd - xStart, 1)
 
-        if (item.prevConnected && (item.radii.tl === 0 || item.radii.bl === 0)) {
-            drawX -= overlap
-            drawW += overlap
-        }
-        if (item.nextConnected && (item.radii.tr === 0 || item.radii.br === 0)) {
-            drawW += overlap
-        }
+      let drawX = xStart
+      let drawW = blockW
+      const overlap = LAYOUT.lineWidth / 2
 
-        const rectY = yCenter - LAYOUT.blockHeight / 2
+      if (item.prevConnected && (item.radii.tl === 0 || item.radii.bl === 0)) {
+        drawX -= overlap
+        drawW += overlap
+      }
+      if (item.nextConnected && (item.radii.tr === 0 || item.radii.br === 0)) {
+        drawW += overlap
+      }
 
-        ctx.fillStyle = colors[item.stage] || colors.light
-        ctx.beginPath()
-        
-        const { tl, tr, br, bl } = item.radii
-        const x = drawX, y = rectY, w = drawW, h = LAYOUT.blockHeight
-        
-        ctx.moveTo(x + tl, y)
-        ctx.lineTo(x + w - tr, y)
-        ctx.quadraticCurveTo(x + w, y, x + w, y + tr)
-        ctx.lineTo(x + w, y + h - br)
-        ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h)
-        ctx.lineTo(x + bl, y + h)
-        ctx.quadraticCurveTo(x, y + h, x, y + h - bl)
-        ctx.lineTo(x, y + tl)
-        ctx.quadraticCurveTo(x, y, x + tl, y)
-        
-        ctx.closePath()
-        ctx.fill()
+      const rectY = yCenter - LAYOUT.blockHeight / 2
+
+      ctx.fillStyle = colors[item.stage] || colors.light
+      ctx.beginPath()
+
+      const { tl, tr, br, bl } = item.radii
+      const x = drawX, y = rectY, w = drawW, h = LAYOUT.blockHeight
+
+      ctx.moveTo(x + tl, y)
+      ctx.lineTo(x + w - tr, y)
+      ctx.quadraticCurveTo(x + w, y, x + w, y + tr)
+      ctx.lineTo(x + w, y + h - br)
+      ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h)
+      ctx.lineTo(x + bl, y + h)
+      ctx.quadraticCurveTo(x, y + h, x, y + h - bl)
+      ctx.lineTo(x, y + tl)
+      ctx.quadraticCurveTo(x, y, x + tl, y)
+
+      ctx.closePath()
+      ctx.fill()
     })
 
     // --- Step D: X 轴刻度 ---
     const startHour = new Date(minTime).getHours()
-    // 计算结束时间的小时数（如果跨天加24）
     const endHour = new Date(maxTime).getHours() + (new Date(maxTime).getDate() !== new Date(minTime).getDate() ? 24 : 0)
-    
+
     ctx.textAlign = 'center'
     ctx.fillStyle = '#94a3b8'
     ctx.font = '11px sans-serif'
 
     for (let h = startHour; h <= endHour; h++) {
-        const date = new Date(minTime)
-        date.setHours(h, 0, 0, 0)
-        if (date.getTime() < minTime) date.setDate(date.getDate() + 1)
-        
-        const tickX = getX(date.getTime())
-        if (tickX >= LAYOUT.paddingLeft && tickX <= width - LAYOUT.paddingRight) {
-             const label = `${h % 24}`.padStart(2, '0') + ':00'
-             ctx.fillText(label, tickX, cssHeight - 10)
-             
-             ctx.beginPath()
-             ctx.moveTo(tickX, cssHeight - 25)
-             ctx.lineTo(tickX, cssHeight - 20)
-             ctx.stroke()
-        }
+      const date = new Date(minTime)
+      date.setHours(h, 0, 0, 0)
+      if (date.getTime() < minTime) date.setDate(date.getDate() + 1)
+
+      const tickX = getX(date.getTime())
+      if (tickX >= LAYOUT.paddingLeft && tickX <= width - LAYOUT.paddingRight) {
+        const label = `${h % 24}`.padStart(2, '0') + ':00'
+        ctx.fillText(label, tickX, cssHeight - 10)
+
+        ctx.beginPath()
+        ctx.moveTo(tickX, cssHeight - 25)
+        ctx.lineTo(tickX, cssHeight - 20)
+        ctx.stroke()
+      }
     }
 
   }, [canvasSize, colors, processedData])
@@ -321,27 +332,27 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     if (drawWidth <= 0 || !processedData.length) return
 
     if (mouseX < LAYOUT.paddingLeft || mouseX > width - LAYOUT.paddingRight) {
-        setHoveredData(null)
-        return
+      setHoveredData(null)
+      return
     }
 
     const minTime = processedData[0].startTime
     const totalTime = processedData[processedData.length - 1].endTime - minTime
-    
+
     const ratio = (mouseX - LAYOUT.paddingLeft) / drawWidth
     const hoverTime = minTime + ratio * totalTime
 
     const found = processedData.find(item => hoverTime >= item.startTime && hoverTime <= item.endTime)
 
     if (found) {
-        setHoveredData({
-            x: e.clientX,
-            y: e.clientY,
-            segment: found,
-            duration: found.duration
-        })
+      setHoveredData({
+        x: e.clientX,
+        y: e.clientY,
+        segment: found,
+        duration: found.duration
+      })
     } else {
-        setHoveredData(null)
+      setHoveredData(null)
     }
   }
 
@@ -355,29 +366,29 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
-      
+
       {hoveredData && (
-        <div 
-            className="fixed z-50 pointer-events-none bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl rounded-lg p-3 text-sm"
-            style={{
-                left: hoveredData.x + 15,
-                top: hoveredData.y + 15,
-                transform: 'translate(0, 0)'
-            }}
+        <div
+          className="fixed z-50 pointer-events-none bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl rounded-lg p-3 text-sm"
+          style={{
+            left: hoveredData.x + 15,
+            top: hoveredData.y + 15,
+            transform: 'translate(0, 0)'
+          }}
         >
-            <div className="font-semibold text-slate-800 mb-1">
-                {STAGES.find(s => s.key === hoveredData.segment.stage)?.label}
-            </div>
-            <div className="text-slate-500 text-xs tabular-nums">
-                {hoveredData.segment.start} - {hoveredData.segment.end}
-            </div>
-            <div className="text-slate-500 text-xs mt-1">
-                Duration: {hoveredData.duration} min
-            </div>
-            <div 
-                className="absolute left-0 top-3 w-1 h-4 rounded-r" 
-                style={{ backgroundColor: colors[hoveredData.segment.stage] }}
-            />
+          <div className="font-semibold text-slate-800 mb-1">
+            {STAGES.find(s => s.key === hoveredData.segment.stage)?.label}
+          </div>
+          <div className="text-slate-500 text-xs tabular-nums">
+            {hoveredData.segment.start} - {hoveredData.segment.end}
+          </div>
+          <div className="text-slate-500 text-xs mt-1">
+            Duration: {hoveredData.duration} min
+          </div>
+          <div
+            className="absolute left-0 top-3 w-1 h-4 rounded-r"
+            style={{ backgroundColor: colors[hoveredData.segment.stage] }}
+          />
         </div>
       )}
     </div>

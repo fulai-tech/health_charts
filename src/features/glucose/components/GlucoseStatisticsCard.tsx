@@ -61,6 +61,7 @@ export function GlucoseStatisticsCard({ data, className, isLoading }: GlucoseSta
       icon={Activity}
       themeColor={themeColor}
       items={items}
+      pieChartSize={"medium"}
       centerValue={t('common.good')}
       centerLabel={t('common.inAverage')}
       highlightValue={normalCount}

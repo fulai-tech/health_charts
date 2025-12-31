@@ -1,6 +1,7 @@
 import { forwardRef, type HTMLAttributes } from 'react'
 import { Slot } from '@radix-ui/react-slot'
 import { cn } from '@/lib/utils'
+import { UI_STYLES } from '@/config/theme'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   asChild?: boolean
@@ -17,9 +18,15 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <Comp
         ref={ref}
         className={cn(
-          'rounded-2xl shadow-sm bg-white px-5 py-4 border border-slate-100',
+          'shadow-sm bg-white py-4 border border-slate-100',
           className
         )}
+        style={{
+          borderRadius: UI_STYLES.cardBorderRadius,
+          paddingLeft: UI_STYLES.cardPaddingX,
+          paddingRight: UI_STYLES.cardPaddingX,
+          ...props.style
+        }}
         {...props}
       />
     )
@@ -27,7 +34,7 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
 )
 Card.displayName = 'Card'
 
-interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> {}
+interface CardHeaderProps extends HTMLAttributes<HTMLDivElement> { }
 
 const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ className, ...props }, ref) => (
@@ -40,7 +47,7 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
 )
 CardHeader.displayName = 'CardHeader'
 
-interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> {}
+interface CardTitleProps extends HTMLAttributes<HTMLHeadingElement> { }
 
 const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
   ({ className, ...props }, ref) => (
@@ -53,7 +60,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, CardTitleProps>(
 )
 CardTitle.displayName = 'CardTitle'
 
-interface CardDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {}
+interface CardDescriptionProps extends HTMLAttributes<HTMLParagraphElement> { }
 
 const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => (
@@ -66,7 +73,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
 )
 CardDescription.displayName = 'CardDescription'
 
-interface CardContentProps extends HTMLAttributes<HTMLDivElement> {}
+interface CardContentProps extends HTMLAttributes<HTMLDivElement> { }
 
 const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, ...props }, ref) => (
@@ -75,7 +82,7 @@ const CardContent = forwardRef<HTMLDivElement, CardContentProps>(
 )
 CardContent.displayName = 'CardContent'
 
-interface CardFooterProps extends HTMLAttributes<HTMLDivElement> {}
+interface CardFooterProps extends HTMLAttributes<HTMLDivElement> { }
 
 const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
   ({ className, ...props }, ref) => (

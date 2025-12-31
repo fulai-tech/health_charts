@@ -7,6 +7,7 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info } from 'lucide-react'
+import { UI_STYLES } from '@/config/theme'
 import type { QualityIndicator } from '../types'
 
 export interface SleepQualityIndicatorsProps {
@@ -56,7 +57,11 @@ const SleepQualityIndicatorsInner = ({
     const { t } = useTranslation()
 
     return (
-        <div className={`bg-white rounded-2xl p-5 shadow-sm ${className}`}>
+        <div className={`bg-white py-5 shadow-sm ${className}`} style={{
+            borderRadius: UI_STYLES.cardBorderRadius,
+            paddingLeft: UI_STYLES.cardPaddingX,
+            paddingRight: UI_STYLES.cardPaddingX,
+        }}>
             {/* Header */}
             <div className="flex items-center gap-2 mb-4">
                 <span className="w-1.5 h-4 rounded-full bg-violet-400" />

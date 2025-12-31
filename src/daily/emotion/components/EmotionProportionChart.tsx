@@ -7,7 +7,7 @@
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info } from 'lucide-react'
-import { EMOTION_COLORS } from '@/config/theme'
+import { EMOTION_COLORS, UI_STYLES } from '@/config/theme'
 import { TimeAxisBarChart } from '@/components/charts/TimeAxisBarChart'
 import type { EmotionChartPoint } from '../types'
 
@@ -43,7 +43,11 @@ const EmotionProportionChartInner = ({
     ]
 
     return (
-        <div className={`bg-white rounded-2xl p-5 shadow-sm ${className}`}>
+        <div className={`bg-white py-5 shadow-sm ${className}`} style={{
+            borderRadius: UI_STYLES.cardBorderRadius,
+            paddingLeft: UI_STYLES.cardPaddingX,
+            paddingRight: UI_STYLES.cardPaddingX,
+        }}>
             {/* Header */}
             <div className="flex items-center gap-2 mb-4">
                 <span className="w-1.5 h-4 rounded-full bg-orange-400" />
@@ -58,6 +62,7 @@ const EmotionProportionChartInner = ({
                 height={200}
                 yAxisDomain={[0, 100]}
                 showLegend={true}
+                maxBarSize={10}
             />
         </div>
     )

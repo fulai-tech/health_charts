@@ -15,7 +15,7 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    Cell,
+    Rectangle,
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 
@@ -50,6 +50,14 @@ export interface TimeAxisBarChartProps {
     showLegend?: boolean
     /** Custom tooltip renderer */
     renderTooltip?: (props: any) => React.ReactNode
+    /** Maximum bar width (default: 20) */
+    maxBarSize?: number
+    /** Bar border radius for top bar [topLeft, topRight, bottomRight, bottomLeft] (default: [4, 4, 0, 0]) */
+    barRadius?: [number, number, number, number]
+    /** Gap between bars in the same category (default: undefined) */
+    barGap?: number
+    /** Gap between bar categories (default: undefined) */
+    barCategoryGap?: number
     /** Additional class names */
     className?: string
 }
@@ -83,6 +91,30 @@ const DefaultTooltip = memo(({ active, payload, layers }: any) => {
     )
 })
 
+/**
+ * Internal component for rendering bars with rounded tops
+ */
+const RoundedTopBar = memo((props: any) => {
+    const { fill, x, y, width, height, payload, dataKey, layers, barRadius } = props
+
+    // Determine which layer is the topmost with data
+    let topKey = null
+    for (let i = layers.length - 1; i >= 0; i--) {
+        const key = layers[i].dataKey
+        if (payload[key] && payload[key] > 0) {
+            topKey = key
+            break
+        }
+    }
+
+    const isTop = dataKey === topKey
+    const radius = isTop ? barRadius : [0, 0, 0, 0]
+
+    return <Rectangle {...props} radius={radius} />
+})
+
+RoundedTopBar.displayName = 'RoundedTopBar'
+
 const TimeAxisBarChartInner = ({
     data,
     layers,
@@ -90,20 +122,16 @@ const TimeAxisBarChartInner = ({
     yAxisDomain = [0, 100],
     showLegend = true,
     renderTooltip,
+    maxBarSize = 20,
+    barRadius = [4, 4, 0, 0],
+    barGap,
+    barCategoryGap,
     className = '',
 }: TimeAxisBarChartProps) => {
     const animationProps = getChartAnimationProps()
 
     // Transform data to include position
     const chartData = useMemo(() => {
-        // Create fixed time slots
-        const slots = [0, 6, 12, 18, 24]
-        const slotData = slots.map((hour) => ({
-            hour: `${hour.toString().padStart(2, '0')}:00`,
-            position: hour,
-            ...layers.reduce((acc, layer) => ({ ...acc, [layer.dataKey]: 0 }), {}),
-        }))
-
         // Place actual data points at their positions
         const result = data.map((point) => ({
             ...point,
@@ -111,7 +139,7 @@ const TimeAxisBarChartInner = ({
         }))
 
         return result
-    }, [data, layers])
+    }, [data])
 
     // Fixed X-axis ticks
     const xAxisTicks = ['00:00', '06:00', '12:00', '18:00', '24:00']
@@ -139,6 +167,8 @@ const TimeAxisBarChartInner = ({
                     <ComposedChart
                         data={chartData}
                         margin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+                        barGap={barGap}
+                        barCategoryGap={barCategoryGap}
                     >
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
                         <XAxis
@@ -162,14 +192,14 @@ const TimeAxisBarChartInner = ({
                             allowEscapeViewBox={{ x: false, y: false }}
                         />
                         {/* Stacked bars */}
-                        {layers.map((layer, index) => (
+                        {layers.map((layer) => (
                             <Bar
                                 key={layer.dataKey}
                                 dataKey={layer.dataKey}
                                 stackId="stack"
                                 fill={layer.color}
-                                radius={index === layers.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
-                                maxBarSize={30}
+                                maxBarSize={maxBarSize}
+                                shape={<RoundedTopBar layers={layers} barRadius={barRadius} />}
                                 {...animationProps}
                             />
                         ))}

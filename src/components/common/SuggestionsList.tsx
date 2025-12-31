@@ -7,6 +7,7 @@
 
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { UI_STYLES } from '@/config/theme'
 
 export interface Suggestion {
     /** Icon image path (relative to public) */
@@ -58,7 +59,12 @@ const SuggestionsListInner = ({
                 {suggestions.map((suggestion, index) => (
                     <div
                         key={index}
-                        className="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex items-center gap-4"
+                        className="bg-white py-4 shadow-sm border border-slate-100 flex items-center gap-4"
+                        style={{
+                            borderRadius: UI_STYLES.cardBorderRadius,
+                            paddingLeft: UI_STYLES.cardPaddingX,
+                            paddingRight: UI_STYLES.cardPaddingX,
+                        }}
                     >
                         {/* Icon */}
                         <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
