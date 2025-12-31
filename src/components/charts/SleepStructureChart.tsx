@@ -359,7 +359,7 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
   const handleMouseLeave = () => setHoveredData(null)
 
   return (
-    <div ref={containerRef} className={`relative w-full ${className}`} style={{ height: `${height}px` }}>
+    <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }}>
       <canvas
         ref={canvasRef}
         className="w-full h-full block"
@@ -371,9 +371,10 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
         <div
           className="fixed z-50 pointer-events-none bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl rounded-lg p-3 text-sm"
           style={{
-            left: hoveredData.x + 15,
-            top: hoveredData.y + 15,
-            transform: 'translate(0, 0)'
+            left: 0,
+            top: 0,
+            transform: `translate(${hoveredData.x + 15}px, ${hoveredData.y + 15}px)`,
+            transition: 'transform 0.15s ease-out',
           }}
         >
           <div className="font-semibold text-slate-800 mb-1">
@@ -390,8 +391,9 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
             style={{ backgroundColor: colors[hoveredData.segment.stage] }}
           />
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   )
 }
 

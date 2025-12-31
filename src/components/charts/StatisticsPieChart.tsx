@@ -6,6 +6,7 @@
 
 import { memo } from 'react'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { getChartAnimationProps } from '@/lib/utils'
 
 export interface PieChartData {
   name: string
@@ -55,7 +56,7 @@ const StatisticsPieChartInner = ({
   children,
   widthClass = 'w-full',
   heightClass = 'h-full',
-  animationProps,
+  animationProps = getChartAnimationProps(),
   className = '',
 
   useCornerRadius = true,
@@ -63,7 +64,7 @@ const StatisticsPieChartInner = ({
 
 
   return (
-    <div className={`relative ${widthClass} ${heightClass} ${className}`}>
+    <div className={`relative transform-gpu will-change-transform ${widthClass} ${heightClass} ${className}`}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <Pie

@@ -155,7 +155,7 @@ const TrendLineChartInner = ({
     }
 
     return (
-        <div className={className}>
+        <div className={`transform-gpu will-change-transform ${className}`}>
             {/* Legend */}
             {showLegend && (
                 <div className="flex items-center gap-4 mb-2 flex-wrap">

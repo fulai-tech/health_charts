@@ -145,7 +145,7 @@ const TimeAxisBarChartInner = ({
     const xAxisTicks = ['00:00', '06:00', '12:00', '18:00', '24:00']
 
     return (
-        <div className={className}>
+        <div className={`transform-gpu will-change-transform ${className}`}>
             {/* Legend */}
             {showLegend && (
                 <div className="flex items-center gap-4 mb-3 flex-wrap">

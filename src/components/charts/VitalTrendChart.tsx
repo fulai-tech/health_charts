@@ -14,7 +14,7 @@ import {
   type TooltipProps,
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import { cn, getOptimizedAnimationDuration } from '@/lib/utils'
+import { cn, getChartAnimationProps } from '@/lib/utils'
 import { useMemo, memo } from 'react'
 
 export type ChartType = 'line' | 'area' | 'range' | 'mixed'
@@ -128,10 +128,6 @@ export function VitalTrendChart({
   domainPadding = 5,
   yDomain,
 }: VitalTrendChartProps) {
-  const optimizedAnimationDuration = useMemo(
-    () => getOptimizedAnimationDuration(animationDuration),
-    [animationDuration]
-  )
 
   const commonProps = useMemo(
     () => ({
@@ -149,6 +145,8 @@ export function VitalTrendChart({
     }),
     []
   )
+
+  const animationProps = getChartAnimationProps();
 
   const getYDomain = useMemo(() => {
     return (): [number | string, number | string] => {
@@ -183,18 +181,14 @@ export function VitalTrendChart({
             dataKey="rangeBase"
             stackId="range"
             fill="transparent"
-            animationDuration={optimizedAnimationDuration}
-            animationEasing="linear"
-            isAnimationActive={true}
+            {...animationProps}
           />
           <Bar
             dataKey="rangeHeight"
             stackId="range"
             fill={`${color}40`}
             radius={[4, 4, 4, 4]}
-            animationDuration={optimizedAnimationDuration}
-            animationEasing="linear"
-            isAnimationActive={true}
+            {...animationProps}
           >
             {transformedData.map((_, index) => (
               <Cell key={`cell-${index}`} fill={`${color}40`} />
@@ -207,9 +201,7 @@ export function VitalTrendChart({
             strokeWidth={2.5}
             dot={{ fill: color, strokeWidth: 0, r: 4 }}
             activeDot={{ r: 6, stroke: color, strokeWidth: 2, fill: '#fff' }}
-            animationDuration={optimizedAnimationDuration}
-            animationEasing="linear"
-            isAnimationActive={true}
+            {...animationProps}
           />
         </ComposedChart>
       )
@@ -240,9 +232,7 @@ export function VitalTrendChart({
             stroke={color}
             strokeWidth={2}
             fill={`url(#gradient-${color})`}
-            animationDuration={optimizedAnimationDuration}
-            animationEasing="linear"
-            isAnimationActive={true}
+            {...animationProps}
           />
         </AreaChart>
       )
@@ -268,9 +258,7 @@ export function VitalTrendChart({
             strokeWidth={2}
             dot={{ fill: color, strokeWidth: 0, r: 3 }}
             activeDot={{ r: 5, stroke: color, strokeWidth: 2, fill: '#fff' }}
-            animationDuration={optimizedAnimationDuration}
-            animationEasing="linear"
-            isAnimationActive={true}
+            {...animationProps}
           />
           <Line
             type="monotone"
@@ -285,9 +273,7 @@ export function VitalTrendChart({
               strokeWidth: 2,
               fill: '#fff',
             }}
-            animationDuration={optimizedAnimationDuration}
-            animationEasing="linear"
-            isAnimationActive={true}
+            {...animationProps}
           />
         </LineChart>
       )
@@ -312,16 +298,14 @@ export function VitalTrendChart({
           strokeWidth={2}
           dot={{ fill: color, strokeWidth: 0, r: 3 }}
           activeDot={{ r: 5, stroke: color, strokeWidth: 2, fill: '#fff' }}
-          animationDuration={optimizedAnimationDuration}
-          animationEasing="linear"
-          isAnimationActive={true}
+          {...animationProps}
         />
       </LineChart>
     )
   }
 
   return (
-    <div className={cn('w-full', className)} style={{ height }}>
+    <div className={cn('w-full transform-gpu will-change-transform', className)} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         {renderChart()}
       </ResponsiveContainer>

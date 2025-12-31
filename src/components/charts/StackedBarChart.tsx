@@ -9,7 +9,7 @@ import {
     Tooltip,
     Rectangle,
 } from 'recharts'
-import { getOptimizedAnimationDuration } from '@/lib/utils'
+import { getChartAnimationProps } from '@/lib/utils'
 
 /**
  * Interface for a single bar layer in the stack
@@ -99,13 +99,13 @@ const StackedBarChartInner = ({
     stackId = 'stack',
     showLegend = true,
 }: StackedBarChartProps) => {
-    const animationDuration = getOptimizedAnimationDuration(300)
+
 
     // Determine legend indicator class based on shape
     const indicatorClass = legendShape === 'circle' ? 'rounded-full' : 'rounded'
 
     return (
-        <div className={className}>
+        <div className={`transform-gpu will-change-transform ${className}`}>
             {/* Legend */}
             {showLegend && (
                 <div className="flex items-center gap-4 mb-2 flex-wrap">
@@ -158,7 +158,7 @@ const StackedBarChartInner = ({
                                 fill={layer.color}
                                 barSize={barSize}
                                 shape={showRoundedTop ? <RoundedTopBar layers={layers} /> : undefined}
-                                animationDuration={animationDuration}
+                                {...getChartAnimationProps()}
                             />
                         ))}
                     </ComposedChart>
