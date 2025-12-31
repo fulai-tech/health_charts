@@ -10,6 +10,7 @@ import {
     Rectangle,
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
+import { useChartAnimation } from '@/hooks/useChartAnimation'
 
 /**
  * Interface for a single bar layer in the stack
@@ -99,7 +100,7 @@ const StackedBarChartInner = ({
     stackId = 'stack',
     showLegend = true,
 }: StackedBarChartProps) => {
-
+    const animationProps = useChartAnimation()
 
     // Determine legend indicator class based on shape
     const indicatorClass = legendShape === 'circle' ? 'rounded-full' : 'rounded'
@@ -158,7 +159,7 @@ const StackedBarChartInner = ({
                                 fill={layer.color}
                                 barSize={barSize}
                                 shape={showRoundedTop ? <RoundedTopBar layers={layers} /> : undefined}
-                                {...getChartAnimationProps()}
+                                {...animationProps}
                             />
                         ))}
                     </ComposedChart>

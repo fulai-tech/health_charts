@@ -4,10 +4,11 @@ import { DataAnalysisCard } from '@/components/common/DataAnalysisCard'
 import { EMOTION_COLORS } from '@/config/theme'
 import type { EmotionDomainModel } from '../types'
 
+
 interface EmotionDataAnalysisCardProps {
   data?: EmotionDomainModel
   className?: string
-  isLoading?: boolean
+  isLoading?: boolean // Optional, unused
 }
 
 /**
@@ -16,7 +17,6 @@ interface EmotionDataAnalysisCardProps {
 export function EmotionDataAnalysisCard({
   data,
   className,
-  isLoading,
 }: EmotionDataAnalysisCardProps) {
   const { t } = useTranslation()
 
@@ -38,7 +38,6 @@ export function EmotionDataAnalysisCard({
       items={items}
       themeColor={EMOTION_COLORS.primary}
       className={className}
-      isLoading={isLoading}
     />
   )
 }

@@ -117,43 +117,7 @@ export function SpO2Page() {
   // Fetch SpO2 data with date range - will refetch when dates change
   const { data, isLoading, isFetching, error } = useSpO2TrendData(apiDateRange)
 
-  // Minimum loading time control (1 second)
-  const [showLoading, setShowLoading] = useState(false)
-  const loadingTimerRef = useRef<number | null>(null)
-  const loadingStartRef = useRef<number>(0)
 
-  useEffect(() => {
-    if (isFetching) {
-      // Start loading
-      setShowLoading(true)
-      loadingStartRef.current = Date.now()
-
-      // Clear any existing timer
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-        loadingTimerRef.current = null
-      }
-    } else {
-      // Data loaded - ensure minimum 1s display time
-      const elapsed = Date.now() - loadingStartRef.current
-      const remaining = Math.max(0, 1000 - elapsed)
-
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-
-      loadingTimerRef.current = setTimeout(() => {
-        setShowLoading(false)
-        loadingTimerRef.current = null
-      }, remaining)
-    }
-
-    return () => {
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-    }
-  }, [isFetching])
 
   // Error state
   if (error) {
@@ -206,10 +170,10 @@ export function SpO2Page() {
           ) : (
             // Always show cards - with overlay when loading
             <div className="space-y-4">
-              <SpO2TrendyReportCard data={data} isLoading={showLoading || isLoading} />
-              <SpO2StatisticsCard data={data} isLoading={showLoading || isLoading} />
-              <SpO2DataAnalysisCard data={data} isLoading={showLoading || isLoading} />
-              <SpO2WeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
+              <SpO2TrendyReportCard data={data} />
+              <SpO2StatisticsCard data={data} />
+              <SpO2DataAnalysisCard data={data} />
+              <SpO2WeeklyOverviewCard data={data} />
               <DisclaimerBox />
             </div>
           )}

@@ -20,7 +20,7 @@ import { EMOTION_COLORS, UI_STYLES } from '@/config/theme'
 
 export default function EmotionDailyPage() {
     const { t } = useTranslation()
-    const [data, setData] = useState<EmotionDailyData | null>(null)
+    const [data, setData] = useState<EmotionDailyData | null>(() => generateEmotionDemoData())
     const [demoMode, setDemoMode] = useState(isDemoModeEnabled())
 
     // Load data
@@ -34,9 +34,7 @@ export default function EmotionDailyPage() {
         setDemoMode(newState)
     }
 
-    if (!data) {
-        return <div className="flex items-center justify-center h-64">Loading...</div>
-    }
+    if (!data) return null
 
     return (
         <div className="min-h-screen pb-20" style={{ backgroundColor: '#F1EFEE' }}>

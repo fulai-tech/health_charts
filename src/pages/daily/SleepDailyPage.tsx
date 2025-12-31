@@ -21,7 +21,7 @@ import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 
 export default function SleepDailyPage() {
     const { t } = useTranslation()
-    const [data, setData] = useState<SleepDailyData | null>(null)
+    const [data, setData] = useState<SleepDailyData | null>(() => generateSleepDemoData())
     const [demoMode, setDemoMode] = useState(isDemoModeEnabled())
 
     useEffect(() => {
@@ -33,9 +33,7 @@ export default function SleepDailyPage() {
         setDemoMode(newState)
     }
 
-    if (!data) {
-        return <div className="flex items-center justify-center h-64">Loading...</div>
-    }
+    if (!data) return null
 
     return (
         <div className="min-h-screen pb-20" style={{ backgroundColor: '#F1EFEE' }}>

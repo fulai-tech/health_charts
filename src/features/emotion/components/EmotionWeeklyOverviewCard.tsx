@@ -4,10 +4,11 @@ import { WeeklyOverviewCard } from '@/components/common/WeeklyOverviewCard'
 import { EMOTION_COLORS } from '@/config/theme'
 import type { EmotionDomainModel } from '../types'
 
+
 interface EmotionWeeklyOverviewCardProps {
   data?: EmotionDomainModel
   className?: string
-  isLoading?: boolean
+  isLoading?: boolean // Optional, unused
 }
 
 /**
@@ -16,7 +17,6 @@ interface EmotionWeeklyOverviewCardProps {
 export function EmotionWeeklyOverviewCard({
   data,
   className,
-  isLoading,
 }: EmotionWeeklyOverviewCardProps) {
   const { t } = useTranslation()
 
@@ -43,7 +43,6 @@ export function EmotionWeeklyOverviewCard({
       suggestions={weeklySummary?.suggestions}
       themeColor={EMOTION_COLORS.primary}
       className={className}
-      isLoading={isLoading}
     />
   )
 }

@@ -27,7 +27,6 @@ export const NutritionPage = () => {
     const { t } = useTranslation()
     const { theme } = useUrlConfig()
     const [data, setData] = useState<NutritionDomainModel | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
 
     // Date range state
     const [dateRange, setDateRange] = useState(() => {
@@ -76,7 +75,6 @@ export const NutritionPage = () => {
 
     useEffect(() => {
         const loadData = async () => {
-            setIsLoading(true)
             try {
                 // In a real app, pass dateRange to fetch
                 const rawData = await fetchNutritionData()
@@ -84,8 +82,6 @@ export const NutritionPage = () => {
                 setData(adaptedData)
             } catch (error) {
                 console.error('Failed to load nutrition data', error)
-            } finally {
-                setIsLoading(false)
             }
         }
 

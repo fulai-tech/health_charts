@@ -82,14 +82,7 @@ const EmotionStatisticsCardInner = ({ data, className, isLoading }: EmotionStati
 
   return (
     <Card className={`${className} relative overflow-hidden`}>
-      {/* Loading overlay */}
-      <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
-      >
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
-      </div>
+
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">

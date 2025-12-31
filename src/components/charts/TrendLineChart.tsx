@@ -11,6 +11,7 @@ import {
     Tooltip,
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
+import { useChartAnimation } from '@/hooks/useChartAnimation'
 
 /**
  * Legend indicator shape type
@@ -130,7 +131,7 @@ const TrendLineChartInner = ({
     showLegend = true,
     chartMargin = { top: 10, right: 10, left: -15, bottom: 0 },
 }: TrendLineChartProps) => {
-    const animationProps = getChartAnimationProps()
+    const animationProps = useChartAnimation()
 
     // Generate gradients for each line if not provided
     const linesWithGradients = lines.map((line, index) => ({
@@ -155,7 +156,7 @@ const TrendLineChartInner = ({
     }
 
     return (
-        <div className={`transform-gpu will-change-transform ${className}`}>
+        <div className={`w-full transform-gpu will-change-transform ${className}`}>
             {/* Legend */}
             {showLegend && (
                 <div className="flex items-center gap-4 mb-2 flex-wrap">
@@ -262,4 +263,5 @@ const TrendLineChartInner = ({
 
 TrendLineChartInner.displayName = 'TrendLineChart'
 
+console.log('TrendLineChart module loaded')
 export const TrendLineChart = memo(TrendLineChartInner)

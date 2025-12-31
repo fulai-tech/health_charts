@@ -5,7 +5,7 @@
  */
 
 import { memo } from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Sector } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 
 export interface PieChartData {
@@ -60,8 +60,40 @@ const StatisticsPieChartInner = ({
   className = '',
 
   useCornerRadius = true,
-}: StatisticsPieChartProps) => {
+  smallSectorThreshold = 0.02, // Default threshold 2%
+}: StatisticsPieChartProps & { smallSectorThreshold?: number }) => {
 
+  const renderShape = (props: any) => {
+    const { cx, cy, innerRadius, outerRadius, startAngle, endAngle, fill } = props
+
+    // Calculate the arc length in pixels
+    const midRadius = (innerRadius + outerRadius) / 2
+    const angleDiff = Math.abs(endAngle - startAngle)
+    const arcLength = (angleDiff * Math.PI / 180) * midRadius
+
+    // If the arc length is very small (less than ~14px), render as a circle
+    // This prevents the "square" look when arc length is comparable to corner radius
+    if (useCornerRadius && arcLength < 14) {
+      const midAngle = (startAngle + endAngle) / 2
+      const RADIAN = Math.PI / 180
+      const x = cx + midRadius * Math.cos(-midAngle * RADIAN)
+      const y = cy + midRadius * Math.sin(-midAngle * RADIAN)
+
+      const ringWidth = outerRadius - innerRadius
+      // Use a consistent dot size, maxing out at cornerRadius (5) or half ring width
+      const dotRadius = Math.min(ringWidth / 2, 5)
+
+      return <circle cx={x} cy={y} r={dotRadius} fill={fill} />
+    }
+
+    return (
+      <Sector
+        {...props}
+        cornerRadius={useCornerRadius ? 5 : 0}
+        strokeWidth={0}
+      />
+    )
+  }
 
   return (
     <div className={`relative transform-gpu will-change-transform ${widthClass} ${heightClass} ${className}`}>
@@ -78,7 +110,7 @@ const StatisticsPieChartInner = ({
             startAngle={startAngle}
             endAngle={endAngle}
             strokeWidth={0}
-            cornerRadius={useCornerRadius ? 5 : 0}
+            shape={renderShape}
             {...animationProps}
           >
             {data.map((entry, index) => (

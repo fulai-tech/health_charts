@@ -15,6 +15,7 @@ import {
 } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { cn, getChartAnimationProps } from '@/lib/utils'
+import { useChartAnimation } from '@/hooks/useChartAnimation'
 import { useMemo, memo } from 'react'
 
 export type ChartType = 'line' | 'area' | 'range' | 'mixed'
@@ -146,7 +147,7 @@ export function VitalTrendChart({
     []
   )
 
-  const animationProps = getChartAnimationProps();
+  const animationProps = useChartAnimation();
 
   const getYDomain = useMemo(() => {
     return (): [number | string, number | string] => {

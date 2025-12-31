@@ -17,6 +17,7 @@ import {
     Tooltip,
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
+import { useChartAnimation } from '@/hooks/useChartAnimation'
 
 export interface TimeLineDataPoint {
     /** Time in format "HH:00" (e.g., "01:00", "14:00") */
@@ -78,7 +79,7 @@ const TimeAxisLineChartInner = ({
     className = '',
     gradientId,
 }: TimeAxisLineChartProps) => {
-    const animationProps = getChartAnimationProps()
+    const animationProps = useChartAnimation()
     const uniqueGradientId = gradientId || `timeLineGradient-${Math.random().toString(36).substr(2, 9)}`
 
     // Fixed X-axis ticks

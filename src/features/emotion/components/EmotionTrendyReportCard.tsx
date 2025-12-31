@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next'
-import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
+import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react'
 import { Card } from '@/components/ui/card'
+import { TrendLineChart as TrendChart } from '@/components/charts/TrendLineChart'
 import { UI_STYLES, UI_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { EmotionFaceIcon } from '@/components/common/EmotionFaceIcon'
 import type { EmotionDomainModel } from '../types'
 import { memo, useMemo } from 'react'
-import { TrendLineChart } from '@/components/charts/TrendLineChart'
 
 interface EmotionTrendyReportCardProps {
   data?: EmotionDomainModel
   className?: string
-  isLoading?: boolean
+  isLoading?: boolean // Optional, kept for compatibility but unused for overlay
 }
 
 /**
@@ -96,14 +96,7 @@ const EmotionTrendyReportCardInner = ({ data, className, isLoading }: EmotionTre
 
   return (
     <Card className={`${className} relative overflow-hidden`}>
-      {/* Loading overlay */}
-      <div
-        className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
-          }`}
-        style={{ backgroundColor: UI_STYLES.loadingOverlay }}
-      >
-        <Loader2 className="w-8 h-8 text-white animate-spin" />
-      </div>
+
 
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
@@ -153,7 +146,7 @@ const EmotionTrendyReportCardInner = ({ data, className, isLoading }: EmotionTre
         </div>
       </div>
 
-      <TrendLineChart
+      <TrendChart
         data={chartData}
         lines={[
           {

@@ -114,40 +114,7 @@ export function EmotionPage() {
   // Fetch Emotion data
   const { data, isLoading, isFetching, error } = useEmotionTrendData(apiDateRange)
 
-  // Minimum loading time control (1 second)
-  const [showLoading, setShowLoading] = useState(false)
-  const loadingTimerRef = useRef<number | null>(null)
-  const loadingStartRef = useRef<number>(0)
 
-  useEffect(() => {
-    if (isFetching) {
-      setShowLoading(true)
-      loadingStartRef.current = Date.now()
-
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-        loadingTimerRef.current = null
-      }
-    } else {
-      const elapsed = Date.now() - loadingStartRef.current
-      const remaining = Math.max(0, 1000 - elapsed)
-
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-
-      loadingTimerRef.current = setTimeout(() => {
-        setShowLoading(false)
-        loadingTimerRef.current = null
-      }, remaining)
-    }
-
-    return () => {
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-    }
-  }, [isFetching])
 
   // Error state
   if (error) {
@@ -201,12 +168,12 @@ export function EmotionPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              <EmotionTrendyReportCard data={data} isLoading={showLoading || isLoading} />
-              <EmotionStatisticsCard data={data} isLoading={showLoading || isLoading} />
-              <EmotionDistributionCard data={data} isLoading={showLoading || isLoading} />
-              <EmotionDataAnalysisCard data={data} isLoading={showLoading || isLoading} />
-              <EmotionWeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
-              <EmotionDiaryCard data={data} isLoading={showLoading || isLoading} />
+              <EmotionTrendyReportCard data={data} />
+              <EmotionStatisticsCard data={data} />
+              <EmotionDistributionCard data={data} />
+              <EmotionDataAnalysisCard data={data} />
+              <EmotionWeeklyOverviewCard data={data} />
+              <EmotionDiaryCard data={data} />
               <DisclaimerBox />
             </div>
           )}

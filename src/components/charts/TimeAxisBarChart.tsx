@@ -18,6 +18,7 @@ import {
     Rectangle,
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
+import { useChartAnimation } from '@/hooks/useChartAnimation'
 
 export interface TimeDataPoint {
     /** Hour in format "HH:00" (e.g., "11:00", "14:00") */
@@ -128,7 +129,7 @@ const TimeAxisBarChartInner = ({
     barCategoryGap,
     className = '',
 }: TimeAxisBarChartProps) => {
-    const animationProps = getChartAnimationProps()
+    const animationProps = useChartAnimation()
 
     // Transform data to include position
     const chartData = useMemo(() => {

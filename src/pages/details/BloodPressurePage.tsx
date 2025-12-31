@@ -112,43 +112,7 @@ export function BloodPressurePage() {
   // Fetch BP data with date range - will refetch when dates change
   const { data, isLoading, isFetching, error } = useBPTrendData(apiDateRange)
 
-  // Minimum loading time control (1 second)
-  const [showLoading, setShowLoading] = useState(false)
-  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const loadingStartRef = useRef<number>(0)
 
-  useEffect(() => {
-    if (isFetching) {
-      // Start loading
-      setShowLoading(true)
-      loadingStartRef.current = Date.now()
-
-      // Clear any existing timer
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-        loadingTimerRef.current = null
-      }
-    } else {
-      // Data loaded - ensure minimum 1s display time
-      const elapsed = Date.now() - loadingStartRef.current
-      const remaining = Math.max(0, 1000 - elapsed)
-
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-
-      loadingTimerRef.current = setTimeout(() => {
-        setShowLoading(false)
-        loadingTimerRef.current = null
-      }, remaining)
-    }
-
-    return () => {
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-    }
-  }, [isFetching])
 
   // Error state
   if (error) {
@@ -201,10 +165,10 @@ export function BloodPressurePage() {
           ) : (
             // Always show cards - with skeleton content when no data, with overlay when loading
             <div className="space-y-4">
-              <BPTrendyReportCard data={data} isLoading={showLoading || isLoading} />
-              <BPStatisticsCard data={data} isLoading={showLoading || isLoading} />
-              <BPCompareCard data={data} isLoading={showLoading || isLoading} />
-              <BPWeeklyOverviewCard data={data} isLoading={showLoading || isLoading} />
+              <BPTrendyReportCard data={data} />
+              <BPStatisticsCard data={data} />
+              <BPCompareCard data={data} />
+              <BPWeeklyOverviewCard data={data} />
               <DisclaimerBox />
             </div>
           )}

@@ -22,7 +22,7 @@ import { VITAL_COLORS, HEALTH_COLORS, UI_STYLES } from '@/config/theme'
 
 export default function HealthyDailyPage() {
     const { t } = useTranslation()
-    const [data, setData] = useState<HealthyDailyData | null>(null)
+    const [data, setData] = useState<HealthyDailyData | null>(() => generateHealthyDemoData())
     const [demoMode, setDemoMode] = useState(isDemoModeEnabled())
 
     useEffect(() => {
@@ -34,9 +34,7 @@ export default function HealthyDailyPage() {
         setDemoMode(newState)
     }
 
-    if (!data) {
-        return <div className="flex items-center justify-center h-64">Loading...</div>
-    }
+    if (!data) return null
 
     return (
         <div className="min-h-screen pb-20" style={{ backgroundColor: '#F1EFEE' }}>

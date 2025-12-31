@@ -17,10 +17,11 @@ const EMOTION_TYPE_COLORS: Record<string, string> = {
   neutral: EMOTION_COLORS.calm,
 }
 
+
 interface EmotionDistributionCardProps {
   data?: EmotionDomainModel
   className?: string
-  isLoading?: boolean
+  isLoading?: boolean // Optional, unused
 }
 
 /**
@@ -57,7 +58,6 @@ const EmotionDistributionCardInner = ({ data, className, isLoading }: EmotionDis
       showCount={false}
       columns={2}
       className={className}
-      isLoading={isLoading}
     />
   )
 }

@@ -1,5 +1,6 @@
 // @ts-nocheck
 import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { SLEEP_COLORS } from '@/config/theme'
 
 // =======================
@@ -91,7 +92,19 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [hoveredData, setHoveredData] = useState<{ x: number, y: number, segment: SleepSegment, duration: number } | null>(null)
+  const [tooltip, setTooltip] = useState<{
+    x: number
+    y: number
+    visible: boolean
+    segment: SleepSegment | null
+    duration: number
+  }>({
+    x: 0,
+    y: 0,
+    visible: false,
+    segment: null,
+    duration: 0
+  })
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
   // 1. 数据预处理
@@ -332,7 +345,7 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     if (drawWidth <= 0 || !processedData.length) return
 
     if (mouseX < LAYOUT.paddingLeft || mouseX > width - LAYOUT.paddingRight) {
-      setHoveredData(null)
+      setTooltip(prev => ({ ...prev, visible: false }))
       return
     }
 
@@ -345,18 +358,19 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     const found = processedData.find(item => hoverTime >= item.startTime && hoverTime <= item.endTime)
 
     if (found) {
-      setHoveredData({
+      setTooltip({
         x: e.clientX,
         y: e.clientY,
+        visible: true,
         segment: found,
         duration: found.duration
       })
     } else {
-      setHoveredData(null)
+      setTooltip(prev => ({ ...prev, visible: false }))
     }
   }
 
-  const handleMouseLeave = () => setHoveredData(null)
+  const handleMouseLeave = () => setTooltip(prev => ({ ...prev, visible: false }))
 
   return (
     <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }}>
@@ -367,32 +381,51 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
         onMouseLeave={handleMouseLeave}
       />
 
-      {hoveredData && (
-        <div
-          className="fixed z-50 pointer-events-none bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl rounded-lg p-3 text-sm"
-          style={{
-            left: 0,
-            top: 0,
-            transform: `translate(${hoveredData.x + 15}px, ${hoveredData.y + 15}px)`,
-            transition: 'transform 0.15s ease-out',
-          }}
-        >
-          <div className="font-semibold text-slate-800 mb-1">
-            {STAGES.find(s => s.key === hoveredData.segment.stage)?.label}
-          </div>
-          <div className="text-slate-500 text-xs tabular-nums">
-            {hoveredData.segment.start} - {hoveredData.segment.end}
-          </div>
-          <div className="text-slate-500 text-xs mt-1">
-            Duration: {hoveredData.duration} min
-          </div>
-          <div
-            className="absolute left-0 top-3 w-1 h-4 rounded-r"
-            style={{ backgroundColor: colors[hoveredData.segment.stage] }}
-          />
-        </div>
-      )
-      }
+      {typeof document !== 'undefined' && createPortal(
+        (() => {
+          const { x, y, visible, segment, duration } = tooltip
+          // If no segment has ever been hovered, don't render anything
+          if (!segment) return null
+
+          const winW = typeof window !== 'undefined' ? window.innerWidth : 1000
+          const winH = typeof window !== 'undefined' ? window.innerHeight : 800
+
+          const isRight = x > winW / 2
+          const isBottom = y > winH / 2
+
+          const xOffset = isRight ? -15 : 15
+          const yOffset = isBottom ? -15 : 15
+          const xPercent = isRight ? '-100%' : '0%'
+          const yPercent = isBottom ? '-100%' : '0%'
+
+          return (
+            <div
+              className={`fixed z-50 pointer-events-none bg-white/95 backdrop-blur-sm border border-slate-200 shadow-xl rounded-lg p-3 text-sm transition-all duration-200 ease-out ${visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+                }`}
+              style={{
+                left: 0,
+                top: 0,
+                transform: `translate3d(${x}px, ${y}px, 0) translate(${xOffset}px, ${yOffset}px) translate(${xPercent}, ${yPercent})`,
+              }}
+            >
+              <div className="font-semibold text-slate-800 mb-1">
+                {STAGES.find(s => s.key === segment.stage)?.label}
+              </div>
+              <div className="text-slate-500 text-xs tabular-nums">
+                {segment.start} - {segment.end}
+              </div>
+              <div className="text-slate-500 text-xs mt-1">
+                Duration: {duration} min
+              </div>
+              <div
+                className="absolute left-0 top-3 w-1 h-4 rounded-r"
+                style={{ backgroundColor: colors[segment.stage] }}
+              />
+            </div>
+          )
+        })(),
+        document.body
+      )}
     </div >
   )
 }

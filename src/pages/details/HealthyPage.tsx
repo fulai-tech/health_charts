@@ -127,40 +127,7 @@ export function HealthyPage() {
   // Fetch healthy data using viewType
   const { data, isLoading, isFetching, error } = useHealthyData(viewType)
 
-  // Minimum loading time control
-  const [showLoading, setShowLoading] = useState(false)
-  const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const loadingStartRef = useRef<number>(0)
 
-  useEffect(() => {
-    if (isFetching) {
-      setShowLoading(true)
-      loadingStartRef.current = Date.now()
-
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-        loadingTimerRef.current = null
-      }
-    } else {
-      const elapsed = Date.now() - loadingStartRef.current
-      const remaining = Math.max(0, 1000 - elapsed)
-
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-
-      loadingTimerRef.current = setTimeout(() => {
-        setShowLoading(false)
-        loadingTimerRef.current = null
-      }, remaining)
-    }
-
-    return () => {
-      if (loadingTimerRef.current) {
-        clearTimeout(loadingTimerRef.current)
-      }
-    }
-  }, [isFetching])
 
   // Error state
   if (error) {
@@ -179,7 +146,7 @@ export function HealthyPage() {
     )
   }
 
-  const isLoadingState = showLoading || isLoading
+
 
   return (
     <div
@@ -221,55 +188,47 @@ export function HealthyPage() {
                 data={data?.comprehensiveHealth}
                 period={period}
                 onPeriodChange={setPeriod}
-                isLoading={isLoadingState}
               />
 
               {/* Blood Pressure */}
               <HealthBloodPressureCard
                 data={data?.bloodPressure}
-                isLoading={isLoadingState}
                 onClick={() => navigate('/details/blood-pressure')}
               />
 
               {/* Heart Rate */}
               <HealthHeartRateCard
                 data={data?.heartRate}
-                isLoading={isLoadingState}
                 onClick={() => navigate('/details/heart-rate')}
               />
 
               {/* Blood Sugar */}
               <HealthBloodSugarCard
                 data={data?.bloodSugar}
-                isLoading={isLoadingState}
                 onClick={() => navigate('/details/glucose')}
               />
 
               {/* Blood Oxygen */}
               <HealthBloodOxygenCard
                 data={data?.bloodOxygen}
-                isLoading={isLoadingState}
                 onClick={() => navigate('/details/spo2')}
               />
 
               {/* Sleep */}
               <HealthSleepCard
                 data={data?.sleep}
-                isLoading={isLoadingState}
                 onClick={() => console.log('Navigate to sleep details')}
               />
 
               {/* Emotion */}
               <HealthEmotionCard
                 data={data?.emotion}
-                isLoading={isLoadingState}
                 onClick={() => console.log('Navigate to emotion details')}
               />
 
               {/* Nutrition */}
               <HealthNutritionCard
                 data={data?.nutrition}
-                isLoading={isLoadingState}
                 onClick={() => console.log('Navigate to nutrition details')}
               />
 
