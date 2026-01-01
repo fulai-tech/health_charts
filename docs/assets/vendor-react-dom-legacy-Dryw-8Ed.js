@@ -1,0 +1,1 @@
+System.register(["./rolldown-runtime-legacy-DbTM_YVz.js","./vendor-charts-legacy-T56nRIl-.js"],function(t,e){var o,r;return{setters:[function(t){o=t.t},function(t){r=t.y}],execute:function(){t("t",o({"node_modules/react-dom/client.js":t=>{var e=r();t.createRoot=e.createRoot,t.hydrateRoot=e.hydrateRoot}}))}}});
