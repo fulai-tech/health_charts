@@ -1,1 +1,0 @@
-import{at as e}from"./vendor-DxyDeVV0.js";import{o as t}from"./card-DR_iUne-.js";var n=e();const r=(e=100)=>{let[r,i]=(0,n.useState)(!1);(0,n.useEffect)(()=>{let t=setTimeout(()=>{i(!0)},e);return()=>clearTimeout(t)},[e]);let a=t();return{...a,isAnimationActive:a.isAnimationActive&&r}};export{r as t};

@@ -11,19 +11,15 @@ export default defineConfig({
   plugins: [
     react(),
     legacy({
-      // 针对 Chromium 63-80 的兼容性（华为 WebView 83 基于 Chromium 83）
-      targets: ['chrome 63', 'safari 11.1', 'ios 11.3', 'android 67'],
-      additionalLegacyPolyfills: ['regenerator-runtime/runtime'],
-      modernPolyfills: true,
+      // 针对腾讯 X5 内核优化（基于 Chromium 83+）
+      // X5 4.x 内核已支持大部分 ES2020 特性，无需额外 polyfill
+      targets: ['chrome 83'],
+      // 关闭现代浏览器 polyfill，X5 83+ 不需要
+      modernPolyfills: false,
+      // 保留 legacy chunks 以防万一有更老的 WebView
       renderLegacyChunks: true,
-      polyfills: [
-        'es.promise.finally',
-        'es/global-this',
-        'es.array.flat',
-        'es.array.flat-map',
-        'es.object.from-entries',
-        'es.string.match-all'
-      ],
+      // 移除不必要的 polyfills，Chrome 83 已原生支持这些特性
+      polyfills: false,
     }),
     viteCompression({
       verbose: true,
@@ -67,36 +63,14 @@ export default defineConfig({
         // 手动分包以优化缓存
         manualChunks: (id) => {
           if (id.includes('node_modules')) {
-            // React 核心
-            if (id.includes('react-dom')) {
-              return 'vendor-react-dom'
-            }
-            if (id.includes('/react/') || id.includes('/react-is/')) {
+            if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor-react'
             }
-            // 图表库单独分包
             if (id.includes('recharts')) {
               return 'vendor-charts'
             }
-            // d3 图表依赖
-            if (id.includes('d3-')) {
-              return 'vendor-d3'
-            }
-            // ECharts 单独分包（如果使用）
-            if (id.includes('echarts')) {
-              return 'vendor-echarts'
-            }
-            // 状态管理
             if (id.includes('@tanstack')) {
               return 'vendor-query'
-            }
-            // 路由
-            if (id.includes('react-router')) {
-              return 'vendor-router'
-            }
-            // i18n
-            if (id.includes('i18next')) {
-              return 'vendor-i18n'
             }
             // 其他第三方
             return 'vendor'

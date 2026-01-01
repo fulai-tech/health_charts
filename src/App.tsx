@@ -2,46 +2,41 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { lazy, Suspense } from 'react'
 
-// ============================================
-// All pages are lazy-loaded for optimal bundle splitting
-// Each route will only load its required code when accessed
-// ============================================
-
-// Home Page
-const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.HomePage })))
-
 // Blood Pressure Pages
-const BloodPressurePage = lazy(() => import('@/pages/details/BloodPressurePage').then(m => ({ default: m.BloodPressurePage })))
-const BPTrendWidgetPage = lazy(() => import('@/pages/widget/BPTrendWidgetPage').then(m => ({ default: m.BPTrendWidgetPage })))
+import { BloodPressurePage } from '@/pages/details/BloodPressurePage'
+import { BPTrendWidgetPage } from '@/pages/widget/BPTrendWidgetPage'
 
 // SpO2 Pages
-const SpO2Page = lazy(() => import('@/pages/details/SpO2Page').then(m => ({ default: m.SpO2Page })))
-const SpO2TrendWidgetPage = lazy(() => import('@/pages/widget/SpO2TrendWidgetPage').then(m => ({ default: m.SpO2TrendWidgetPage })))
+import { SpO2Page } from '@/pages/details/SpO2Page'
+import { SpO2TrendWidgetPage } from '@/pages/widget/SpO2TrendWidgetPage'
 
 // Heart Rate Pages
-const HeartRatePage = lazy(() => import('@/pages/details/HeartRatePage').then(m => ({ default: m.HeartRatePage })))
-const HRTrendWidgetPage = lazy(() => import('@/pages/widget/HRTrendWidgetPage').then(m => ({ default: m.HRTrendWidgetPage })))
+import { HeartRatePage } from '@/pages/details/HeartRatePage'
+import { HRTrendWidgetPage } from '@/pages/widget/HRTrendWidgetPage'
 
 // Glucose Pages
-const GlucosePage = lazy(() => import('@/pages/details/GlucosePage').then(m => ({ default: m.GlucosePage })))
-const GlucoseTrendWidgetPage = lazy(() => import('@/pages/widget/GlucoseTrendWidgetPage').then(m => ({ default: m.GlucoseTrendWidgetPage })))
+import { GlucosePage } from '@/pages/details/GlucosePage'
+import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
 
 // Healthy Page
-const HealthyPage = lazy(() => import('@/pages/details/HealthyPage').then(m => ({ default: m.HealthyPage })))
+import { HealthyPage } from '@/pages/details/HealthyPage'
 
 // Sleep Page
-const SleepPage = lazy(() => import('@/pages/details/SleepPage').then(m => ({ default: m.SleepPage })))
+import { SleepPage } from '@/pages/details/SleepPage'
 
 // Emotion Page
-const EmotionPage = lazy(() => import('@/pages/details/EmotionPage').then(m => ({ default: m.EmotionPage })))
+import { EmotionPage } from '@/pages/details/EmotionPage'
 
 // Nutrition Page
-const NutritionPage = lazy(() => import('@/features/nutrition/pages/NutritionPage').then(m => ({ default: m.NutritionPage })))
+import { NutritionPage } from '@/features/nutrition/pages/NutritionPage'
 
 // Daily Report Pages
-const EmotionDailyPage = lazy(() => import('@/pages/daily/EmotionDailyPage'))
-const SleepDailyPage = lazy(() => import('@/pages/daily/SleepDailyPage'))
-const HealthyDailyPage = lazy(() => import('@/pages/daily/HealthyDailyPage'))
+import EmotionDailyPage from '@/pages/daily/EmotionDailyPage'
+import SleepDailyPage from '@/pages/daily/SleepDailyPage'
+import HealthyDailyPage from '@/pages/daily/HealthyDailyPage'
+
+// Home Page
+import { HomePage } from '@/pages/HomePage'
 
 // Initialize i18n
 import '@/i18n'
