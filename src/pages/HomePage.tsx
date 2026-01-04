@@ -7,45 +7,47 @@ import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme
 const EMOTION_COLOR = 'rgb(251, 146, 61)'
 const EMOTION_COLOR_ALPHA = 'rgba(251, 146, 61, 0.125)'
 
-const routes = [
-  {
-    category: 'Details Pages',
-    items: [
-      { path: '/details/healthy', label: 'Healthy Dashboard', icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
-      { path: '/details/blood-pressure', label: 'Blood Pressure', icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
-      { path: '/details/spo2', label: 'Blood Oxygen (SpO2)', icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
-      { path: '/details/heart-rate', label: 'Heart Rate', icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
-      { path: '/details/glucose', label: 'Blood Glucose', icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
-      { path: '/details/sleep', label: 'Sleep', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
-      { path: '/details/emotion', label: 'Emotion', icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
-      { path: '/details/nutrition', label: 'Nutrition', icon: Utensils, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition },
-    ],
-  },
-  {
-    category: 'Daily Report Pages',
-    items: [
-      { path: '/daily/healthy', label: 'Healthy Daily Report', icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
-      { path: '/daily/emotion', label: 'Emotion Daily Report', icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
-      { path: '/daily/sleep', label: 'Sleep Daily Report', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
-    ],
-  },
-  {
-    category: 'Widget Pages (for iframe embedding)',
-    items: [
-      { path: '/widget/blood-pressure/trend', label: 'BP Trend Widget', icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
-      { path: '/widget/spo2/trend', label: 'SpO2 Trend Widget', icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
-      { path: '/widget/heart-rate/trend', label: 'HR Trend Widget', icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
-      { path: '/widget/glucose/trend', label: 'Glucose Trend Widget', icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
-    ],
-  },
-]
+
 
 export function HomePage() {
   const { t, i18n } = useTranslation()
 
   const toggleLanguage = () => {
-    i18n.changeLanguage(i18n.language === 'en' ? 'zh' : 'en')
+    i18n.changeLanguage(i18n.language.startsWith('en') ? 'zh' : 'en')
   }
+
+  const routes = [
+    {
+      category: t('home.detailPages'),
+      items: [
+        { path: '/details/healthy', label: t('nav.healthyDashboard'), icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
+        { path: '/details/blood-pressure', label: t('nav.bloodPressure'), icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
+        { path: '/details/spo2', label: t('nav.spo2'), icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
+        { path: '/details/heart-rate', label: t('nav.heartRate'), icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
+        { path: '/details/glucose', label: t('nav.glucose'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
+        { path: '/details/sleep', label: t('vitals.sleep'), icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
+        { path: '/details/emotion', label: t('vitals.emotion'), icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+        { path: '/details/nutrition', label: t('vitals.nutrition'), icon: Utensils, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition },
+      ],
+    },
+    {
+      category: t('home.dailyReportPages'),
+      items: [
+        { path: '/daily/healthy', label: t('nav.healthyDailyReport'), icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
+        { path: '/daily/emotion', label: t('nav.emotionDailyReport'), icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+        { path: '/daily/sleep', label: t('nav.sleepDailyReport'), icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
+      ],
+    },
+    {
+      category: t('home.widgetPages'),
+      items: [
+        { path: '/widget/blood-pressure/trend', label: t('nav.bpTrendWidget'), icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
+        { path: '/widget/spo2/trend', label: t('nav.spo2TrendWidget'), icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
+        { path: '/widget/heart-rate/trend', label: t('nav.hrTrendWidget'), icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
+        { path: '/widget/glucose/trend', label: t('nav.glucoseTrendWidget'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
+      ],
+    },
+  ]
 
   const handleTestClick = () => {
     // @ts-ignore
@@ -81,14 +83,14 @@ export function HomePage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-slate-800">Health Vitals</h1>
-            <p className="text-slate-500 mt-1">Visualization Library</p>
+            <h1 className="text-3xl font-bold text-slate-800">{t('home.title')}</h1>
+            <p className="text-slate-500 mt-1">{t('home.subtitle')}</p>
           </div>
           <button
             onClick={toggleLanguage}
             className="px-4 py-2 bg-white rounded-xl shadow-sm text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
           >
-            {i18n.language === 'en' ? '中文' : 'English'}
+            {i18n.language.startsWith('en') ? '中文' : 'English'}
           </button>
         </div>
 
@@ -144,7 +146,7 @@ export function HomePage() {
         </button> */}
         {/* URL Parameters Info */}
         <div className="p-4 bg-white/50 rounded-2xl border border-slate-200">
-          <h3 className="text-sm font-semibold text-slate-600 mb-2">URL Parameters</h3>
+          <h3 className="text-sm font-semibold text-slate-600 mb-2">{t('home.urlParameters')}</h3>
           <div className="text-sm text-slate-500 space-y-1 font-mono">
             <p>?lang=en | ?lang=zh</p>
             <p>?theme=light | ?theme=dark</p>

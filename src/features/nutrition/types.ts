@@ -46,6 +46,12 @@ export interface NutritionAnalysisData {
   details: string[]
 }
 
+export interface NutritionWeeklySummary {
+  overview: string | null
+  highlights: string | null
+  suggestions: string[]
+}
+
 export interface NutritionDomainModel {
   weeklyManagement: WeeklyManagementData
   metabolismTrend: MetabolismTrendData[]
@@ -53,4 +59,5 @@ export interface NutritionDomainModel {
   microElements: MicroElementData[]
   recipes: RecipeData[]
   analysis: NutritionAnalysisData
+  weeklySummary: NutritionWeeklySummary
 }

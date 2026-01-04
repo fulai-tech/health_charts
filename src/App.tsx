@@ -28,7 +28,7 @@ import { SleepPage } from '@/pages/details/SleepPage'
 import { EmotionPage } from '@/pages/details/EmotionPage'
 
 // Nutrition Page
-import { NutritionPage } from '@/features/nutrition/pages/NutritionPage'
+import { NutritionPage } from '@/pages/details/NutritionPage'
 
 // Daily Report Pages
 import EmotionDailyPage from '@/pages/daily/EmotionDailyPage'

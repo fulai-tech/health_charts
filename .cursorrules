@@ -23,3 +23,43 @@ The stack is React 18, TypeScript, Vite, Tailwind CSS, Radix UI, and Recharts.
 - Define strict TypeScript interfaces matching the backend JSON.
 - Use TanStack Query (React Query) for data fetching.
 - Handle loading and error states gracefully (Skeleton screens are preferred).
+
+# Component Naming Convention
+
+## Feature Components (在 `src/features/[feature]/components` 目录)
+
+命名格式: `[FeaturePrefix][ComponentType]Card.tsx`
+
+### FeaturePrefix 对照表
+| Feature | Prefix | 示例 |
+|---------|--------|------|
+| heart-rate | HR | HRStatisticsCard |
+| nutrition | Nutrition | NutritionStatisticsCard |
+| sleep | Sleep | SleepStatisticsCard |
+| spo2 | SpO2 | SpO2StatisticsCard |
+| blood-pressure | BP | BPStatisticsCard |
+| glucose | Glucose | GlucoseStatisticsCard |
+| emotion | Emotion | EmotionStatisticsCard |
+
+### ComponentType 对照表
+| Type | 用途 | 复用的通用组件 |
+|------|------|----------------|
+| Statistics | 统计图表/分布 | `DistributionCard` 或 `TargetBarChartCard` |
+| DataAnalysis | 数据分析列表 | `DataAnalysisCard` |
+| WeeklyOverview | 周概览卡片 | `WeeklyOverviewCard` |
+| TrendyReport | 趋势报告图表 | `TrendLineChart` |
+| Summary | 概要信息卡片 | 无固定复用 |
+| WeeklyGauge | 周仪表盘 | 自定义 |
+
+### 命名示例
+- ✅ 正确: `HRStatisticsCard.tsx`, `NutritionDataAnalysisCard.tsx`
+- ❌ 错误: `NutritionTrendsCard.tsx` (应使用 StatisticsCard)
+- ❌ 错误: `DataAnalysis.tsx` (缺少 Feature 前缀)
+
+---
+
+- **Statistics Card**: `[Feature]StatisticsCard` (e.g., `HRStatisticsCard`, `NutritionStatisticsCard`). Used for the main visualization/chart of the feature.
+- **Data Analysis Card**: `[Feature]DataAnalysisCard` (e.g., `HRDataAnalysisCard`, `NutritionDataAnalysisCard`). Used for text-based analysis lists.
+- **Weekly Overview Card**: `[Feature]WeeklyOverviewCard`. Used for weekly summaries.
+- **Page Components**: Components specific to a feature page should be in `src/features/[feature]/components`.
+- **Common Components**: Reusable UI logic (like `DistributionCard`, `TargetBarChartCard`, `DataAnalysisCard`) should be in `src/components/common`.

@@ -3,13 +3,23 @@
     "bloodPressure": "血压",
     "spo2": "血氧",
     "heartRate": "心率",
-    "glucose": "血糖"
+    "glucose": "血糖",
+    "healthyDashboard": "健康看板",
+    "healthyDailyReport": "健康日报",
+    "emotionDailyReport": "情绪日报",
+    "sleepDailyReport": "睡眠日报",
+    "bpTrendWidget": "血压趋势组件",
+    "spo2TrendWidget": "血氧趋势组件",
+    "hrTrendWidget": "心率趋势组件",
+    "glucoseTrendWidget": "血糖趋势组件"
   },
   "home": {
-    "title": "健康数据可视化",
-    "subtitle": "Health Vital Visualization 组件库",
+    "title": "健康指标",
+    "subtitle": "可视化图表库",
     "detailPages": "详情页面",
-    "widgetPages": "Widget 组件"
+    "widgetPages": "Widget 组件页 (用于 iframe 嵌入)",
+    "dailyReportPages": "日报页面",
+    "urlParameters": "URL 参数"
   },
   "common": {
     "loading": "加载中...",
@@ -55,7 +65,8 @@
     "mgDl": "mg/dL",
     "mmolL": "mmol/L",
     "bpm": "次/分",
-    "minute": "分钟"
+    "minute": "分钟",
+    "hour": "小时"
   },
   "status": {
     "normal": "正常",
@@ -230,12 +241,41 @@
       "defaultHighlights": "趋势图显示您的情绪在本周中有一些波动。这是正常的，可能会受到工作压力、睡眠质量和社交活动的影响。",
       "defaultAnalysis1": "您的情绪以积极为主，整体状态良好",
       "defaultAnalysis2": "情绪波动在正常范围内，情绪调节能力较强",
-      "defaultAnalysis3": "建议继续保持积极的生活态度，适当进行放松训练",
-      "demoMode": "演示模式",
-      "toggleDemoMode": "切换演示模式",
-      "demoModeOn": "使用假数据",
-      "demoModeOff": "使用后端数据"
+      "defaultAnalysis3": "建议继续保持积极的生活态度，适当进行放松训练"
+    },
+    "nutrition": {
+      "weeklyOverview": "周报概览",
+      "defaultOverview": "本周您的营养摄入整体均衡。总热量摄入略有波动，但保持在目标范围内。",
+      "defaultHighlights": "分析显示您的蛋白质摄入保持稳定，但周末脂肪摄入略有超标。建议增加蔬菜摄入以平衡微量元素。",
+      "anomalyAlert": "异常警报"
     }
+  },
+  "daily": {
+    "todayScore": "今日评分",
+    "todayEmotionScore": "今日情绪评分",
+    "aiAnalysis": "AI 分析",
+    "aiHealthInsights": "AI 健康相关见解",
+    "personalizedSuggestions": "个性化建议",
+    "emotionProportion": "情绪比例分析",
+    "emotionDistribution": "情绪分布",
+    "asMain": "为主",
+    "sleepStructure": "睡眠结构图",
+    "sleepDistribution": "睡眠分布",
+    "sleepQuality": "睡眠质量指标",
+    "totalDuration": "总睡眠时长",
+    "deepSleep": "深度睡眠",
+    "totalHours": "总时长",
+    "coreIndicators": "核心指标分析",
+    "reference": "参考值",
+    "latest": "最新值",
+    "weekAvg": "7日均值",
+    "newestValue": "最新值",
+    "average": "平均值",
+    "standard": "参考值",
+    "demoMode": "演示模式",
+    "toggleDemoMode": "切换演示模式",
+    "demoModeOn": "使用假数据",
+    "demoModeOff": "使用后端数据"
   },
   "healthy": {
     "comprehensiveHealth": "综合健康数据",
@@ -263,5 +303,31 @@
     "toggleDemoMode": "切换演示模式",
     "demoModeOn": "使用假数据",
     "demoModeOff": "使用后端数据"
+  },
+  "nutrition": {
+    "dataAnalysis": "数据分析",
+    "dietAnalysis": "饮食分析",
+    "healthScore": "健康评分",
+    "basalMetabolismTrend": "基础代谢趋势",
+    "avg": "平均",
+    "meet": "达标",
+    "insufficient": "不足",
+    "excess": "超标",
+    "microElementStatus": "微量元素状态",
+    "normal": "正常",
+    "range": "范围",
+    "viewAllElements": "查看所有元素",
+    "weeklyAverageReport": "周平均报告",
+    "weeklyIntakeReport": "周摄入报告",
+    "excessiveIntake": "摄入过量",
+    "target": "目标",
+    "calorieIntake": "热量摄入",
+    "averageConsumption": "平均消耗",
+    "microElementStructure": "微量元素结构",
+    "balancedIntakeSummary": "您的碳水化合物、蛋白质和脂肪摄入相对均衡。继续关注维生素摄入。",
+    "complicatedRecipes": "推荐食谱",
+    "kcal": "千卡",
+    "goal": "达标",
+    "exceed": "超标"
   }
 }

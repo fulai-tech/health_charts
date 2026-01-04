@@ -1,6 +1,7 @@
 import { SwipeableCarousel } from '@/components/ui/swipeable-carousel'
 import type { RecipeData } from '../types'
 import { Utensils } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface ComplicatedRecipesCardProps {
     data?: RecipeData[]
@@ -8,12 +9,14 @@ interface ComplicatedRecipesCardProps {
 }
 
 export const ComplicatedRecipesCard = ({ data, className }: ComplicatedRecipesCardProps) => {
+    const { t } = useTranslation()
+
     if (!data) return null
 
     const header = (
         <div className="flex items-center gap-2">
             <Utensils className="w-5 h-5 text-orange-500" />
-            <h3 className="text-base font-semibold text-slate-800">Complicated recipes</h3>
+            <h3 className="text-base font-semibold text-slate-800">{t('nutrition.complicatedRecipes', 'Complicated recipes')}</h3>
         </div>
     )
 
@@ -32,7 +35,7 @@ export const ComplicatedRecipesCard = ({ data, className }: ComplicatedRecipesCa
                     ))}
                 </div>
                 <div className="text-lg font-bold text-orange-500">
-                    +{recipe.calories} <span className="text-xs font-normal text-slate-500">kcal</span>
+                    +{recipe.calories} <span className="text-xs font-normal text-slate-500">{t('nutrition.kcal', 'kcal')}</span>
                 </div>
             </div>
             {/* Go button / Arrow */}

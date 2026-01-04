@@ -3,13 +3,23 @@
     "bloodPressure": "Blood Pressure",
     "spo2": "Blood Oxygen",
     "heartRate": "Heart Rate",
-    "glucose": "Blood Glucose"
+    "glucose": "Blood Glucose",
+    "healthyDashboard": "Healthy Dashboard",
+    "healthyDailyReport": "Healthy Daily Report",
+    "emotionDailyReport": "Emotion Daily Report",
+    "sleepDailyReport": "Sleep Daily Report",
+    "bpTrendWidget": "BP Trend Widget",
+    "spo2TrendWidget": "SpO2 Trend Widget",
+    "hrTrendWidget": "HR Trend Widget",
+    "glucoseTrendWidget": "Glucose Trend Widget"
   },
   "home": {
-    "title": "Health Vital Visualization",
-    "subtitle": "Health Data Visualization Library",
-    "detailPages": "Detail Pages",
-    "widgetPages": "Widget Components"
+    "title": "Health Vitals",
+    "subtitle": "Visualization Library",
+    "detailPages": "Details Pages",
+    "widgetPages": "Widget Pages (for iframe embedding)",
+    "dailyReportPages": "Daily Report Pages",
+    "urlParameters": "URL Parameters"
   },
   "common": {
     "loading": "Loading...",
@@ -55,7 +65,8 @@
     "mgDl": "mg/dL",
     "mmolL": "mmol/L",
     "bpm": "bpm",
-    "minute": "minute"
+    "minute": "minute",
+    "hour": "hours"
   },
   "status": {
     "normal": "Normal",
@@ -235,6 +246,12 @@
       "toggleDemoMode": "Toggle demo mode",
       "demoModeOn": "Using dummy data",
       "demoModeOff": "Using backend data"
+    },
+    "nutrition": {
+      "weeklyOverview": "Weekly Overview",
+      "defaultOverview": "Your nutritional intake is generally balanced. Total calorie intake fluctuates slightly but remains within the target range.",
+      "defaultHighlights": "The analysis shows that your protein intake has been consistent, but there was a slight excess in fat consumption over the weekend. We recommend increasing vegetable intake to balance the micronutrients.",
+      "anomalyAlert": "Anomaly alert"
     }
   },
   "healthy": {
@@ -282,12 +299,41 @@
     "coreIndicators": "Core indicator Analysis",
     "reference": "Reference",
     "latest": "Latest",
-    "weekAvg": "7d Avg"
+    "weekAvg": "7d Avg",
+    "newestValue": "Latest",
+    "average": "Average",
+    "standard": "Reference"
   },
   "sleep": {
     "deep": "Deep sleep",
     "light": "Light sleep",
     "rem": "REM",
     "awake": "Awake"
+  },
+  "nutrition": {
+    "dataAnalysis": "Data Analysis",
+    "dietAnalysis": "Diet analysis",
+    "healthScore": "Health Score",
+    "basalMetabolismTrend": "Basal metabolism trend",
+    "avg": "Avg",
+    "meet": "Meet",
+    "insufficient": "Insufficient",
+    "excess": "Excess",
+    "microElementStatus": "Micro-element status",
+    "normal": "Normal",
+    "range": "Range",
+    "viewAllElements": "View all elements",
+    "weeklyAverageReport": "Weekly average report",
+    "weeklyIntakeReport": "Weekly intake report",
+    "excessiveIntake": "Excessive intake",
+    "target": "Target",
+    "calorieIntake": "Calorie intake",
+    "averageConsumption": "Average consumption",
+    "microElementStructure": "Micro-element structure",
+    "balancedIntakeSummary": "Your intake of carbohydrates, protein, and fat is relatively balanced. Keep focusing on Vitamin intake.",
+    "complicatedRecipes": "Complicated recipes",
+    "kcal": "kcal",
+    "goal": "Goal",
+    "exceed": "Exceed"
   }
 }

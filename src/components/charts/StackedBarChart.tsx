@@ -11,6 +11,7 @@ import {
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
+import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
 
 /**
  * Interface for a single bar layer in the stack
@@ -101,6 +102,7 @@ const StackedBarChartInner = ({
     showLegend = true,
 }: StackedBarChartProps) => {
     const animationProps = useChartAnimation()
+    const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
     // Determine legend indicator class based on shape
     const indicatorClass = legendShape === 'circle' ? 'rounded-full' : 'rounded'
@@ -123,7 +125,7 @@ const StackedBarChartInner = ({
             )}
 
             {/* Chart */}
-            <div style={{ height }} className="-mx-2">
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <ComposedChart
                         data={data}

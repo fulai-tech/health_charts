@@ -1,12 +1,14 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
-import { SleepTrendyReportCard } from '@/features/sleep/components/SleepTrendyReportCard'
-import { SleepStructureCard } from '@/features/sleep/components/SleepStructureCard'
-import { SleepDataAnalysisCard } from '@/features/sleep/components/SleepDataAnalysisCard'
-import { SleepCompareCard } from '@/features/sleep/components/SleepCompareCard'
-import { SleepWeeklyOverviewCard } from '@/features/sleep/components/SleepWeeklyOverviewCard'
-import { useSleepTrendData, usePrefetchSleepData } from '@/features/sleep/api'
+import { NutritionWeeklyGaugeCard } from '@/features/nutrition/components/NutritionWeeklyGaugeCard'
+import { NutritionStatisticsCard } from '@/features/nutrition/components/NutritionStatisticsCard'
+import { NutritionDataAnalysisCard } from '@/features/nutrition/components/NutritionDataAnalysisCard'
+import { MicroElementStructureCard } from '@/features/nutrition/components/MicroElementStructureCard'
+import { MicroElementStatusCard } from '@/features/nutrition/components/MicroElementStatusCard'
+import { ComplicatedRecipesCard } from '@/features/nutrition/components/ComplicatedRecipesCard'
+import { NutritionWeeklyOverviewCard } from '@/features/nutrition/components/NutritionWeeklyOverviewCard'
+import { useNutritionData, usePrefetchNutritionData } from '@/features/nutrition/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { UI_STYLES } from '@/config/theme'
@@ -32,16 +34,16 @@ function formatDateForDisplay(date: Date): string {
 }
 
 /**
- * Sleep Details Page
- * 
+ * Nutrition Details Page
+ *
  * URL Params:
  * - ?lang=zh or ?lang=en (language)
  * - ?theme=light or ?theme=dark (theme mode)
  */
-export function SleepPage() {
+export function NutritionPage() {
     const { t } = useTranslation()
     const { theme } = useUrlConfig()
-    const { prefetchPreviousWeeks } = usePrefetchSleepData()
+    const { prefetchPreviousWeeks } = usePrefetchNutritionData()
 
     // Date range state
     const [dateRange, setDateRange] = useState(() => {
@@ -67,16 +69,22 @@ export function SleepPage() {
     }, [dateRange.end])
 
     // Format dates for API
-    const apiDateRange = useMemo(() => ({
-        startDate: formatDateToAPI(dateRange.start),
-        endDate: formatDateToAPI(dateRange.end),
-    }), [dateRange])
+    const apiDateRange = useMemo(
+        () => ({
+            startDate: formatDateToAPI(dateRange.start),
+            endDate: formatDateToAPI(dateRange.end),
+        }),
+        [dateRange]
+    )
 
     // Format dates for display
-    const displayDateRange = useMemo(() => ({
-        start: formatDateForDisplay(dateRange.start),
-        end: formatDateForDisplay(dateRange.end),
-    }), [dateRange])
+    const displayDateRange = useMemo(
+        () => ({
+            start: formatDateForDisplay(dateRange.start),
+            end: formatDateForDisplay(dateRange.end),
+        }),
+        [dateRange]
+    )
 
     // Handle date navigation
     const handlePrevious = () => {
@@ -110,10 +118,8 @@ export function SleepPage() {
         })
     }
 
-    // Fetch Sleep data with date range - will refetch when dates change
-    const { data, isLoading, isFetching, error } = useSleepTrendData(apiDateRange)
-
-
+    // Fetch Nutrition data with date range - will refetch when dates change
+    const { data, isLoading, isFetching, error } = useNutritionData(apiDateRange)
 
     // Error state
     if (error) {
@@ -160,17 +166,19 @@ export function SleepPage() {
                 <div className="px-4 space-y-4">
                     {!data && !isLoading ? (
                         // No data state (after loading completes with no data)
-                        <div className="flex items-center justify-center py-20">
-                            <p style={{ color: theme.textSecondary }}>{t('common.noData')}</p>
+                        <div className="text-center py-12">
+                            <p className="text-slate-500">{t('common.noData')}</p>
                         </div>
                     ) : (
-                        // Always show cards - with skeleton content when no data, with overlay when loading
+                        // Always show cards - with overlay when loading
                         <div className="space-y-4">
-                            <SleepTrendyReportCard data={data} />
-                            <SleepStructureCard data={data} />
-                            <SleepDataAnalysisCard data={data} />
-                            <SleepCompareCard data={data} />
-                            <SleepWeeklyOverviewCard data={data} />
+                            <NutritionWeeklyGaugeCard data={data?.weeklyManagement} />
+                            <NutritionStatisticsCard data={data?.metabolismTrend} />
+                            <NutritionDataAnalysisCard data={data?.analysis} />
+                            <MicroElementStructureCard data={data?.nutrientStructure} />
+                            <MicroElementStatusCard data={data?.microElements} />
+                            <ComplicatedRecipesCard data={data?.recipes} />
+                            <NutritionWeeklyOverviewCard data={data} />
                             <DisclaimerBox />
                         </div>
                     )}

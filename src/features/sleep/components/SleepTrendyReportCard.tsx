@@ -145,11 +145,11 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
                         <span className="text-3xl font-bold" style={{ color: '#FB923D' }}>
                             {data?.summary?.avgHours ?? '--'}
                         </span>
-                        <span className="text-base text-slate-600">hours</span>
+                        <span className="text-base text-slate-600">{t('units.hour', 'hours')}</span>
                         <span className="text-3xl font-bold ml-1" style={{ color: '#FB923D' }}>
                             {data?.summary?.avgMinutes ?? '--'}
                         </span>
-                        <span className="text-base text-slate-600">minutes</span>
+                        <span className="text-base text-slate-600">{t('units.minute', 'minutes')}</span>
                     </div>
 
                     {/* Trend indicator with arrow */}
@@ -181,11 +181,11 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
                             <span className="text-2xl font-bold" style={{ color: '#FB923D' }}>
                                 {data?.summary?.highestHours ?? '--'}
                             </span>
-                            <span className="text-sm text-slate-600">hours</span>
+                            <span className="text-sm text-slate-600">{t('units.hour', 'hours')}</span>
                             <span className="text-2xl font-bold ml-1" style={{ color: '#FB923D' }}>
                                 {data?.summary?.highestMinutes ?? '--'}
                             </span>
-                            <span className="text-sm text-slate-600">minutes</span>
+                            <span className="text-sm text-slate-600">{t('units.minute', 'minutes')}</span>
                         </div>
                     </div>
                     <div>
@@ -196,11 +196,11 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
                             <span className="text-2xl font-bold" style={{ color: '#FB923D' }}>
                                 {data?.summary?.lowestHours ?? '--'}
                             </span>
-                            <span className="text-sm text-slate-600">hours</span>
+                            <span className="text-sm text-slate-600">{t('units.hour', 'hours')}</span>
                             <span className="text-2xl font-bold ml-1" style={{ color: '#FB923D' }}>
                                 {data?.summary?.lowestMinutes ?? '--'}
                             </span>
-                            <span className="text-sm text-slate-600">minutes</span>
+                            <span className="text-sm text-slate-600">{t('units.minute', 'minutes')}</span>
                         </div>
                     </div>
                 </div>

@@ -16,6 +16,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import { cn, getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
+import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
 import { useMemo, memo } from 'react'
 
 export type ChartType = 'line' | 'area' | 'range' | 'mixed'
@@ -148,6 +149,7 @@ export function VitalTrendChart({
   )
 
   const animationProps = useChartAnimation();
+  const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
   const getYDomain = useMemo(() => {
     return (): [number | string, number | string] => {
@@ -306,7 +308,7 @@ export function VitalTrendChart({
   }
 
   return (
-    <div className={cn('w-full transform-gpu will-change-transform', className)} style={{ height }}>
+    <div ref={chartContainerRef} className={cn('w-full transform-gpu will-change-transform', className)} style={{ height }}>
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         {renderChart()}
       </ResponsiveContainer>

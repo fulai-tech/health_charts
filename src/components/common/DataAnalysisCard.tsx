@@ -12,6 +12,7 @@ export interface DataAnalysisCardProps {
     themeColor: string
     className?: string
     isLoading?: boolean
+    topContent?: React.ReactNode
 }
 
 const DataAnalysisCardInner = ({
@@ -21,6 +22,7 @@ const DataAnalysisCardInner = ({
     themeColor,
     className,
     isLoading,
+    topContent,
 }: DataAnalysisCardProps) => {
     const { t } = useTranslation()
 
@@ -52,6 +54,13 @@ const DataAnalysisCardInner = ({
                     {t(titleKey)}
                 </h3>
             </div>
+
+            {/* Top Content (e.g. Score Summary) */}
+            {topContent && (
+                <div className="mb-4">
+                    {topContent}
+                </div>
+            )}
 
             {/* Analysis Items */}
             <div className="space-y-3">

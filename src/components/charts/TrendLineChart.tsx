@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
+import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
 
 /**
  * Legend indicator shape type
@@ -132,6 +133,7 @@ const TrendLineChartInner = ({
     chartMargin = { top: 10, right: 10, left: -15, bottom: 0 },
 }: TrendLineChartProps) => {
     const animationProps = useChartAnimation()
+    const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
     // Generate gradients for each line if not provided
     const linesWithGradients = lines.map((line, index) => ({
@@ -170,7 +172,7 @@ const TrendLineChartInner = ({
             )}
 
             {/* Chart */}
-            <div style={{ height }} className="-mx-2">
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <ComposedChart data={data} margin={chartMargin}>
                         {/* Gradient Definitions */}

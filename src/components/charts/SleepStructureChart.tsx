@@ -335,6 +335,15 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     draw()
   }, [draw])
 
+  // 5. Hide tooltip on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setTooltip(prev => ({ ...prev, visible: false }))
+    }
+    window.addEventListener('scroll', handleScroll, true)
+    return () => window.removeEventListener('scroll', handleScroll, true)
+  }, [])
+
   // 5. Interaction
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current!.getBoundingClientRect()

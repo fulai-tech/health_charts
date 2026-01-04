@@ -1,49 +1,102 @@
 import { Card } from '@/components/ui/card'
 import type { NutrientStructureData } from '../types'
 import { PieChart as PieChartIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface MicroElementStructureCardProps {
     data?: NutrientStructureData[]
     className?: string
 }
 
+// Determine status based on current vs total
+function getStatus(current: number, total: number): 'goal' | 'exceed' | 'insufficient' {
+    const percentage = (current / total) * 100
+    if (percentage >= 90 && percentage <= 110) return 'goal'
+    if (percentage > 110) return 'exceed'
+    return 'insufficient'
+}
+
+// Get status badge color and text
+function getStatusBadge(status: 'goal' | 'exceed' | 'insufficient', t: any) {
+    switch (status) {
+        case 'goal':
+            return {
+                bg: 'bg-green-100',
+                text: 'text-green-600',
+                label: t('nutrition.goal', 'Goal')
+            }
+        case 'exceed':
+            return {
+                bg: 'bg-orange-100',
+                text: 'text-orange-600',
+                label: t('nutrition.exceed', 'Exceed')
+            }
+        case 'insufficient':
+            return {
+                bg: 'bg-blue-100',
+                text: 'text-blue-600',
+                label: t('nutrition.insufficient', 'Insufficient')
+            }
+    }
+}
+
 export const MicroElementStructureCard = ({ data, className }: MicroElementStructureCardProps) => {
+    const { t } = useTranslation()
+
     if (!data) return null
 
     return (
         <Card className={`${className} p-5`}>
             <div className="flex items-center gap-2 mb-4">
                 <PieChartIcon className="w-5 h-5 text-orange-500" />
-                <h3 className="text-base font-semibold text-slate-800">Micro-element structure</h3>
+                <h3 className="text-base font-semibold text-slate-800">{t('nutrition.macronutrientStructure', 'Macronutrient structure')}</h3>
             </div>
 
             <div className="flex flex-col gap-4">
-                {data.map((item, index) => (
-                    <div key={index}>
-                        <div className="flex justify-between items-baseline mb-1">
-                            <span className="text-sm font-medium text-slate-700">{item.label}</span>
-                            <div>
-                                <span className="text-lg font-bold text-slate-800" style={{ color: item.color }}>{item.current}</span>
-                                <span className="text-xs text-slate-400 ml-1">{item.unit}</span>
-                                <span className="text-xs text-slate-400 ml-2">Target: {item.total}</span>
+                {data.map((item, index) => {
+                    const status = getStatus(item.current, item.total)
+                    const badge = getStatusBadge(status, t)
+
+                    return (
+                        <div key={index} className="bg-slate-50 rounded-xl p-4">
+                            {/* Top row: Name and Status Badge */}
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-sm font-medium text-slate-700">{item.label}</span>
+                                <span className={`text-xs font-medium px-3 py-1 rounded-full ${badge.bg} ${badge.text}`}>
+                                    {badge.label}
+                                </span>
+                            </div>
+
+                            {/* Middle row: Large number and Target */}
+                            <div className="flex justify-between items-baseline mb-3">
+                                <div>
+                                    <span className="text-3xl font-bold" style={{ color: item.color }}>
+                                        {item.current}
+                                    </span>
+                                    <span className="text-sm text-slate-500 ml-1">{item.unit}</span>
+                                </div>
+                                <span className="text-sm text-slate-400">
+                                    {t('nutrition.target', 'Target')}: {item.total} {item.unit}
+                                </span>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{
+                                        width: `${Math.min(100, (item.current / item.total) * 100)}%`,
+                                        backgroundColor: item.color
+                                    }}
+                                />
                             </div>
                         </div>
-                        {/* Progress Bar */}
-                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                                className="h-full rounded-full transition-all duration-500"
-                                style={{
-                                    width: `${Math.min(100, (item.current / item.total) * 100)}%`,
-                                    backgroundColor: item.color
-                                }}
-                            />
-                        </div>
-                    </div>
-                ))}
+                    )
+                })}
             </div>
 
-            <div className="mt-4 p-3 bg-blue-50 rounded-xl text-xs text-slate-600 leading-relaxed">
-                Your intake of carbohydrates, protein, and fat is relatively balanced. Keep focusing on Vitamin intake.
+            <div className="mt-4 p-3 bg-blue-50 rounded-xl text-sm text-slate-600 leading-relaxed">
+                {t('nutrition.balancedIntakeSummary', 'Your macronutrient balance is generally good. Protein intake hits the target, while fat intake is slightly high. We recommend maintaining current protein levels while reducing fat consumption.')}
             </div>
         </Card>
     )

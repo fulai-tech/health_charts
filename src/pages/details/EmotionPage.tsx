@@ -11,6 +11,7 @@ import { EmotionDemoModeToggle } from '@/features/emotion/components/EmotionDemo
 import { useEmotionTrendData, usePrefetchEmotionData } from '@/features/emotion/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
+import { UI_STYLES } from '@/config/theme'
 
 /**
  * Format Date to YYYY-MM-DD string
@@ -138,7 +139,7 @@ export function EmotionPage() {
       className="min-h-screen pb-20"
       style={{ backgroundColor: theme.background }}
     >
-      <div className="max-w-2xl mx-auto">
+      <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
         {/* Date Range Picker */}
         <div
           className="sticky top-0 z-20 py-3 px-4"

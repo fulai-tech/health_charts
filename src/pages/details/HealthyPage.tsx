@@ -19,6 +19,7 @@ import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { useHealthyData } from '@/features/healthy/api'
 import type { TimePeriod, ViewType } from '@/features/healthy/types'
+import { UI_STYLES } from '@/config/theme'
 
 // Import all healthy components
 import {
@@ -153,7 +154,7 @@ export function HealthyPage() {
       className="min-h-screen pb-20"
       style={{ backgroundColor: theme.background }}
     >
-      <div className="max-w-2xl mx-auto">
+      <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
         {/* Date Range Picker */}
         <div
           className="sticky top-0 z-20 py-3 px-4"

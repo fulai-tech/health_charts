@@ -47,7 +47,7 @@ export const THEMES: Record<ThemeMode, ThemeConfig> = {
 export function useThemeMode(): ThemeConfig {
   const [searchParams] = useSearchParams()
   const theme = searchParams.get('theme') as ThemeMode | null
-  
+
   return useMemo(() => {
     if (theme === 'dark') {
       return THEMES.dark
@@ -63,15 +63,15 @@ export function useThemeMode(): ThemeConfig {
 export function useUrlLanguage(): string {
   const [searchParams] = useSearchParams()
   const { i18n } = useTranslation()
-  
+
   const lang = searchParams.get('lang')
-  
+
   useEffect(() => {
     if (lang && (lang === 'en' || lang === 'zh')) {
       i18n.changeLanguage(lang)
     }
   }, [lang, i18n])
-  
+
   return i18n.language
 }
 
@@ -82,7 +82,7 @@ export function useUrlLanguage(): string {
 export function useUrlConfig() {
   const themeConfig = useThemeMode()
   const language = useUrlLanguage()
-  
+
   return {
     theme: themeConfig,
     language,

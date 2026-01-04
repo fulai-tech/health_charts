@@ -18,6 +18,7 @@ import {
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
+import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
 
 export interface TimeLineDataPoint {
     /** Time in format "HH:00" (e.g., "01:00", "14:00") */
@@ -80,6 +81,7 @@ const TimeAxisLineChartInner = ({
     gradientId,
 }: TimeAxisLineChartProps) => {
     const animationProps = useChartAnimation()
+    const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
     const uniqueGradientId = gradientId || `timeLineGradient-${Math.random().toString(36).substr(2, 9)}`
 
     // Fixed X-axis ticks
@@ -101,7 +103,7 @@ const TimeAxisLineChartInner = ({
     }, [data, dataKey, yAxisDomain])
 
     return (
-        <div className={`transform-gpu will-change-transform ${className}`} style={{ height }}>
+        <div ref={chartContainerRef} className={`transform-gpu will-change-transform ${className}`} style={{ height }}>
             <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                     data={data}

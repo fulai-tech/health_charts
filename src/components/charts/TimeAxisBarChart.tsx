@@ -19,6 +19,7 @@ import {
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
+import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
 
 export interface TimeDataPoint {
     /** Hour in format "HH:00" (e.g., "11:00", "14:00") */
@@ -130,6 +131,7 @@ const TimeAxisBarChartInner = ({
     className = '',
 }: TimeAxisBarChartProps) => {
     const animationProps = useChartAnimation()
+    const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
     // Transform data to include position
     const chartData = useMemo(() => {
@@ -163,7 +165,7 @@ const TimeAxisBarChartInner = ({
             )}
 
             {/* Chart */}
-            <div style={{ height }} className="-mx-2">
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2">
                 <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                         data={chartData}
