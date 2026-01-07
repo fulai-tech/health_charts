@@ -3,14 +3,65 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import type { NutritionDomainModel } from './types'
+import type { NutritionDomainModel, BackendNutritionResponse } from './types'
 import { adaptNutritionData } from './adapter'
 import { usePrefetchData, type DateRange } from '@/lib/usePrefetchData'
 
 // Re-export DateRange for backwards compatibility
 export type { DateRange }
 
-// Mock Data
+// Demo Mode Toggle
+const USE_DEMO = true // Set to false to use real backend API
+
+// API Configuration
+const API_BASE_URL = 'http://43.138.100.224:5001'
+const API_TOKEN = 'sk-proj-VvBPGYkFpr0SFMfZJvwDfNwJV4N_hdx5'
+const USER_ID = '69521a739c443012172f98b3'
+
+/**
+ * Fetch nutrition data from backend API
+ */
+async function fetchBackendNutritionData(weekStartDate: string): Promise<BackendNutritionResponse | null> {
+  // Skip backend request if in demo mode
+  if (USE_DEMO) {
+    console.log('[Nutrition API] Demo mode enabled, using mock data')
+    return null
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/nutrition/calc/weekly_nutrition_report_app_new`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_TOKEN}`
+      },
+      body: JSON.stringify({
+        user_id: USER_ID,
+        force_refresh: false,
+        week_start_date: weekStartDate
+      })
+    })
+
+    if (!response.ok) {
+      console.warn('[Nutrition API] Backend request failed:', response.status)
+      return null
+    }
+
+    const data: BackendNutritionResponse = await response.json()
+    
+    if (data.code !== 200) {
+      console.warn('[Nutrition API] Backend returned error code:', data.code)
+      return null
+    }
+
+    return data
+  } catch (error) {
+    console.warn('[Nutrition API] Backend request error:', error)
+    return null
+  }
+}
+
+// Mock Data for fallback
 const MOCK_DATA: NutritionDomainModel = {
   weeklyManagement: {
     currentCal: 3350,
@@ -93,11 +144,18 @@ export const nutritionQueryKeys = {
     [...nutritionQueryKeys.all, 'detail', dateRange?.startDate, dateRange?.endDate] as const,
 }
 
-// Keep the raw fetch function but remove delay
+/**
+ * Main fetch function that combines backend data with mock data
+ */
 export const fetchNutritionData = async (dateRange?: { start_date?: string, end_date?: string }): Promise<NutritionDomainModel> => {
-  // In a real app, uses dateRange to fetch
-  // console.log('[Nutrition API] Fetching with dateRange:', dateRange)
-  return Promise.resolve(MOCK_DATA)
+  // Use start_date as week_start_date for backend API
+  const weekStartDate = dateRange?.start_date || new Date().toISOString().split('T')[0]
+  
+  // Try to fetch from backend
+  const backendData = await fetchBackendNutritionData(weekStartDate)
+  
+  // Use adapter to merge backend data with mock data
+  return adaptNutritionData(backendData, MOCK_DATA)
 }
 
 /**
@@ -111,10 +169,9 @@ export function useNutritionData(dateRange?: DateRange) {
         ? { start_date: dateRange.startDate, end_date: dateRange.endDate }
         : undefined
 
-      const rawData = await fetchNutritionData(apiDateRange)
-      return rawData
+      // fetchNutritionData already returns adapted data
+      return await fetchNutritionData(apiDateRange)
     },
-    select: (data): NutritionDomainModel => adaptNutritionData(data),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     placeholderData: (previousData) => previousData,

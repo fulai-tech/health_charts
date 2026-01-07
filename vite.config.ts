@@ -44,6 +44,13 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',  // 监听所有网络接口，接受局域网请求
     port: 5174,
+    proxy: {
+      '/nutrition': {
+        target: 'http://43.138.100.224:5001',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     outDir: 'docs',
