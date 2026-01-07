@@ -217,11 +217,13 @@ function adaptWeeklySummary(backendData: BackendNutritionResponse | null, mockDa
 
   const weeklyOverview = backendData.data.report.weekly_overview
   const caloriesOverview = backendData.data.report.weekly_calories_overview
+  const dietaryInsights = backendData.data.report.dietary_insights
 
   return {
     overview: weeklyOverview.overall_trend || mockData.overview,
     highlights: caloriesOverview?.evaluation || mockData.highlights,
-    suggestions: backendData.data.report.dietary_insights || mockData.suggestions
+    // Use backend suggestions if exists and not empty, otherwise use mock
+    suggestions: (dietaryInsights && dietaryInsights.length > 0) ? dietaryInsights : mockData.suggestions
   }
 }
 

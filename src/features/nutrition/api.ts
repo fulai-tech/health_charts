@@ -11,10 +11,10 @@ import { usePrefetchData, type DateRange } from '@/lib/usePrefetchData'
 export type { DateRange }
 
 // Demo Mode Toggle
-const USE_DEMO = true // Set to false to use real backend API
+const USE_DEMO = false // Set to false to use real backend API
 
 // API Configuration
-const API_BASE_URL = 'http://43.138.100.224:5001'
+const API_BASE_URL = 'https://test.fulai.tech/ns'
 const API_TOKEN = 'sk-proj-VvBPGYkFpr0SFMfZJvwDfNwJV4N_hdx5'
 const USER_ID = '69521a739c443012172f98b3'
 

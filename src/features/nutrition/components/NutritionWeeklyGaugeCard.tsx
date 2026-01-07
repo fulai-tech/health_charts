@@ -33,7 +33,7 @@ export const NutritionWeeklyGaugeCard = ({ data, className }: NutritionWeeklyGau
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-orange-500" />
-                    <h3 className="text-[16px] font-semibold text-[#1E293B]">{t('nutrition.weeklyAverageReport', 'Weekly average report')}</h3>
+                    <h3 className=" font-semibold ">{t('nutrition.weeklyAverageReport', 'Weekly average report')}</h3>
                 </div>
             </div>
 
