@@ -15,6 +15,7 @@ import type {
   NutritionAnalysisData,
   NutritionWeeklySummary
 } from './types'
+import { WEEKDAY_LABEL_MAP, getCurrentWeekDateRange } from '@/lib/dateUtils'
 
 /**
  * Helper to get nutrition status from backend data safely
@@ -27,14 +28,46 @@ function getNutritionStatus(backendData: BackendNutritionResponse | null) {
 
 /**
  * Convert backend nutrition status to WeeklyManagementData
+ * Supports both old format (能量) and new format (能量（千卡）)
  */
 function adaptWeeklyManagement(backendData: BackendNutritionResponse | null, mockData: WeeklyManagementData): WeeklyManagementData {
-  const ns = getNutritionStatus(backendData)
-  if (!ns?.能量) {
+  if (!backendData?.data?.report) {
     return mockData
   }
 
-  const energyData = ns.能量
+  const report = backendData.data.report
+  const caloriesOverview = report.weekly_calories_overview
+  const ns = getNutritionStatus(backendData)
+
+  // Try new format first: use weekly_calories_overview
+  if (caloriesOverview?.average_calories && caloriesOverview?.target_calories) {
+    const currentCal = caloriesOverview.average_calories
+    const targetCal = caloriesOverview.target_calories
+    const percentage = Math.round((currentCal / targetCal) * 100)
+
+    // Determine status based on percentage
+    let status: 'good' | 'warning' | 'alert' = 'good'
+    if (percentage < 80) {
+      status = 'warning'
+    } else if (percentage > 120) {
+      status = 'alert'
+    }
+
+    return {
+      currentCal: Math.round(currentCal),
+      targetCal: Math.round(targetCal),
+      remainingCal: Math.round(currentCal - targetCal), // Note: positive means over target
+      percentage,
+      status
+    }
+  }
+
+  // Fallback to nutrition_status (support both old and new key formats)
+  const energyData = ns?.['能量（千卡）'] || ns?.能量
+  if (!energyData) {
+    return mockData
+  }
+
   const currentCal = energyData.value
   const targetCal = energyData.target
   const percentage = energyData.percentage
@@ -50,23 +83,90 @@ function adaptWeeklyManagement(backendData: BackendNutritionResponse | null, moc
   return {
     currentCal: Math.round(currentCal),
     targetCal: Math.round(targetCal),
-    remainingCal: Math.round(targetCal - currentCal),
+    remainingCal: Math.round(currentCal - targetCal), // Note: positive means over target
     percentage: Math.round(percentage),
     status
   }
 }
 
 /**
+ * Map Chinese weekday labels to English abbreviations
+ */
+const WEEKDAY_ABBR_MAP: Record<string, string> = {
+  周一: 'Mon',
+  周二: 'Tue',
+  周三: 'Wed',
+  周四: 'Thu',
+  周五: 'Fri',
+  周六: 'Sat',
+  周日: 'Sun',
+}
+
+/**
  * Convert backend data to MetabolismTrendData
- * Note: Backend doesn't provide daily breakdown, so we use mock data
+ * Extracts daily trend data from backend if available, otherwise uses mock data
+ * Supports both new format (daily_calories array) and old format (trend_chart)
  */
 function adaptMetabolismTrend(backendData: BackendNutritionResponse | null, mockData: MetabolismTrendData[]): MetabolismTrendData[] {
-  // Backend doesn't provide daily trend data, use mock
+  if (!backendData?.data?.report) {
+    return mockData
+  }
+
+  const report = backendData.data.report
+  const caloriesOverview = report.weekly_calories_overview
+
+  // Try new format first: use daily_calories array
+  if (caloriesOverview?.daily_calories && caloriesOverview.daily_calories.length === 7) {
+    const targetCal = caloriesOverview.target_calories || 2000
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+    const trendData: MetabolismTrendData[] = caloriesOverview.daily_calories.map((value, index) => ({
+      date: weekdays[index],
+      value: Math.round(value),
+      target: Math.round(targetCal)
+    }))
+
+    console.log('[Nutrition Adapter] Successfully extracted trend data from daily_calories array:', trendData)
+    return trendData
+  }
+
+  // Fallback to old format: try trend_chart
+  const trendChart = backendData.data.trend_chart || report.trend_chart
+  const chartData = trendChart?.chart_data
+
+  if (chartData && chartData.length > 0) {
+    // Get target calories from weekly_calories_overview or nutrition_status
+    const targetCal = caloriesOverview?.target_daily_calories
+      || caloriesOverview?.target_calories
+      || report.nutrition_status?.['能量（千卡）']?.target
+      || report.nutrition_status?.能量?.target
+      || 2000 // Default target
+
+    // Transform backend chart data to frontend format
+    const trendData: MetabolismTrendData[] = chartData.map((point) => {
+      // Convert Chinese weekday label to English abbreviation
+      const dateLabel = WEEKDAY_ABBR_MAP[point.label] || point.label
+
+      return {
+        date: dateLabel,
+        value: Math.round(point.value),
+        target: point.target || Math.round(targetCal)
+      }
+    })
+
+    if (trendData.length > 0) {
+      console.log('[Nutrition Adapter] Successfully extracted trend data from trend_chart:', trendData)
+      return trendData
+    }
+  }
+
+  console.log('[Nutrition Adapter] No trend data found, using mock data')
   return mockData
 }
 
 /**
  * Convert backend nutrition_status to NutrientStructureData
+ * Supports both old format (without units) and new format (with units)
  */
 function adaptNutrientStructure(backendData: BackendNutritionResponse | null, mockData: NutrientStructureData[]): NutrientStructureData[] {
   const ns = getNutritionStatus(backendData)
@@ -76,34 +176,37 @@ function adaptNutrientStructure(backendData: BackendNutritionResponse | null, mo
 
   const nutrients: NutrientStructureData[] = []
 
-  // Carbs (碳水化合物)
-  if (ns.碳水化合物) {
+  // Carbs (碳水化合物) - try new format first, then old format
+  const carbs = ns['碳水化合物(g)'] || ns.碳水化合物
+  if (carbs) {
     nutrients.push({
       label: 'Carbs',
-      current: Math.round(ns.碳水化合物.value * 10) / 10,
-      total: ns.碳水化合物.target,
+      current: Math.round(carbs.value * 10) / 10,
+      total: carbs.target,
       unit: 'g',
       color: '#86EFAC'
     })
   }
 
-  // Fat (脂肪)
-  if (ns.脂肪) {
+  // Fat (脂肪) - try new format first, then old format
+  const fat = ns['脂肪(g)'] || ns.脂肪
+  if (fat) {
     nutrients.push({
       label: 'Fat',
-      current: Math.round(ns.脂肪.value * 10) / 10,
-      total: ns.脂肪.target,
+      current: Math.round(fat.value * 10) / 10,
+      total: fat.target,
       unit: 'g',
       color: '#FB923D'
     })
   }
 
-  // Protein (蛋白质)
-  if (ns.蛋白质) {
+  // Protein (蛋白质) - try new format first, then old format
+  const protein = ns['蛋白质(g)'] || ns.蛋白质
+  if (protein) {
     nutrients.push({
       label: 'Protein',
-      current: Math.round(ns.蛋白质.value * 10) / 10,
-      total: ns.蛋白质.target,
+      current: Math.round(protein.value * 10) / 10,
+      total: protein.target,
       unit: 'g',
       color: '#93C5FD'
     })
@@ -125,17 +228,19 @@ function adaptMicroElements(backendData: BackendNutritionResponse | null, mockDa
   const elements: MicroElementData[] = []
 
   // Mapping of backend keys to display names
-  const microElementMap: Array<{ key: string; name: string; unit: string }> = [
-    { key: '钙', name: 'Calcium (Ca)', unit: 'mg' },
-    { key: '钠', name: 'Sodium (Na)', unit: 'mg' },
-    { key: '铁', name: 'Iron (Fe)', unit: 'mg' },
-    { key: '锌', name: 'Zinc (Zn)', unit: 'mg' },
-    { key: '维生素C', name: 'Vitamin C', unit: 'mg' },
-    { key: '维生素D', name: 'Vitamin D', unit: 'μg' },
+  // Try new format (with units) first, then old format (without units)
+  const microElementMap: Array<{ newKey: string; oldKey: string; name: string; unit: string }> = [
+    { newKey: '钙(mg)', oldKey: '钙', name: 'Calcium (Ca)', unit: 'mg' },
+    { newKey: '钠(mg)', oldKey: '钠', name: 'Sodium (Na)', unit: 'mg' },
+    { newKey: '铁(mg)', oldKey: '铁', name: 'Iron (Fe)', unit: 'mg' },
+    { newKey: '锌(mg)', oldKey: '锌', name: 'Zinc (Zn)', unit: 'mg' },
+    { newKey: '维生素C(mg)', oldKey: '维生素C', name: 'Vitamin C', unit: 'mg' },
+    { newKey: '维生素D(ug)', oldKey: '维生素D', name: 'Vitamin D', unit: 'μg' },
   ]
 
-  microElementMap.forEach(({ key, name, unit }) => {
-    const item = ns[key]
+  microElementMap.forEach(({ newKey, oldKey, name, unit }) => {
+    // Try new format first, then old format
+    const item = ns[newKey] || ns[oldKey]
     if (item) {
       // Convert status from Chinese to English
       let status: 'low' | 'normal' | 'high' = 'normal'
@@ -189,11 +294,22 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
   const dietaryInsights = report?.dietary_insights || (backendData.data as any).dietary_insights
   const categoryEvaluations = report?.category_evaluations || (backendData.data as any).category_evaluations
 
-  // Use data_analysis as summary
-  const summary = dataAnalysis || mockData.summary
+  // Use data_analysis as summary (can be string or array)
+  let summary: string = mockData.summary
+  if (typeof dataAnalysis === 'string') {
+    summary = dataAnalysis
+  } else if (Array.isArray(dataAnalysis) && dataAnalysis.length > 0) {
+    // Use first item as summary if it's an array
+    summary = dataAnalysis[0]
+  }
 
   // Combine dietary_insights with category_evaluations
   const details: string[] = []
+
+  // If data_analysis is an array, use all items as details
+  if (Array.isArray(dataAnalysis) && dataAnalysis.length > 0) {
+    details.push(...dataAnalysis)
+  }
 
   if (dietaryInsights && dietaryInsights.length > 0) {
     details.push(...dietaryInsights)
