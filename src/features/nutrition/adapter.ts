@@ -5,8 +5,8 @@
  * complete data to display, even when backend doesn't provide all required fields.
  */
 
-import type { 
-  NutritionDomainModel, 
+import type {
+  NutritionDomainModel,
   BackendNutritionResponse,
   WeeklyManagementData,
   MetabolismTrendData,
@@ -17,18 +17,28 @@ import type {
 } from './types'
 
 /**
+ * Helper to get nutrition status from backend data safely
+ * Supports both data.report.nutrition_status and data.nutrition_status
+ */
+function getNutritionStatus(backendData: BackendNutritionResponse | null) {
+  if (!backendData?.data) return null
+  return backendData.data.report?.nutrition_status || (backendData.data as any).nutrition_status
+}
+
+/**
  * Convert backend nutrition status to WeeklyManagementData
  */
 function adaptWeeklyManagement(backendData: BackendNutritionResponse | null, mockData: WeeklyManagementData): WeeklyManagementData {
-  if (!backendData?.data?.report?.nutrition_status?.能量) {
+  const ns = getNutritionStatus(backendData)
+  if (!ns?.能量) {
     return mockData
   }
 
-  const energyData = backendData.data.report.nutrition_status.能量
+  const energyData = ns.能量
   const currentCal = energyData.value
   const targetCal = energyData.target
   const percentage = energyData.percentage
-  
+
   // Determine status based on percentage
   let status: 'good' | 'warning' | 'alert' = 'good'
   if (percentage < 80) {
@@ -59,12 +69,11 @@ function adaptMetabolismTrend(backendData: BackendNutritionResponse | null, mock
  * Convert backend nutrition_status to NutrientStructureData
  */
 function adaptNutrientStructure(backendData: BackendNutritionResponse | null, mockData: NutrientStructureData[]): NutrientStructureData[] {
-  if (!backendData?.data?.report?.nutrition_status) {
+  const ns = getNutritionStatus(backendData)
+  if (!ns) {
     return mockData
   }
 
-  const ns = backendData.data.report.nutrition_status
-  
   const nutrients: NutrientStructureData[] = []
 
   // Carbs (碳水化合物)
@@ -108,11 +117,11 @@ function adaptNutrientStructure(backendData: BackendNutritionResponse | null, mo
  * Convert backend nutrition_status to MicroElementData
  */
 function adaptMicroElements(backendData: BackendNutritionResponse | null, mockData: MicroElementData[]): MicroElementData[] {
-  if (!backendData?.data?.report?.nutrition_status) {
+  const ns = getNutritionStatus(backendData)
+  if (!ns) {
     return mockData
   }
 
-  const ns = backendData.data.report.nutrition_status
   const elements: MicroElementData[] = []
 
   // Mapping of backend keys to display names
@@ -158,7 +167,7 @@ function adaptMicroElements(backendData: BackendNutritionResponse | null, mockDa
  * Convert backend data to NutritionAnalysisData
  */
 function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: NutritionAnalysisData): NutritionAnalysisData {
-  if (!backendData?.data?.report) {
+  if (!backendData?.data) {
     return mockData
   }
 
@@ -166,32 +175,39 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
 
   // Calculate score based on nutrition status
   let score = 85 // Default score
-  if (report.nutrition_status) {
-    const statusItems = Object.values(report.nutrition_status)
-    const normalCount = statusItems.filter(item => item.status === '达标').length
+  const ns = getNutritionStatus(backendData)
+
+  if (ns) {
+    const statusItems = Object.values(ns as object)
+    const normalCount = statusItems.filter((item: any) => item.status === '达标').length
     const totalCount = statusItems.length
     score = Math.round((normalCount / totalCount) * 100)
   }
 
+  // Handle report-level fields which might also be directly under data now
+  const dataAnalysis = report?.data_analysis || (backendData.data as any).data_analysis
+  const dietaryInsights = report?.dietary_insights || (backendData.data as any).dietary_insights
+  const categoryEvaluations = report?.category_evaluations || (backendData.data as any).category_evaluations
+
   // Use data_analysis as summary
-  const summary = report.data_analysis || mockData.summary
+  const summary = dataAnalysis || mockData.summary
 
   // Combine dietary_insights with category_evaluations
   const details: string[] = []
-  
-  if (report.dietary_insights && report.dietary_insights.length > 0) {
-    details.push(...report.dietary_insights)
+
+  if (dietaryInsights && dietaryInsights.length > 0) {
+    details.push(...dietaryInsights)
   }
 
-  if (report.category_evaluations) {
-    if (report.category_evaluations.macro_nutrients) {
-      details.push(report.category_evaluations.macro_nutrients)
+  if (categoryEvaluations) {
+    if (categoryEvaluations.macro_nutrients) {
+      details.push(categoryEvaluations.macro_nutrients)
     }
-    if (report.category_evaluations.micro_nutrients) {
-      details.push(report.category_evaluations.micro_nutrients)
+    if (categoryEvaluations.micro_nutrients) {
+      details.push(categoryEvaluations.micro_nutrients)
     }
-    if (report.category_evaluations.dietary_components) {
-      details.push(report.category_evaluations.dietary_components)
+    if (categoryEvaluations.dietary_components) {
+      details.push(categoryEvaluations.dietary_components)
     }
   }
 
@@ -209,21 +225,34 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
 
 /**
  * Convert backend data to NutritionWeeklySummary
+ * Uses new backend format with weekly_summary.overview, weekly_summary.highlights
+ * Ignores backend suggestions as per requirement
  */
 function adaptWeeklySummary(backendData: BackendNutritionResponse | null, mockData: NutritionWeeklySummary): NutritionWeeklySummary {
+  // Try new backend format first (weekly_summary.overview, weekly_summary.highlights)
+  const weeklySummary = (backendData?.data as any)?.weekly_summary
+  if (weeklySummary) {
+    return {
+      overview: weeklySummary.overview || mockData.overview,
+      highlights: weeklySummary.highlights || mockData.highlights,
+      // Ignore backend suggestions as per requirement
+      suggestions: []
+    }
+  }
+
+  // Fallback to old backend format (report.weekly_overview)
   if (!backendData?.data?.report?.weekly_overview) {
     return mockData
   }
 
   const weeklyOverview = backendData.data.report.weekly_overview
   const caloriesOverview = backendData.data.report.weekly_calories_overview
-  const dietaryInsights = backendData.data.report.dietary_insights
 
   return {
     overview: weeklyOverview.overall_trend || mockData.overview,
-    highlights: caloriesOverview?.evaluation || mockData.highlights,
-    // Use backend suggestions if exists and not empty, otherwise use mock
-    suggestions: (dietaryInsights && dietaryInsights.length > 0) ? dietaryInsights : mockData.suggestions
+    highlights: weeklyOverview.anomaly_alert || caloriesOverview?.evaluation || mockData.highlights,
+    // Ignore backend suggestions as per requirement
+    suggestions: []
   }
 }
 
@@ -235,7 +264,7 @@ export const adaptNutritionData = (
   backendData: BackendNutritionResponse | null,
   mockData: NutritionDomainModel
 ): NutritionDomainModel => {
-  console.log('[Nutrition Adapter] Adapting data, backend available:', !!backendData)
+  console.log('[Nutrition Adapter] Data received:', backendData)
 
   return {
     weeklyManagement: adaptWeeklyManagement(backendData, mockData.weeklyManagement),

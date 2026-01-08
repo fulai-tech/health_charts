@@ -37,6 +37,7 @@ export function useSpO2TrendData(dateRange?: DateRange) {
     select: (data): SpO2DomainModel => adaptSpO2Data(data),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   })
 }
 

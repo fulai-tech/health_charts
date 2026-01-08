@@ -70,16 +70,31 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
         awake: '#F9933B',
     }
 
-    // Placeholder data when no real data
-    const placeholderChartData = [
-        { name: 'Mon', deep: 60, light: 180, rem: 90, awake: 10 },
-        { name: 'Tue', deep: 50, light: 190, rem: 100, awake: 15 },
-        { name: 'Wed', deep: 70, light: 170, rem: 80, awake: 10 },
-        { name: 'Thu', deep: 55, light: 185, rem: 95, awake: 12 },
-        { name: 'Fri', deep: 65, light: 175, rem: 85, awake: 8 },
-        { name: 'Sat', deep: 80, light: 160, rem: 110, awake: 20 },
-        { name: 'Sun', deep: 60, light: 180, rem: 90, awake: 10 },
+    // Placeholder data when no real data - shows demo values for past days, 0 for future days
+    const currentWeekdayIndex = (() => {
+        const today = new Date()
+        const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday, ...
+        return dayOfWeek === 0 ? 6 : dayOfWeek - 1 // Convert to 0 = Monday, 6 = Sunday
+    })()
+
+    const placeholderValues = [
+        { deep: 60, light: 180, rem: 90, awake: 10 },
+        { deep: 50, light: 190, rem: 100, awake: 15 },
+        { deep: 70, light: 170, rem: 80, awake: 10 },
+        { deep: 55, light: 185, rem: 95, awake: 12 },
+        { deep: 65, light: 175, rem: 85, awake: 8 },
+        { deep: 80, light: 160, rem: 110, awake: 20 },
+        { deep: 60, light: 180, rem: 90, awake: 10 },
     ]
+
+    const placeholderChartData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((name, index) => ({
+        name,
+        // Show demo values for days up to today; future days show 0
+        deep: index <= currentWeekdayIndex ? placeholderValues[index].deep : 0,
+        light: index <= currentWeekdayIndex ? placeholderValues[index].light : 0,
+        rem: index <= currentWeekdayIndex ? placeholderValues[index].rem : 0,
+        awake: index <= currentWeekdayIndex ? placeholderValues[index].awake : 0,
+    }))
 
     const chartData = useMemo(
         () => data?.chartData?.map((point) => ({

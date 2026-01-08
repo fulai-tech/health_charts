@@ -47,6 +47,8 @@ export function formatDateToAPI(date: Date): string {
     return `${y}-${m}-${d}`
 }
 
+import { getPreviousWeekRange } from './dateUtils'
+
 /**
  * Configuration for the prefetch hook
  */
@@ -71,26 +73,24 @@ export function usePrefetchData<TData = unknown>(config: PrefetchConfig<TData>) 
 
     /**
      * Prefetch data for multiple previous weeks
-     * @param currentEndDate - The end date of the current displayed week
+     * @param currentWeekStart - The start date (Monday) of the current displayed week
      * @param weekCount - Number of previous weeks to prefetch (default: 3)
      */
-    const prefetchPreviousWeeks = useCallback((currentEndDate: Date, weekCount = 3) => {
-        console.log(`[${featureName} Prefetch] Starting prefetch of ${weekCount} previous weeks`)
+    const prefetchPreviousWeeks = useCallback((currentWeekStart: Date, weekCount = 3) => {
+        console.log(`[${featureName} Prefetch] Starting prefetch of ${weekCount} previous weeks from ${currentWeekStart}`)
+
+        let currentMonday = currentWeekStart
 
         for (let i = 1; i <= weekCount; i++) {
-            // Calculate date range for each previous week
-            const endDate = new Date(currentEndDate)
-            endDate.setDate(endDate.getDate() - (7 * i))
-
-            const startDate = new Date(endDate)
-            startDate.setDate(startDate.getDate() - 6)
+            // Use the shared utility to calculate the previous week range correctly
+            const { start: prevStart, end: prevEnd } = getPreviousWeekRange(currentMonday)
 
             const dateRange: DateRange = {
-                startDate: formatDateToAPI(startDate),
-                endDate: formatDateToAPI(endDate),
+                startDate: formatDateToAPI(prevStart),
+                endDate: formatDateToAPI(prevEnd),
             }
 
-            console.log(`[${featureName} Prefetch] Week ${i}: ${dateRange.startDate} to ${dateRange.endDate}`)
+            console.log(`[${featureName} Prefetch] Week -${i}: ${dateRange.startDate} to ${dateRange.endDate}`)
 
             // Prefetch the data - won't refetch if data is fresh
             queryClient.prefetchQuery({
@@ -98,6 +98,9 @@ export function usePrefetchData<TData = unknown>(config: PrefetchConfig<TData>) 
                 queryFn: () => fetchFn(dateRange),
                 staleTime,
             })
+
+            // Update currentMonday for the next iteration (going further back)
+            currentMonday = prevStart
         }
     }, [queryClient, featureName, queryKeyFn, fetchFn, staleTime])
 

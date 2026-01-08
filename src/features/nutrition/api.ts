@@ -13,15 +13,17 @@ export type { DateRange }
 // Demo Mode Toggle
 const USE_DEMO = false // Set to false to use real backend API
 
-// API Configuration
-const API_BASE_URL = 'https://test.fulai.tech/ns'
+// API Configuration for Nutrition (different from other indicators)
+const API_BASE_URL = 'https://test.fulai.tech'
+const NUTRITION_API_URL = `${API_BASE_URL}/ns/nutrition/calc/weekly_nutrition_report_app_new`
 const API_TOKEN = 'sk-proj-VvBPGYkFpr0SFMfZJvwDfNwJV4N_hdx5'
 const USER_ID = '69521a739c443012172f98b3'
 
 /**
  * Fetch nutrition data from backend API
+ * Uses specific nutrition endpoint with week_start_date and week_end_date
  */
-async function fetchBackendNutritionData(weekStartDate: string): Promise<BackendNutritionResponse | null> {
+async function fetchBackendNutritionData(weekStartDate: string, weekEndDate: string): Promise<BackendNutritionResponse | null> {
   // Skip backend request if in demo mode
   if (USE_DEMO) {
     console.log('[Nutrition API] Demo mode enabled, using mock data')
@@ -29,7 +31,7 @@ async function fetchBackendNutritionData(weekStartDate: string): Promise<Backend
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/nutrition/calc/weekly_nutrition_report_app_new`, {
+    const response = await fetch(NUTRITION_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +40,8 @@ async function fetchBackendNutritionData(weekStartDate: string): Promise<Backend
       body: JSON.stringify({
         user_id: USER_ID,
         force_refresh: false,
-        week_start_date: weekStartDate
+        week_start_date: weekStartDate,
+        week_end_date: weekEndDate
       })
     })
 
@@ -48,7 +51,8 @@ async function fetchBackendNutritionData(weekStartDate: string): Promise<Backend
     }
 
     const data: BackendNutritionResponse = await response.json()
-    
+    console.log('[Nutrition API] Response:', data)
+
     if (data.code !== 200) {
       console.warn('[Nutrition API] Backend returned error code:', data.code)
       return null
@@ -64,7 +68,7 @@ async function fetchBackendNutritionData(weekStartDate: string): Promise<Backend
 // Mock Data for fallback
 const MOCK_DATA: NutritionDomainModel = {
   weeklyManagement: {
-    currentCal: 3350,
+    currentCal: 33520,
     targetCal: 2350,
     remainingCal: 2350,
     percentage: 75,
@@ -148,12 +152,15 @@ export const nutritionQueryKeys = {
  * Main fetch function that combines backend data with mock data
  */
 export const fetchNutritionData = async (dateRange?: { start_date?: string, end_date?: string }): Promise<NutritionDomainModel> => {
-  // Use start_date as week_start_date for backend API
+  // Use start_date as week_start_date and end_date as week_end_date
   const weekStartDate = dateRange?.start_date || new Date().toISOString().split('T')[0]
-  
+  const weekEndDate = dateRange?.end_date || new Date().toISOString().split('T')[0]
+
+  console.log('[Nutrition API] Fetching with week range:', weekStartDate, 'to', weekEndDate)
+
   // Try to fetch from backend
-  const backendData = await fetchBackendNutritionData(weekStartDate)
-  
+  const backendData = await fetchBackendNutritionData(weekStartDate, weekEndDate)
+
   // Use adapter to merge backend data with mock data
   return adaptNutritionData(backendData, MOCK_DATA)
 }

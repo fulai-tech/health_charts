@@ -5,20 +5,7 @@ import type {
   BPStatus,
   TrendDirection,
 } from './types'
-
-/**
- * Map Chinese weekday labels to translation keys
- * This is part of the Adapter Pattern - NEVER display backend strings directly
- */
-const WEEKDAY_MAP: Record<string, string> = {
-  周一: 'weekdays.mon',
-  周二: 'weekdays.tue',
-  周三: 'weekdays.wed',
-  周四: 'weekdays.thu',
-  周五: 'weekdays.fri',
-  周六: 'weekdays.sat',
-  周日: 'weekdays.sun',
-}
+import { ensureFullWeekData, WEEKDAY_LABEL_MAP, getDateForWeekday, getCurrentWeekDateRange } from '@/lib/dateUtils'
 
 /**
  * Map Chinese BP status labels to standard type codes
@@ -70,19 +57,29 @@ function determineBPStatus(systolic: number, diastolic: number): BPStatus {
  */
 export function adaptBPData(apiData: BPDetailData): BPDomainModel {
   const rawData = apiData?.trend_chart?.chart_data || []
+  const { start: currentMonday } = getCurrentWeekDateRange()
 
   // Transform each data point
-  const chartData: BPDataPoint[] = rawData.map((point) => {
+  const partialChartData: BPDataPoint[] = rawData.map((point) => {
     const date = new Date(point.date)
 
     return {
       date,
       dateLabel: formatDate(point.date),
-      weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
+      weekdayKey: WEEKDAY_LABEL_MAP[point.label] || 'weekdays.mon',
       systolic: point.systolic || 0,
       diastolic: point.diastolic || 0,
     }
   })
+
+  // Ensure all 7 weekdays are present (fill missing days with 0 values)
+  const chartData = ensureFullWeekData(partialChartData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    systolic: 0,
+    diastolic: 0,
+  }))
 
   // Get averages from API response with fallbacks
   const avgSystolic = apiData?.overview?.systolic_avg || 0
@@ -128,6 +125,9 @@ export function adaptBPData(apiData: BPDetailData): BPDomainModel {
     type: BP_STATUS_MAP[item.label] || item.type || 'normal',
   }))
 
+  // Get weekly summary
+  const weeklySummary = apiData?.weekly_summary || {}
+
   const result: BPDomainModel = {
     chartData,
     yAxisRange: apiData?.trend_chart?.y_axis_range || { min: 60, max: 160 },
@@ -153,6 +153,12 @@ export function adaptBPData(apiData: BPDetailData): BPDomainModel {
         diastolic: comparison.previous?.diastolic_avg || 0,
       },
       insight: comparison.insight || null,
+    },
+    weeklySummary: {
+      overview: weeklySummary.overview || null,
+      highlights: weeklySummary.highlights || null,
+      suggestions: weeklySummary.suggestions || [],
+      dataAnalysis: [],
     },
     latestReading,
   }

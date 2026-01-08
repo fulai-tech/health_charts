@@ -5,6 +5,7 @@ import { VITAL_COLORS, CHART_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme
 import type { SpO2DomainModel } from '../types'
 import { memo, useMemo } from 'react'
 import { TrendLineChart } from '@/components/charts/TrendLineChart'
+import { getCurrentWeekdayIndex } from '@/lib/dateUtils'
 
 interface SpO2TrendyReportCardProps {
   data?: SpO2DomainModel
@@ -58,15 +59,31 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.spo2
 
-  const placeholderChartData = useMemo(() => [
-    { name: 'Mon', weekdayKey: 'weekday.mon', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
-    { name: 'Tues', weekdayKey: 'weekday.tue', range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
-    { name: 'Wed', weekdayKey: 'weekday.wed', range: [96, 99] as [number, number], avg: 98, max: 99, min: 96 },
-    { name: 'Thu', weekdayKey: 'weekday.thu', range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
-    { name: 'Fri', weekdayKey: 'weekday.fri', range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
-    { name: 'Sat', weekdayKey: 'weekday.sat', range: [97, 99] as [number, number], avg: 98, max: 99, min: 97 },
-    { name: 'Sun', weekdayKey: 'weekday.sun', range: [96, 98] as [number, number], avg: 97, max: 98, min: 96 },
-  ], [])
+  // Placeholder data when no real data - shows demo values for past days, 0 for future days
+  const placeholderChartData = useMemo(() => {
+    const currentWeekdayIndex = getCurrentWeekdayIndex() // 0 = Monday, 6 = Sunday
+    const weekdays = ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const weekdayKeys = ['weekday.mon', 'weekday.tue', 'weekday.wed', 'weekday.thu', 'weekday.fri', 'weekday.sat', 'weekday.sun']
+    const values = [
+      { range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
+      { range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
+      { range: [96, 99] as [number, number], avg: 98, max: 99, min: 96 },
+      { range: [95, 98] as [number, number], avg: 97, max: 98, min: 95 },
+      { range: [96, 99] as [number, number], avg: 97, max: 99, min: 96 },
+      { range: [97, 99] as [number, number], avg: 98, max: 99, min: 97 },
+      { range: [96, 98] as [number, number], avg: 97, max: 98, min: 96 },
+    ]
+
+    return weekdays.map((name, index) => ({
+      name,
+      weekdayKey: weekdayKeys[index],
+      // Show demo values for days up to today; future days show 0
+      range: index <= currentWeekdayIndex ? values[index].range : [0, 0] as [number, number],
+      avg: index <= currentWeekdayIndex ? values[index].avg : 0,
+      max: index <= currentWeekdayIndex ? values[index].max : 0,
+      min: index <= currentWeekdayIndex ? values[index].min : 0,
+    }))
+  }, [])
 
   const chartData = useMemo(
     () => data?.chartData?.map((point, index) => ({

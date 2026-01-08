@@ -102,20 +102,6 @@ const WeeklyOverviewCardInner = ({
                     </p>
                 </div>
             </div>
-
-            {/* Suggestions */}
-            {suggestions && suggestions.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                    <ul className="space-y-2">
-                        {suggestions.map((suggestion, index) => (
-                            <li key={index} className="flex items-start gap-2 text-sm text-slate-600">
-                                <span style={{ color: themeColor }}>•</span>
-                                {suggestion}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
         </Card>
     )
 }

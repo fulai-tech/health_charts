@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { EmotionTrendyReportCard } from '@/features/emotion/components/EmotionTrendyReportCard'
@@ -12,26 +12,14 @@ import { useEmotionTrendData, usePrefetchEmotionData } from '@/features/emotion/
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { UI_STYLES } from '@/config/theme'
-
-/**
- * Format Date to YYYY-MM-DD string
- */
-function formatDateToAPI(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
-}
-
-/**
- * Format Date for display (YYYY/MM/DD)
- */
-function formatDateForDisplay(date: Date): string {
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}/${m}/${d}`
-}
+import {
+  formatDateToAPI,
+  formatDateForDisplay,
+  getCurrentWeekDateRange,
+  getPreviousWeekRange,
+  getNextWeekRange,
+  canNavigateToNextWeek
+} from '@/lib/dateUtils'
 
 /**
  * Emotion Details Page
@@ -41,27 +29,16 @@ export function EmotionPage() {
   const { theme } = useUrlConfig()
   const { prefetchPreviousWeeks } = usePrefetchEmotionData()
 
-  // Date range state
-  const [dateRange, setDateRange] = useState(() => {
-    const end = new Date()
-    const start = new Date()
-    start.setDate(end.getDate() - 6)
-    return { start, end }
-  })
+  // Date range state - week-aligned (Monday to today or Sunday)
+  const [dateRange, setDateRange] = useState(() => getCurrentWeekDateRange())
 
   // Prefetch previous weeks
   useEffect(() => {
-    prefetchPreviousWeeks(dateRange.end, 3)
-  }, [dateRange.end, prefetchPreviousWeeks])
+    prefetchPreviousWeeks(dateRange.start, 3)
+  }, [dateRange.start, prefetchPreviousWeeks])
 
-  // Check if we can go to next period
-  const canGoNext = useMemo(() => {
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const endDate = new Date(dateRange.end)
-    endDate.setHours(0, 0, 0, 0)
-    return endDate < today
-  }, [dateRange.end])
+  // Check if we can navigate to next week
+  const canGoNext = useMemo(() => canNavigateToNextWeek(dateRange.start), [dateRange.start])
 
   // Format dates for API
   const apiDateRange = useMemo(
@@ -81,34 +58,16 @@ export function EmotionPage() {
     [dateRange]
   )
 
-  // Handle date navigation
+  // Handle date navigation - week by week
   const handlePrevious = () => {
-    setDateRange((prev) => {
-      const newStart = new Date(prev.start)
-      const newEnd = new Date(prev.end)
-      newStart.setDate(newStart.getDate() - 7)
-      newEnd.setDate(newEnd.getDate() - 7)
-      return { start: newStart, end: newEnd }
-    })
+    setDateRange((prev) => getPreviousWeekRange(prev.start))
   }
 
   const handleNext = () => {
     if (!canGoNext) return
-
     setDateRange((prev) => {
-      const newStart = new Date(prev.start)
-      const newEnd = new Date(prev.end)
-      newStart.setDate(newStart.getDate() + 7)
-      newEnd.setDate(newEnd.getDate() + 7)
-
-      const today = new Date()
-      if (newEnd > today) {
-        newEnd.setTime(today.getTime())
-        newStart.setTime(today.getTime())
-        newStart.setDate(newStart.getDate() - 6)
-      }
-
-      return { start: newStart, end: newEnd }
+      const next = getNextWeekRange(prev.start)
+      return next || prev
     })
   }
 

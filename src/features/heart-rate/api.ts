@@ -37,6 +37,7 @@ export function useHRTrendData(dateRange?: DateRange) {
     select: (data): HRDomainModel => adaptHRData(data),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
+    placeholderData: (previousData) => previousData,
   })
 }
 

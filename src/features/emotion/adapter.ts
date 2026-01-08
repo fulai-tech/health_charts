@@ -6,19 +6,7 @@ import type {
   TrendDirection,
   EmotionLevel,
 } from './types'
-
-/**
- * Map Chinese weekday labels to translation keys
- */
-const WEEKDAY_MAP: Record<string, string> = {
-  周一: 'weekdays.mon',
-  周二: 'weekdays.tue',
-  周三: 'weekdays.wed',
-  周四: 'weekdays.thu',
-  周五: 'weekdays.fri',
-  周六: 'weekdays.sat',
-  周日: 'weekdays.sun',
-}
+import { ensureFullWeekData, WEEKDAY_LABEL_MAP, getDateForWeekday, getCurrentWeekDateRange, getCurrentWeekdayIndex, WEEKDAY_KEYS } from '@/lib/dateUtils'
 
 /**
  * Format date to MM/DD
@@ -121,50 +109,70 @@ interface ApiEmotionData {
 
 /**
  * Dummy data for when API doesn't return data
- * Returns consistent demo data for all emotion components
+ * Returns consistent demo data for all emotion components.
+ * Respects week boundaries - only generates data for Monday to today.
  */
 export function getDummyEmotionData(): EmotionDomainModel {
-  const today = new Date()
+  const { start: currentMonday } = getCurrentWeekDateRange()
+  const currentWeekdayIndex = getCurrentWeekdayIndex() // 0 = Monday, 6 = Sunday
   const dummyTrendData: EmotionTrendDataPoint[] = []
   const dummyCompositionData: EmotionCompositionDataPoint[] = []
 
-  // Consistent score values for 7 days
+  // Consistent score values for days (only generate up to today)
   const scores = [78, 82, 75, 88, 85, 90, 86]
   const positivePercents = [25, 30, 20, 35, 32, 40, 38]
   const neutralPercents = [55, 50, 60, 45, 48, 42, 44]
   const negativePercents = [20, 20, 20, 20, 20, 18, 18]
 
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    const weekdayIndex = date.getDay()
-    const weekdayKeys = ['weekdays.sun', 'weekdays.mon', 'weekdays.tue', 'weekdays.wed', 'weekdays.thu', 'weekdays.fri', 'weekdays.sat']
-    const dataIndex = 6 - i
+  // Only generate data for Monday through today (not future days)
+  for (let i = 0; i <= currentWeekdayIndex; i++) {
+    const date = getDateForWeekday(currentMonday, i)
+    const weekdayKey = WEEKDAY_KEYS[i]
 
     dummyTrendData.push({
       date,
       dateLabel: formatDate(date.toISOString().split('T')[0]),
-      weekdayKey: weekdayKeys[weekdayIndex],
-      score: scores[dataIndex],
+      weekdayKey,
+      score: scores[i],
     })
 
     dummyCompositionData.push({
       date,
       dateLabel: formatDate(date.toISOString().split('T')[0]),
-      weekdayKey: weekdayKeys[weekdayIndex],
-      positivePercent: positivePercents[dataIndex],
-      neutralPercent: neutralPercents[dataIndex],
-      negativePercent: negativePercents[dataIndex],
-      positiveCount: Math.round(positivePercents[dataIndex] / 5),
-      neutralCount: Math.round(neutralPercents[dataIndex] / 5),
-      negativeCount: Math.round(negativePercents[dataIndex] / 5),
+      weekdayKey,
+      positivePercent: positivePercents[i],
+      neutralPercent: neutralPercents[i],
+      negativePercent: negativePercents[i],
+      positiveCount: Math.round(positivePercents[i] / 5),
+      neutralCount: Math.round(neutralPercents[i] / 5),
+      negativeCount: Math.round(negativePercents[i] / 5),
     })
   }
 
+  // Fill remaining weekdays with 0 values using ensureFullWeekData
+  const filledTrendData = ensureFullWeekData(dummyTrendData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    score: 0,
+  }))
+
+  const filledCompositionData = ensureFullWeekData(dummyCompositionData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    positivePercent: 0,
+    neutralPercent: 0,
+    negativePercent: 0,
+    positiveCount: 0,
+    neutralCount: 0,
+    negativeCount: 0,
+  }))
+
   return {
-    trendChartData: dummyTrendData,
+    trendChartData: filledTrendData,
     yAxisRange: { min: 0, max: 100 },
-    compositionData: dummyCompositionData,
+    compositionData: filledCompositionData,
     summary: {
       avgValue: 85,
       previousAvg: 86,
@@ -254,25 +262,48 @@ export function adaptEmotionData(apiData: ApiEmotionData | null | undefined): Em
 
   // Transform trend chart data
   const rawTrendData = apiData?.trend_chart?.chart_data || []
-  const trendChartData: EmotionTrendDataPoint[] = rawTrendData.map((point) => ({
+  const { start: currentMonday } = getCurrentWeekDateRange()
+
+  const partialTrendData: EmotionTrendDataPoint[] = rawTrendData.map((point) => ({
     date: new Date(point.date),
     dateLabel: formatDate(point.date),
-    weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
+    weekdayKey: WEEKDAY_LABEL_MAP[point.label] || 'weekdays.mon',
     score: point.score,
+  }))
+
+  // Ensure all 7 weekdays are present in trend data
+  const trendChartData = ensureFullWeekData(partialTrendData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    score: 0,
   }))
 
   // Transform composition data
   const rawCompositionData = apiData?.emotion_composition?.chart_data || []
-  const compositionData: EmotionCompositionDataPoint[] = rawCompositionData.map((point) => ({
+  const partialCompositionData: EmotionCompositionDataPoint[] = rawCompositionData.map((point) => ({
     date: new Date(point.date),
     dateLabel: formatDate(point.date),
-    weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
+    weekdayKey: WEEKDAY_LABEL_MAP[point.label] || 'weekdays.mon',
     positivePercent: point.positive_percent,
     neutralPercent: point.neutral_percent,
     negativePercent: point.negative_percent,
     positiveCount: point.positive_count,
     neutralCount: point.neutral_count,
     negativeCount: point.negative_count,
+  }))
+
+  // Ensure all 7 weekdays are present in composition data
+  const compositionData = ensureFullWeekData(partialCompositionData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    positivePercent: 0,
+    neutralPercent: 0,
+    negativePercent: 0,
+    positiveCount: 0,
+    neutralCount: 0,
+    negativeCount: 0,
   }))
 
   // Transform diaries
@@ -294,8 +325,8 @@ export function adaptEmotionData(apiData: ApiEmotionData | null | undefined): Em
   const previousAvg = overview.previous_average || 0
   const maxValue = overview.max || 0
   const minValue = overview.min || 0
-  const maxWeekdayKey = overview.max_label ? (WEEKDAY_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
-  const minWeekdayKey = overview.min_label ? (WEEKDAY_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
+  const maxWeekdayKey = overview.max_label ? (WEEKDAY_LABEL_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
+  const minWeekdayKey = overview.min_label ? (WEEKDAY_LABEL_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
   const emotionLevel = safeEmotionLevel(overview.emotion_level)
   const emotionLabel = overview.emotion_label || ''
 

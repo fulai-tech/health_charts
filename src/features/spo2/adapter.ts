@@ -6,19 +6,7 @@ import type {
   TrendDirection,
   SpO2WeeklySummary,
 } from './types'
-
-/**
- * Map Chinese weekday labels to translation keys
- */
-const WEEKDAY_MAP: Record<string, string> = {
-  周一: 'weekdays.mon',
-  周二: 'weekdays.tue',
-  周三: 'weekdays.wed',
-  周四: 'weekdays.thu',
-  周五: 'weekdays.fri',
-  周六: 'weekdays.sat',
-  周日: 'weekdays.sun',
-}
+import { ensureFullWeekData, WEEKDAY_LABEL_MAP, getDateForWeekday, getCurrentWeekDateRange } from '@/lib/dateUtils'
 
 /**
  * Format date to MM/DD
@@ -55,7 +43,7 @@ function safeTrend(trend?: string): TrendDirection {
  */
 function getWeekdayKey(label?: string): string {
   if (!label) return 'weekdays.mon'
-  return WEEKDAY_MAP[label] || 'weekdays.mon'
+  return WEEKDAY_LABEL_MAP[label] || 'weekdays.mon'
 }
 
 /**
@@ -65,22 +53,34 @@ export function adaptSpO2Data(apiData: SpO2DetailData): SpO2DomainModel {
   console.log('[SpO2 Adapter] Input:', apiData)
 
   const rawData = apiData?.trend_chart?.chart_data || []
+  const { start: currentMonday } = getCurrentWeekDateRange()
 
   // Transform each data point
-  const chartData: SpO2DataPoint[] = rawData.map((point) => {
+  const partialChartData: SpO2DataPoint[] = rawData.map((point) => {
     const date = new Date(point.date)
     const avg = point.avg ?? Math.round((point.max + point.min) / 2)
 
     return {
       date,
       dateLabel: formatDate(point.date),
-      weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
+      weekdayKey: WEEKDAY_LABEL_MAP[point.label] || 'weekdays.mon',
       max: point.max || 0,
       min: point.min || 0,
       avg,
       range: [point.min || 0, point.max || 0] as [number, number],
     }
   })
+
+  // Ensure all 7 weekdays are present (fill missing days with 0 values)
+  const chartData = ensureFullWeekData(partialChartData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    max: 0,
+    min: 0,
+    avg: 0,
+    range: [0, 0] as [number, number],
+  }))
 
   // Get average from API
   const avgValue = apiData?.overview?.average || 0
@@ -107,11 +107,11 @@ export function adaptSpO2Data(apiData: SpO2DetailData): SpO2DomainModel {
   const latestReading =
     chartData.length > 0
       ? {
-          avg: chartData[chartData.length - 1].avg,
-          min: chartData[chartData.length - 1].min,
-          max: chartData[chartData.length - 1].max,
-          date: chartData[chartData.length - 1].date,
-        }
+        avg: chartData[chartData.length - 1].avg,
+        min: chartData[chartData.length - 1].min,
+        max: chartData[chartData.length - 1].max,
+        date: chartData[chartData.length - 1].date,
+      }
       : null
 
   // Process weekly summary

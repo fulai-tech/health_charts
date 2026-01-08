@@ -7,11 +7,6 @@ import { memo, useMemo } from 'react'
 
 interface BPWeeklyOverviewCardProps {
   data?: BPDomainModel
-  weeklySummary?: {
-    overview: string | null
-    highlights: string | null
-    suggestions: string[]
-  }
   className?: string
   isLoading?: boolean
 }
@@ -20,8 +15,7 @@ interface BPWeeklyOverviewCardProps {
  * BP Weekly Overview Card
  */
 const BPWeeklyOverviewCardInner = ({
-  data: _data,
-  weeklySummary,
+  data,
   className,
   isLoading,
 }: BPWeeklyOverviewCardProps) => {
@@ -30,20 +24,20 @@ const BPWeeklyOverviewCardInner = ({
 
   const overviewText = useMemo(
     () =>
-      weeklySummary?.overview ||
+      data?.weeklySummary?.overview ||
       t('page.bloodPressure.defaultOverview', {
         defaultValue: 'Your blood pressure is generally within the ideal range. Although your systolic blood pressure has risen slightly compared to last week, it remains within the normal fluctuation range.'
       }),
-    [weeklySummary?.overview, t]
+    [data?.weeklySummary?.overview, t]
   )
 
   const highlightsText = useMemo(
     () =>
-      weeklySummary?.highlights ||
+      data?.weeklySummary?.highlights ||
       t('page.bloodPressure.defaultHighlights', {
         defaultValue: 'The trend chart shows that your blood pressure rose significantly during the week (Wednesday and Thursday), with a peak systolic pressure approaching 150 mmHg. Meanwhile, the statistics show that your blood pressure measurements fluctuated considerably across different levels. We will continue to monitor your condition and help you identify any possible causes for the elevated blood pressure.'
       }),
-    [weeklySummary?.highlights, t]
+    [data?.weeklySummary?.highlights, t]
   )
 
   return (
@@ -54,7 +48,7 @@ const BPWeeklyOverviewCardInner = ({
       highlightText={highlightsText}
       highlightLabelKey="page.bloodPressure.needsAttention"
       highlightColor="#FBBF24"
-      suggestions={weeklySummary?.suggestions}
+      suggestions={data?.weeklySummary?.suggestions}
       themeColor={themeColor}
       className={className}
       isLoading={isLoading}

@@ -82,4 +82,11 @@ export interface BPDomainModel {
     diastolic: number
     date: Date
   } | null
+  /** Weekly summary */
+  weeklySummary: {
+    overview: string | null
+    highlights: string | null
+    suggestions: string[]
+    dataAnalysis: string[]
+  }
 }

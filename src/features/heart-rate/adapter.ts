@@ -5,19 +5,7 @@ import type {
   HRStatus,
   TrendDirection,
 } from './types'
-
-/**
- * Map Chinese weekday labels to translation keys
- */
-const WEEKDAY_MAP: Record<string, string> = {
-  周一: 'weekdays.mon',
-  周二: 'weekdays.tue',
-  周三: 'weekdays.wed',
-  周四: 'weekdays.thu',
-  周五: 'weekdays.fri',
-  周六: 'weekdays.sat',
-  周日: 'weekdays.sun',
-}
+import { ensureFullWeekData, WEEKDAY_LABEL_MAP, getDateForWeekday, getCurrentWeekDateRange } from '@/lib/dateUtils'
 
 /**
  * Format date to MM/DD
@@ -56,9 +44,10 @@ function safeTrend(trend?: string): TrendDirection {
 export function adaptHRData(apiData: HRDetailData): HRDomainModel {
 
   const rawData = apiData?.trend_chart?.chart_data || []
+  const { start: currentMonday } = getCurrentWeekDateRange()
 
   // Transform each data point - now with min/max/avg range
-  const chartData: HRDataPoint[] = rawData.map((point) => {
+  const partialChartData: HRDataPoint[] = rawData.map((point) => {
     const date = new Date(point.date)
     const max = point.max ?? point.value ?? 0
     const min = point.min ?? point.value ?? 0
@@ -67,20 +56,30 @@ export function adaptHRData(apiData: HRDetailData): HRDomainModel {
     return {
       date,
       dateLabel: formatDate(point.date),
-      weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
+      weekdayKey: WEEKDAY_LABEL_MAP[point.label] || 'weekdays.mon',
       max,
       min,
       avg,
     }
   })
 
+  // Ensure all 7 weekdays are present (fill missing days with 0 values)
+  const chartData = ensureFullWeekData(partialChartData, (weekdayKey, index) => ({
+    date: getDateForWeekday(currentMonday, index),
+    dateLabel: '',
+    weekdayKey,
+    max: 0,
+    min: 0,
+    avg: 0,
+  }))
+
   // Get values from overview
   const overview = apiData?.overview || {}
   const avgValue = overview.average || 0
   const maxValue = overview.max ?? (chartData.length > 0 ? Math.max(...chartData.map(p => p.max)) : 0)
   const minValue = overview.min ?? (chartData.length > 0 ? Math.min(...chartData.map(p => p.min)) : 0)
-  const maxWeekdayKey = overview.max_label ? (WEEKDAY_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
-  const minWeekdayKey = overview.min_label ? (WEEKDAY_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
+  const maxWeekdayKey = overview.max_label ? (WEEKDAY_LABEL_MAP[overview.max_label] || 'weekdays.mon') : 'weekdays.mon'
+  const minWeekdayKey = overview.min_label ? (WEEKDAY_LABEL_MAP[overview.min_label] || 'weekdays.mon') : 'weekdays.mon'
 
   const avgResting = overview.resting_avg
 

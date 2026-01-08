@@ -6,19 +6,7 @@ import type {
     TrendDirection,
     SleepStageStatus,
 } from './types'
-
-/**
- * Map Chinese weekday labels to translation keys
- */
-const WEEKDAY_MAP: Record<string, string> = {
-    周一: 'weekdays.mon',
-    周二: 'weekdays.tue',
-    周三: 'weekdays.wed',
-    周四: 'weekdays.thu',
-    周五: 'weekdays.fri',
-    周六: 'weekdays.sat',
-    周日: 'weekdays.sun',
-}
+import { ensureFullWeekData, WEEKDAY_LABEL_MAP, getDateForWeekday, getCurrentWeekDateRange } from '@/lib/dateUtils'
 
 /**
  * Map sleep stage types to translation keys
@@ -74,15 +62,16 @@ function mapEvaluation(evaluation: string): SleepStageStatus {
  */
 export function adaptSleepData(apiData: SleepDetailData): SleepDomainModel {
     const rawData = apiData?.trend_chart?.chart_data || []
+    const { start: currentMonday } = getCurrentWeekDateRange()
 
     // Transform each data point
-    const chartData: SleepDataPoint[] = rawData.map((point) => {
+    const partialChartData: SleepDataPoint[] = rawData.map((point) => {
         const date = new Date(point.date)
 
         return {
             date,
             dateLabel: formatDate(point.date),
-            weekdayKey: WEEKDAY_MAP[point.label] || 'weekdays.mon',
+            weekdayKey: WEEKDAY_LABEL_MAP[point.label] || 'weekdays.mon',
             total: point.total || 0,
             totalText: point.total_text || '',
             deep: point.deep || 0,
@@ -91,6 +80,19 @@ export function adaptSleepData(apiData: SleepDetailData): SleepDomainModel {
             awake: point.awake || 0,
         }
     })
+
+    // Ensure all 7 weekdays are present (fill missing days with 0 values)
+    const chartData = ensureFullWeekData(partialChartData, (weekdayKey, index) => ({
+        date: getDateForWeekday(currentMonday, index),
+        dateLabel: '',
+        weekdayKey,
+        total: 0,
+        totalText: '',
+        deep: 0,
+        light: 0,
+        rem: 0,
+        awake: 0,
+    }))
 
     // Get overview data
     const overview = apiData?.overview || {}

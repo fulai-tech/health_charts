@@ -5,6 +5,7 @@ import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import type { BPDomainModel } from '../types'
 import { memo, useMemo } from 'react'
 import { TrendLineChart } from '@/components/charts/TrendLineChart'
+import { getCurrentWeekdayIndex } from '@/lib/dateUtils'
 
 interface BPTrendyReportCardProps {
   data?: BPDomainModel
@@ -45,16 +46,27 @@ const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportC
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.bp
 
-  // Placeholder data when no real data
-  const placeholderChartData = [
-    { name: 'Mon', systolic: 120, diastolic: 80 },
-    { name: 'Tues', systolic: 118, diastolic: 78 },
-    { name: 'Wed', systolic: 122, diastolic: 82 },
-    { name: 'Thu', systolic: 119, diastolic: 79 },
-    { name: 'Fri', systolic: 121, diastolic: 81 },
-    { name: 'Sat', systolic: 117, diastolic: 77 },
-    { name: 'Sun', systolic: 120, diastolic: 80 },
-  ]
+  // Placeholder data when no real data - shows demo values for past days, 0 for future days
+  const placeholderChartData = useMemo(() => {
+    const currentWeekdayIndex = getCurrentWeekdayIndex() // 0 = Monday, 6 = Sunday
+    const weekdays = ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const values = [
+      { systolic: 120, diastolic: 80 },
+      { systolic: 118, diastolic: 78 },
+      { systolic: 122, diastolic: 82 },
+      { systolic: 119, diastolic: 79 },
+      { systolic: 121, diastolic: 81 },
+      { systolic: 117, diastolic: 77 },
+      { systolic: 120, diastolic: 80 },
+    ]
+
+    return weekdays.map((name, index) => ({
+      name,
+      // Show demo values for days up to today; future days show 0
+      systolic: index <= currentWeekdayIndex ? values[index].systolic : 0,
+      diastolic: index <= currentWeekdayIndex ? values[index].diastolic : 0,
+    }))
+  }, [])
 
   const chartData = useMemo(
     () => data?.chartData?.map((point, index) => ({
@@ -62,7 +74,7 @@ const BPTrendyReportCardInner = ({ data, className, isLoading }: BPTrendyReportC
       systolic: point.systolic,
       diastolic: point.diastolic,
     })) ?? placeholderChartData,
-    [data?.chartData]
+    [data?.chartData, placeholderChartData]
   )
 
   return (

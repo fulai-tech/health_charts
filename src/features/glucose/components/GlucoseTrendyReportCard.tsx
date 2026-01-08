@@ -5,6 +5,7 @@ import { VITAL_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
 import type { GlucoseDomainModel } from '../types'
 import { memo, useMemo } from 'react'
 import { TrendLineChart } from '@/components/charts/TrendLineChart'
+import { getCurrentWeekdayIndex } from '@/lib/dateUtils'
 
 interface GlucoseTrendyReportCardProps {
   data?: GlucoseDomainModel
@@ -58,16 +59,31 @@ const GlucoseTrendyReportCardInner = ({ data, className, isLoading }: GlucoseTre
   const { t } = useTranslation()
   const themeColor = VITAL_COLORS.glucose
 
-  // Placeholder data when no real data
-  const placeholderChartData = useMemo(() => [
-    { name: 'Mon', weekdayKey: 'weekday.mon', range: [4.5, 6.5] as [number, number], avg: 5.5, max: 6.5, min: 4.5 },
-    { name: 'Tues', weekdayKey: 'weekday.tue', range: [4.8, 7.0] as [number, number], avg: 5.8, max: 7.0, min: 4.8 },
-    { name: 'Wed', weekdayKey: 'weekday.wed', range: [4.6, 6.8] as [number, number], avg: 5.6, max: 6.8, min: 4.6 },
-    { name: 'Thu', weekdayKey: 'weekday.thu', range: [4.4, 6.4] as [number, number], avg: 5.4, max: 6.4, min: 4.4 },
-    { name: 'Fri', weekdayKey: 'weekday.fri', range: [4.7, 6.9] as [number, number], avg: 5.7, max: 6.9, min: 4.7 },
-    { name: 'Sat', weekdayKey: 'weekday.sat', range: [4.5, 6.6] as [number, number], avg: 5.5, max: 6.6, min: 4.5 },
-    { name: 'Sun', weekdayKey: 'weekday.sun', range: [4.6, 6.7] as [number, number], avg: 5.6, max: 6.7, min: 4.6 },
-  ], [])
+  // Placeholder data when no real data - shows demo values for past days, 0 for future days
+  const placeholderChartData = useMemo(() => {
+    const currentWeekdayIndex = getCurrentWeekdayIndex() // 0 = Monday, 6 = Sunday
+    const weekdays = ['Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const weekdayKeys = ['weekday.mon', 'weekday.tue', 'weekday.wed', 'weekday.thu', 'weekday.fri', 'weekday.sat', 'weekday.sun']
+    const values = [
+      { range: [4.5, 6.5] as [number, number], avg: 5.5, max: 6.5, min: 4.5 },
+      { range: [4.8, 7.0] as [number, number], avg: 5.8, max: 7.0, min: 4.8 },
+      { range: [4.6, 6.8] as [number, number], avg: 5.6, max: 6.8, min: 4.6 },
+      { range: [4.4, 6.4] as [number, number], avg: 5.4, max: 6.4, min: 4.4 },
+      { range: [4.7, 6.9] as [number, number], avg: 5.7, max: 6.9, min: 4.7 },
+      { range: [4.5, 6.6] as [number, number], avg: 5.5, max: 6.6, min: 4.5 },
+      { range: [4.6, 6.7] as [number, number], avg: 5.6, max: 6.7, min: 4.6 },
+    ]
+
+    return weekdays.map((name, index) => ({
+      name,
+      weekdayKey: weekdayKeys[index],
+      // Show demo values for days up to today; future days show 0
+      range: index <= currentWeekdayIndex ? values[index].range : [0, 0] as [number, number],
+      avg: index <= currentWeekdayIndex ? values[index].avg : 0,
+      max: index <= currentWeekdayIndex ? values[index].max : 0,
+      min: index <= currentWeekdayIndex ? values[index].min : 0,
+    }))
+  }, [])
 
   // Prepare chart data with range as [min, max] tuple for Area
   const chartData = useMemo(
