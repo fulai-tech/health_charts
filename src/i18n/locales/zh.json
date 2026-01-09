@@ -82,7 +82,9 @@
     "danger": "危险",
     "normalHighValue": "正常高值",
     "tooLow": "过低",
-    "tooHigh": "过高"
+    "tooHigh": "过高",
+    "exceed": "偏高",
+    "fair": "一般"
   },
   "trend": {
     "up": "上升",
@@ -275,10 +277,38 @@
     "newestValue": "最新值",
     "average": "平均值",
     "standard": "参考值",
+    "highest": "最高",
+    "lowest": "最低",
+    "range": "范围",
+    "mean": "均值",
+    "loading": "加载中...",
+    "error": "数据加载失败",
     "demoMode": "演示模式",
     "toggleDemoMode": "切换演示模式",
     "demoModeOn": "使用假数据",
     "demoModeOff": "使用后端数据"
+  },
+  "sleep": {
+    "deep": "深度睡眠",
+    "light": "浅睡眠",
+    "rem": "快速眼动",
+    "awake": "清醒",
+    "bedTime": "上床时间",
+    "sleepTime": "入睡时间",
+    "wakeTime": "醒来时间",
+    "getUpTime": "起床时间",
+    "sleepLatency": "入睡耗时",
+    "sleepEfficiency": "睡眠效率"
+  },
+  "emotion": {
+    "happy": "快乐",
+    "calm": "平静",
+    "surprised": "惊讶",
+    "sad": "难过",
+    "angry": "愤怒",
+    "fearful": "恐惧",
+    "disgusted": "厌恶",
+    "neutral": "中性"
   },
   "healthy": {
     "comprehensiveHealth": "综合健康数据",

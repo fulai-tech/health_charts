@@ -82,7 +82,9 @@
     "danger": "Danger",
     "normalHighValue": "Normal high value",
     "tooLow": "Too low",
-    "tooHigh": "Too High"
+    "tooHigh": "Too High",
+    "exceed": "Exceed",
+    "fair": "Fair"
   },
   "trend": {
     "up": "Increased",
@@ -305,13 +307,35 @@
     "weekAvg": "7d Avg",
     "newestValue": "Latest",
     "average": "Average",
-    "standard": "Reference"
+    "standard": "Reference",
+    "highest": "Highest",
+    "lowest": "Lowest",
+    "range": "Range",
+    "mean": "Mean",
+    "loading": "Loading...",
+    "error": "Failed to load data"
   },
   "sleep": {
     "deep": "Deep sleep",
     "light": "Light sleep",
     "rem": "REM",
-    "awake": "Awake"
+    "awake": "Awake",
+    "bedTime": "Bed rest time",
+    "sleepTime": "Time to fall asleep",
+    "wakeTime": "Post-awake time",
+    "getUpTime": "Wake-up time",
+    "sleepLatency": "Falling asleep takes time",
+    "sleepEfficiency": "Sleep efficiency"
+  },
+  "emotion": {
+    "happy": "Happy",
+    "calm": "Calm",
+    "surprised": "Surprised",
+    "sad": "Sad",
+    "angry": "Angry",
+    "fearful": "Fear",
+    "disgusted": "Disgust",
+    "neutral": "Neutral"
   },
   "nutrition": {
     "dataAnalysis": "Data Analysis",

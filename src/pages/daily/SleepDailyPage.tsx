@@ -2,7 +2,6 @@
  * Sleep Daily Report Page
  */
 
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Moon } from 'lucide-react'
 import { DailyScoreCard } from '@/components/common/DailyScoreCard'
@@ -12,25 +11,35 @@ import {
     SleepStructureDiagram,
     SleepDistributionCard,
     SleepQualityIndicators,
-    generateSleepDemoData,
-    isDemoModeEnabled,
     toggleDemoMode,
-    type SleepDailyData,
 } from '@/daily/sleep'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
+import { useSleepDailyData } from '@/hooks/useDailyData'
 
 export default function SleepDailyPage() {
     const { t } = useTranslation()
-    const [data, setData] = useState<SleepDailyData | null>(() => generateSleepDemoData())
-    const [demoMode, setDemoMode] = useState(isDemoModeEnabled())
-
-    useEffect(() => {
-        setData(generateSleepDemoData())
-    }, [demoMode])
+    const { data, isLoading, isError, error, isDemoMode, invalidate } = useSleepDailyData()
 
     const handleToggleDemo = () => {
-        const newState = toggleDemoMode()
-        setDemoMode(newState)
+        toggleDemoMode()
+        // Invalidate and refetch after toggling demo mode
+        invalidate()
+    }
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F1EFEE' }}>
+                <div className="animate-pulse text-slate-500">Loading...</div>
+            </div>
+        )
+    }
+
+    if (isError) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F1EFEE' }}>
+                <div className="text-red-500">Error: {error?.message || 'Failed to load data'}</div>
+            </div>
+        )
     }
 
     if (!data) return null
@@ -44,11 +53,11 @@ export default function SleepDailyPage() {
                         <span className="text-xs text-slate-500">Demo Mode</span>
                         <button
                             onClick={handleToggleDemo}
-                            className={`w-10 h-5 rounded-full transition-colors ${demoMode ? 'bg-violet-400' : 'bg-slate-300'
+                            className={`w-10 h-5 rounded-full transition-colors ${isDemoMode ? 'bg-violet-400' : 'bg-slate-300'
                                 }`}
                         >
                             <span
-                                className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform ${demoMode ? 'translate-x-5' : 'translate-x-0.5'
+                                className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform ${isDemoMode ? 'translate-x-5' : 'translate-x-0.5'
                                     }`}
                             />
                         </button>

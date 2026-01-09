@@ -2,32 +2,33 @@
  * BloodPressureIndicatorCard
  * 
  * Displays blood pressure indicator with dual-line chart (SBP/DBP).
- * Reference design: src/features/blood-pressure/components/BPTrendyReportCard.tsx
+ * Shows: Newest Value, Average (no Highest/Lowest in new API)
  */
 
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { Activity, ArrowUp, ArrowDown } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { TrendLineChart } from '@/components/charts/TrendLineChart'
-import { VITAL_COLORS, UI_COLORS } from '@/config/theme'
-import type { IndicatorChartPoint } from '../types'
+import { VITAL_COLORS } from '@/config/theme'
+import { StatBox } from './StatBox'
+import type { IndicatorChartPoint, ChangeIndicator } from '../types'
 
 export interface BloodPressureIndicatorCardProps {
     /** Latest reading */
     latest: { systolic: number; diastolic: number } | null
-    /** 7-day average */
+    /** Change indicator */
+    change?: ChangeIndicator
+    /** Today's average */
     avg: { systolic: number; diastolic: number } | null
-    /** Maximum value */
-    max: { systolic: number; diastolic: number } | null
-    /** Minimum value */
-    min: { systolic: number; diastolic: number } | null
     /** Reference range */
     reference: { systolic: string; diastolic: string }
     /** Status badge */
-    status: string | null
+    status?: string | null
     /** Chart data */
     chart: IndicatorChartPoint[]
+    /** Y-axis range from API */
+    yAxisRange?: { min: number; max: number }
     /** Additional class names */
     className?: string
 }
@@ -66,32 +67,17 @@ const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
 
 CustomTooltip.displayName = 'BPCustomTooltip'
 
-/**
- * Get status color
- */
-const getStatusColor = (status: string | null): string => {
-    if (!status) return '#94a3b8'
-    const statusLower = status.toLowerCase()
-
-    if (statusLower.includes('normal')) return '#10B981'
-    if (statusLower.includes('high') || statusLower.includes('danger')) return '#EF4444'
-    if (statusLower.includes('low')) return '#3B82F6'
-
-    return '#F59E0B'
-}
-
 const BloodPressureIndicatorCardInner = ({
     latest,
+    change,
     avg,
-    max,
-    min,
     reference,
-    status,
     chart,
+    yAxisRange,
     className = '',
 }: BloodPressureIndicatorCardProps) => {
     const { t } = useTranslation()
-    const themeColor = VITAL_COLORS.bp
+    const sbpColor = VITAL_COLORS.bp
     const dbpColor = '#10B981'
 
     // Prepare chart data
@@ -114,23 +100,31 @@ const BloodPressureIndicatorCardInner = ({
         }))
     }, [chart])
 
-    // Calculate change from average
-    const getChange = () => {
-        if (!latest || !avg) return null
-        const diff = latest.systolic - avg.systolic
-        if (diff === 0) return null
+    // Change indicator element
+    const changeElement = useMemo(() => {
+        if (!change || change.value === null || change.trend === null) return null
 
-        const Icon = diff > 0 ? ArrowUp : ArrowDown
-        const color = diff > 0 ? UI_COLORS.trend.up : UI_COLORS.trend.down
+        const Icon = change.trend === 'up' ? ArrowUp : ArrowDown
+        // For BP, higher is generally worse
+        const color = change.trend === 'up' ? '#EF4444' : '#10B981'
 
         return (
             <span className="flex items-center gap-0.5 text-sm" style={{ color }}>
                 <Icon className="w-3 h-3" />
-                {Math.abs(diff)}
+                {change.value}
             </span>
         )
-    }
+    }, [change])
 
+    // Y-axis domain
+    const yDomain = useMemo(() => {
+        if (yAxisRange) {
+            return [yAxisRange.min, yAxisRange.max] as [number, number]
+        }
+        return [50, 180] as [number, number]
+    }, [yAxisRange])
+
+    // Reference string for display
     const refString = `${reference.systolic}/${reference.diastolic}`
 
     return (
@@ -138,7 +132,7 @@ const BloodPressureIndicatorCardInner = ({
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
+                    <Activity className="w-5 h-5" style={{ color: sbpColor }} />
                     <span className="text-base font-semibold text-slate-800">
                         {t('vitals.bloodPressure', 'Blood pressure')}
                     </span>
@@ -149,33 +143,35 @@ const BloodPressureIndicatorCardInner = ({
                 </span>
             </div>
 
-            {/* Stats row */}
-            <div className="flex gap-6 mb-4">
-                <div>
-                    <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-bold" style={{ color: themeColor }}>
-                            {latest ? `${latest.systolic}/${latest.diastolic}` : '--'}
-                        </span>
-                        {getChange()}
+            {/* Stats row - 2 columns with equal width */}
+            <StatBox>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <div className="flex items-baseline gap-1.5">
+                            <span className="text-3xl font-bold" style={{ color: sbpColor }}>
+                                {latest ? `${latest.systolic}/${latest.diastolic}` : '--'}
+                            </span>
+                            {changeElement}
+                        </div>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            {t('daily.newestValue', 'Newest value')}
+                        </p>
                     </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                        {t('daily.newestValue', 'Newest value')}
-                    </p>
+                    <div>
+                        <span className="text-2xl font-semibold text-slate-700">
+                            {avg ? `${avg.systolic}/${avg.diastolic}` : '--'}
+                        </span>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                            {t('daily.average', 'Average')}
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <span className="text-2xl font-semibold text-slate-700">
-                        {avg ? `${avg.systolic}/${avg.diastolic}` : '--'}
-                    </span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                        {t('daily.average', 'Average')}
-                    </p>
-                </div>
-            </div>
+            </StatBox>
 
             {/* Legend */}
             <div className="flex items-center gap-4 mb-2">
                 <div className="flex items-center gap-1.5">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColor }} />
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: sbpColor }} />
                     <span className="text-xs text-slate-500">SBP</span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -190,7 +186,7 @@ const BloodPressureIndicatorCardInner = ({
                 lines={[
                     {
                         dataKey: 'systolic',
-                        color: themeColor,
+                        color: sbpColor,
                         label: 'SBP',
                         showArea: true,
                         gradientId: 'bpSbpGradient',
@@ -206,7 +202,7 @@ const BloodPressureIndicatorCardInner = ({
                     },
                 ]}
                 xAxisKey="time"
-                yAxisDomain={[50, 180]}
+                yAxisDomain={yDomain}
                 renderTooltip={(props) => <CustomTooltip {...props} />}
                 height={180}
                 showLegend={false}

@@ -9,5 +9,11 @@ export {
   getSpO2Detail,
   getSleepDetail,
 } from './trendService'
+export {
+  fetchHealthyDaily,
+  fetchEmotionDaily,
+  fetchSleepDaily,
+  type DailyDimensionType,
+} from './dailyService'
 
 

@@ -48,6 +48,8 @@ export interface UseWeekNavigationReturn {
   goToPreviousWeek: () => void
   /** Navigate to next week (no-op if canGoNext is false) */
   goToNextWeek: () => void
+  /** Jump to a specific week by providing start and end dates */
+  setWeek: (start: Date, end: Date) => void
 }
 
 /**
@@ -118,6 +120,18 @@ export function useWeekNavigation(): UseWeekNavigationReturn {
     })
   }, [])
 
+  // Jump to a specific week
+  const setWeek = useCallback((start: Date, end: Date) => {
+    // Normalize to midnight
+    const normalizedStart = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0)
+    const normalizedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0, 0)
+    
+    setDateRange({
+      start: normalizedStart,
+      end: normalizedEnd,
+    })
+  }, [])
+
   return {
     dateRange,
     apiDateRange,
@@ -125,6 +139,7 @@ export function useWeekNavigation(): UseWeekNavigationReturn {
     canGoNext,
     goToPreviousWeek,
     goToNextWeek,
+    setWeek,
   }
 }
 

@@ -36,6 +36,7 @@ export function NutritionPage() {
     canGoNext,
     goToPreviousWeek,
     goToNextWeek,
+    setWeek,
   } = useWeekNavigation()
 
   // Swipe navigation for touch devices
@@ -91,6 +92,7 @@ export function NutritionPage() {
               onPrevious={goToPreviousWeek}
               onNext={goToNextWeek}
               disableNext={!canGoNext}
+              onSelectWeek={setWeek}
             />
           </div>
         </div>

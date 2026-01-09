@@ -31,6 +31,7 @@ export function EmotionPage() {
     canGoNext,
     goToPreviousWeek,
     goToNextWeek,
+    setWeek,
   } = useWeekNavigation()
 
   // Swipe navigation for touch devices
@@ -86,6 +87,7 @@ export function EmotionPage() {
               onPrevious={goToPreviousWeek}
               onNext={goToNextWeek}
               disableNext={!canGoNext}
+              onSelectWeek={setWeek}
             />
           </div>
 

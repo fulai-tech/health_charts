@@ -27,12 +27,23 @@ const getStageColor = (type: string): string => {
 }
 
 /**
- * Transform SleepStructureItem[] to DistributionItem[]
+ * Get translated label for sleep stage type
  */
-export const transformSleepItems = (items: SleepStructureItem[]): DistributionItem[] => {
+const getSleepStageLabel = (type: string, fallbackLabel: string, t: (key: string, fallback: string) => string): string => {
+    const typeKey = type.toLowerCase()
+    return t(`sleep.${typeKey}`, fallbackLabel)
+}
+
+/**
+ * Transform SleepStructureItem[] to DistributionItem[] with i18n labels
+ */
+export const transformSleepItems = (
+    items: SleepStructureItem[],
+    t: (key: string, fallback: string) => string
+): DistributionItem[] => {
     return items.map((item) => ({
         type: item.type,
-        label: item.label,
+        label: getSleepStageLabel(item.type, item.label, t),
         percent: item.percent,
         color: getStageColor(item.type),
         duration: item.duration,
@@ -48,8 +59,8 @@ const SleepDistributionCardInner = ({
 }: SleepDistributionCardProps) => {
     const { t } = useTranslation()
 
-    // Transform sleep items to distribution items
-    const distributionItems = useMemo(() => transformSleepItems(items), [items])
+    // Transform sleep items to distribution items with i18n labels
+    const distributionItems = useMemo(() => transformSleepItems(items, t), [items, t])
 
     // Calculate hours for center display
     const hours = totalMinutes ? Math.floor(totalMinutes / 60) : '--'

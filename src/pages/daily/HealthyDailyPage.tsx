@@ -2,7 +2,6 @@
  * Healthy Daily Report Page
  */
 
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Activity } from 'lucide-react'
 import { DailyScoreCard } from '@/components/common/DailyScoreCard'
@@ -13,25 +12,35 @@ import {
     HeartRateIndicatorCard,
     BloodGlucoseIndicatorCard,
     BloodOxygenIndicatorCard,
-    generateHealthyDemoData,
-    isDemoModeEnabled,
     toggleDemoMode,
-    type HealthyDailyData,
 } from '@/daily/healthy'
-import { VITAL_COLORS, HEALTH_COLORS, UI_STYLES } from '@/config/theme'
+import { HEALTH_COLORS, UI_STYLES } from '@/config/theme'
+import { useHealthyDailyData } from '@/hooks/useDailyData'
 
 export default function HealthyDailyPage() {
     const { t } = useTranslation()
-    const [data, setData] = useState<HealthyDailyData | null>(() => generateHealthyDemoData())
-    const [demoMode, setDemoMode] = useState(isDemoModeEnabled())
-
-    useEffect(() => {
-        setData(generateHealthyDemoData())
-    }, [demoMode])
+    const { data, isLoading, isError, error, isDemoMode, invalidate } = useHealthyDailyData()
 
     const handleToggleDemo = () => {
-        const newState = toggleDemoMode()
-        setDemoMode(newState)
+        toggleDemoMode()
+        // Invalidate and refetch after toggling demo mode
+        invalidate()
+    }
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F1EFEE' }}>
+                <div className="animate-pulse text-slate-500">Loading...</div>
+            </div>
+        )
+    }
+
+    if (isError) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F1EFEE' }}>
+                <div className="text-red-500">Error: {error?.message || 'Failed to load data'}</div>
+            </div>
+        )
     }
 
     if (!data) return null
@@ -45,11 +54,11 @@ export default function HealthyDailyPage() {
                         <span className="text-xs text-slate-500">Demo Mode</span>
                         <button
                             onClick={handleToggleDemo}
-                            className={`w-10 h-5 rounded-full transition-colors ${demoMode ? 'bg-orange-400' : 'bg-slate-300'
+                            className={`w-10 h-5 rounded-full transition-colors ${isDemoMode ? 'bg-orange-400' : 'bg-slate-300'
                                 }`}
                         >
                             <span
-                                className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform ${demoMode ? 'translate-x-5' : 'translate-x-0.5'
+                                className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform ${isDemoMode ? 'translate-x-5' : 'translate-x-0.5'
                                     }`}
                             />
                         </button>
@@ -76,45 +85,51 @@ export default function HealthyDailyPage() {
                         {/* Blood Pressure */}
                         <BloodPressureIndicatorCard
                             latest={data.indicators.bloodPressure.latest}
+                            change={data.indicators.bloodPressure.change}
                             avg={data.indicators.bloodPressure.avg}
-                            max={data.indicators.bloodPressure.max}
-                            min={data.indicators.bloodPressure.min}
                             reference={data.indicators.bloodPressure.reference}
                             status={data.indicators.bloodPressure.status}
                             chart={data.indicators.bloodPressure.chart}
+                            yAxisRange={data.indicators.bloodPressure.yAxisRange}
                         />
 
                         {/* Heart Rate */}
                         <HeartRateIndicatorCard
                             latest={data.indicators.heartRate.latest}
+                            change={data.indicators.heartRate.change}
                             avg={data.indicators.heartRate.avg}
                             max={data.indicators.heartRate.max}
                             min={data.indicators.heartRate.min}
                             reference={data.indicators.heartRate.reference}
                             status={data.indicators.heartRate.status}
                             chart={data.indicators.heartRate.chart}
+                            yAxisRange={data.indicators.heartRate.yAxisRange}
                         />
 
                         {/* Blood Glucose (POCT) */}
                         <BloodGlucoseIndicatorCard
                             latest={data.indicators.bloodGlucose.latest}
+                            change={data.indicators.bloodGlucose.change}
                             avg={data.indicators.bloodGlucose.avg}
                             max={data.indicators.bloodGlucose.max}
                             min={data.indicators.bloodGlucose.min}
                             reference={data.indicators.bloodGlucose.reference}
                             status={data.indicators.bloodGlucose.status}
                             chart={data.indicators.bloodGlucose.chart}
+                            yAxisRange={data.indicators.bloodGlucose.yAxisRange}
                         />
 
                         {/* Blood Oxygen */}
                         <BloodOxygenIndicatorCard
                             latest={data.indicators.bloodOxygen.latest}
+                            change={data.indicators.bloodOxygen.change}
                             avg={data.indicators.bloodOxygen.avg}
                             max={data.indicators.bloodOxygen.max}
                             min={data.indicators.bloodOxygen.min}
                             reference={data.indicators.bloodOxygen.reference}
                             status={data.indicators.bloodOxygen.status}
                             chart={data.indicators.bloodOxygen.chart}
+                            yAxisRange={data.indicators.bloodOxygen.yAxisRange}
                         />
                     </div>
 

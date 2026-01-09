@@ -12,11 +12,12 @@ import { isDemoModeEnabled } from './demoMode'
  * Fetch healthy daily data
  * @param date - Date in YYYY-MM-DD format
  * @param token - Auth token
+ * @returns Adapted data or null if no data available
  */
 export async function fetchHealthyDailyData(
     date: string,
     token: string
-): Promise<HealthyDailyData> {
+): Promise<HealthyDailyData | null> {
     // If demo mode enabled, return demo data
     if (isDemoModeEnabled()) {
         console.log('🎭 [Healthy Daily] Demo mode enabled, using demo data')
@@ -49,23 +50,51 @@ export async function fetchHealthyDailyData(
             throw new Error(data.msg || 'API error')
         }
 
+        // Adapt API response to domain model
+        // Returns null if API returned null data
         const adaptedData = adaptHealthyDailyData(data)
-
-        // If API returns null score and demo mode check
-        if (adaptedData.score === null && isDemoModeEnabled()) {
-            console.log('⚠️ [Healthy Daily] Null data from API, using demo data')
-            return generateHealthyDemoData()
-        }
 
         return adaptedData
     } catch (error) {
         console.error('[Healthy Daily] API error:', error)
 
-        // Fallback to demo data on error if demo mode enabled
-        if (isDemoModeEnabled()) {
-            return generateHealthyDemoData()
-        }
-
+        // In non-demo mode, propagate the error
+        // Let the UI handle error states
         throw error
     }
+}
+
+/**
+ * Helper to check if a value represents "no data" from backend
+ * Distinguishes between:
+ * - null/undefined: truly no data
+ * - 0: valid data point
+ * - empty array: no items but valid response
+ */
+export function isEmptyValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+        return true
+    }
+    if (Array.isArray(value) && value.length === 0) {
+        return true
+    }
+    if (typeof value === 'string' && value.trim() === '') {
+        return true
+    }
+    return false
+}
+
+/**
+ * Check if indicator has any meaningful data
+ */
+export function hasIndicatorData(indicator: {
+    latest: unknown
+    avg: unknown
+    chart: unknown[]
+}): boolean {
+    return (
+        !isEmptyValue(indicator.latest) ||
+        !isEmptyValue(indicator.avg) ||
+        (Array.isArray(indicator.chart) && indicator.chart.length > 0)
+    )
 }

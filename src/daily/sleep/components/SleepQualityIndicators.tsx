@@ -58,6 +58,16 @@ const SleepQualityIndicatorsInner = ({
 }: SleepQualityIndicatorsProps) => {
     const { t } = useTranslation()
 
+    // i18n translated labels for sleep quality indicators
+    const labels = {
+        bedTime: t('sleep.bedTime', 'Bed rest time'),
+        sleepTime: t('sleep.sleepTime', 'Time to fall asleep'),
+        wakeTime: t('sleep.wakeTime', 'Post-awake time'),
+        getUpTime: t('sleep.getUpTime', 'Wake-up time'),
+        sleepLatency: t('sleep.sleepLatency', 'Falling asleep takes time'),
+        sleepEfficiency: t('sleep.sleepEfficiency', 'Sleep efficiency'),
+    }
+
     return (
         <div className={`bg-white py-5 shadow-sm ${className}`} style={{
             borderRadius: UI_STYLES.cardBorderRadius,
@@ -76,38 +86,38 @@ const SleepQualityIndicatorsInner = ({
             {/* Grid */}
             <div className="grid grid-cols-2 gap-3">
                 <IndicatorCell
-                    label={indicators.bedTime.label}
+                    label={labels.bedTime}
                     value={indicators.bedTime.value}
                     reference={indicators.bedTime.reference}
                     t={t}
                 />
                 <IndicatorCell
-                    label={indicators.sleepTime.label}
+                    label={labels.sleepTime}
                     value={indicators.sleepTime.value}
                     reference={indicators.sleepTime.reference}
                     t={t}
                 />
                 <IndicatorCell
-                    label={indicators.wakeTime.label}
+                    label={labels.wakeTime}
                     value={indicators.wakeTime.value}
                     reference={indicators.wakeTime.reference}
                     t={t}
                 />
                 <IndicatorCell
-                    label={indicators.getUpTime.label}
+                    label={labels.getUpTime}
                     value={indicators.getUpTime.value}
                     reference={indicators.getUpTime.reference}
                     t={t}
                 />
                 <IndicatorCell
-                    label={indicators.sleepLatency.label}
+                    label={labels.sleepLatency}
                     value={indicators.sleepLatency.value}
                     unit={indicators.sleepLatency.unit}
                     reference={indicators.sleepLatency.reference}
                     t={t}
                 />
                 <IndicatorCell
-                    label={indicators.sleepEfficiency.label}
+                    label={labels.sleepEfficiency}
                     value={indicators.sleepEfficiency.value}
                     unit={indicators.sleepEfficiency.unit}
                     reference={indicators.sleepEfficiency.reference}

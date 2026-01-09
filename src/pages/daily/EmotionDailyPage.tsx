@@ -2,7 +2,6 @@
  * Emotion Daily Report Page
  */
 
-import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Moon } from 'lucide-react'
 import { DailyScoreCard } from '@/components/common/DailyScoreCard'
@@ -11,27 +10,35 @@ import { SuggestionsList } from '@/components/common/SuggestionsList'
 import {
     EmotionProportionChart,
     EmotionDistributionCard,
-    generateEmotionDemoData,
-    isDemoModeEnabled,
     toggleDemoMode,
-    type EmotionDailyData,
 } from '@/daily/emotion'
 import { EMOTION_COLORS, UI_STYLES } from '@/config/theme'
+import { useEmotionDailyData } from '@/hooks/useDailyData'
 
 export default function EmotionDailyPage() {
     const { t } = useTranslation()
-    const [data, setData] = useState<EmotionDailyData | null>(() => generateEmotionDemoData())
-    const [demoMode, setDemoMode] = useState(isDemoModeEnabled())
-
-    // Load data
-    useEffect(() => {
-        // For now, use demo data
-        setData(generateEmotionDemoData())
-    }, [demoMode])
+    const { data, isLoading, isError, error, isDemoMode, invalidate } = useEmotionDailyData()
 
     const handleToggleDemo = () => {
-        const newState = toggleDemoMode()
-        setDemoMode(newState)
+        toggleDemoMode()
+        // Invalidate and refetch after toggling demo mode
+        invalidate()
+    }
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F1EFEE' }}>
+                <div className="animate-pulse text-slate-500">Loading...</div>
+            </div>
+        )
+    }
+
+    if (isError) {
+        return (
+            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F1EFEE' }}>
+                <div className="text-red-500">Error: {error?.message || 'Failed to load data'}</div>
+            </div>
+        )
     }
 
     if (!data) return null
@@ -45,11 +52,11 @@ export default function EmotionDailyPage() {
                         <span className="text-xs text-slate-500">Demo Mode</span>
                         <button
                             onClick={handleToggleDemo}
-                            className={`w-10 h-5 rounded-full transition-colors ${demoMode ? 'bg-orange-400' : 'bg-slate-300'
+                            className={`w-10 h-5 rounded-full transition-colors ${isDemoMode ? 'bg-orange-400' : 'bg-slate-300'
                                 }`}
                         >
                             <span
-                                className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform ${demoMode ? 'translate-x-5' : 'translate-x-0.5'
+                                className={`block w-4 h-4 bg-white rounded-full shadow transform transition-transform ${isDemoMode ? 'translate-x-5' : 'translate-x-0.5'
                                     }`}
                             />
                         </button>

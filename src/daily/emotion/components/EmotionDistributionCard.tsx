@@ -55,6 +55,14 @@ export const transformEmotionItems = (items: EmotionDistributionItem[]): Distrib
     }))
 }
 
+/**
+ * Get translated label for emotion type
+ */
+const getEmotionLabel = (type: string, fallbackLabel: string, t: (key: string, fallback: string) => string): string => {
+    const typeKey = type.toLowerCase()
+    return t(`emotion.${typeKey}`, fallbackLabel)
+}
+
 const EmotionDistributionCardInner = ({
     mainEmotion,
     mainEmotionLabel,
@@ -64,8 +72,21 @@ const EmotionDistributionCardInner = ({
 }: EmotionDistributionCardProps) => {
     const { t } = useTranslation()
 
-    // Transform emotion items to distribution items
-    const distributionItems = useMemo(() => transformEmotionItems(items), [items])
+    // Transform emotion items to distribution items with i18n labels
+    const distributionItems = useMemo(() => {
+        return items.map((item) => ({
+            type: item.type,
+            label: getEmotionLabel(item.type, item.label, t),
+            percent: item.percent,
+            count: item.count,
+            color: getEmotionColor(item.type),
+        }))
+    }, [items, t])
+
+    // Translate main emotion label
+    const translatedMainEmotionLabel = useMemo(() => 
+        getEmotionLabel(mainEmotion, mainEmotionLabel, t),
+    [mainEmotion, mainEmotionLabel, t])
 
     // Orange bar icon element
     const orangeBarIcon = (
@@ -79,7 +100,7 @@ const EmotionDistributionCardInner = ({
             themeColor={EMOTION_COLORS.primary}
             items={distributionItems}
             donutThickness={12}
-            centerValue={mainEmotionLabel}
+            centerValue={translatedMainEmotionLabel}
             centerLabel={t('daily.asMain', 'as main')}
             centerValueColor={getEmotionColor(mainEmotion)}
             itemLayout="grid-2col"

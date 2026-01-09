@@ -32,6 +32,7 @@ export function GlucosePage() {
     canGoNext,
     goToPreviousWeek,
     goToNextWeek,
+    setWeek,
   } = useWeekNavigation()
 
   // Swipe navigation for touch devices
@@ -87,6 +88,7 @@ export function GlucosePage() {
               onPrevious={goToPreviousWeek}
               onNext={goToNextWeek}
               disableNext={!canGoNext}
+              onSelectWeek={setWeek}
             />
           </div>
         </div>

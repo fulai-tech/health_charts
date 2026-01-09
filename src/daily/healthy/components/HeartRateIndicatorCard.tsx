@@ -1,33 +1,38 @@
 /**
  * HeartRateIndicatorCard
  * 
- * Displays heart rate indicator with area chart.
- * Reference design: src/features/heart-rate/components/HRTrendyReportCard.tsx
+ * Displays heart rate indicator with area chart showing Range and Mean.
+ * Shows: Newest Value, Average, Highest, Lowest
  */
 
 import { memo, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TrendingUp, ArrowUp, ArrowDown } from 'lucide-react'
+import { Heart, ArrowUp, ArrowDown } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { TrendLineChart } from '@/components/charts/TrendLineChart'
-import { VITAL_COLORS, UI_COLORS } from '@/config/theme'
-import type { IndicatorChartPoint } from '../types'
+import { VITAL_COLORS } from '@/config/theme'
+import { StatBox } from './StatBox'
+import type { IndicatorChartPoint, ChangeIndicator } from '../types'
 
 export interface HeartRateIndicatorCardProps {
     /** Latest reading */
     latest: number | null
-    /** 7-day average */
+    /** Change indicator */
+    change?: ChangeIndicator
+    /** Average value */
     avg: number | null
-    /** Maximum value */
+    /** Maximum value (Highest) */
     max: number | null
-    /** Minimum value */
+    /** Minimum value (Lowest) */
     min: number | null
-    /** Reference range */
+    /** Reference range (e.g., "60-100") */
     reference: string
     /** Status badge */
-    status: string | null
-    /** Chart data */
+    status?: string | null
+    /** Chart data with avg/max/min per point */
     chart: IndicatorChartPoint[]
+    /** Y-axis range from API */
+    yAxisRange?: { min: number; max: number }
     /** Additional class names */
     className?: string
 }
@@ -42,8 +47,9 @@ interface CustomTooltipProps {
         value: number
         payload: {
             time: string
-            value: number
-            range?: [number, number]
+            avg: number
+            max?: number
+            min?: number
         }
     }>
 }
@@ -60,22 +66,61 @@ const CustomTooltip = memo(({ active, payload }: CustomTooltipProps) => {
         <div className="bg-slate-700 text-white px-3 py-2 rounded-lg text-sm shadow-lg">
             <p className="font-medium mb-1">{data.time}</p>
             <p className="text-red-300">
-                {t('vitals.heartRate', 'Heart Rate')}: {data.value} {t('units.bpm', 'bpm')}
+                {t('daily.average', 'Average')}: {data.avg}
             </p>
+            {data.max !== undefined && (
+                <p className="text-red-200">
+                    {t('daily.highest', 'Highest')}: {data.max}
+                </p>
+            )}
+            {data.min !== undefined && (
+                <p className="text-red-200">
+                    {t('daily.lowest', 'Lowest')}: {data.min}
+                </p>
+            )}
         </div>
     )
 })
 
 CustomTooltip.displayName = 'HRCustomTooltip'
 
+/**
+ * Stat item component
+ */
+interface StatItemProps {
+    value: number | null
+    label: string
+    isHighlighted?: boolean
+    themeColor?: string
+    changeIndicator?: React.ReactNode
+}
+
+const StatItem = memo(({ value, label, isHighlighted, themeColor, changeIndicator }: StatItemProps) => (
+    <div className="flex-1 text-center">
+        <div className="flex items-baseline justify-center gap-1">
+            <span
+                className={`font-bold ${isHighlighted ? 'text-3xl' : 'text-2xl'}`}
+                style={isHighlighted && themeColor ? { color: themeColor } : { color: '#334155' }}
+            >
+                {value ?? '--'}
+            </span>
+            {changeIndicator}
+        </div>
+        <p className="text-xs text-slate-400 mt-0.5">{label}</p>
+    </div>
+))
+
+StatItem.displayName = 'StatItem'
+
 const HeartRateIndicatorCardInner = ({
     latest,
+    change,
     avg,
     max,
     min,
     reference,
-    status,
     chart,
+    yAxisRange,
     className = '',
 }: HeartRateIndicatorCardProps) => {
     const { t } = useTranslation()
@@ -84,46 +129,52 @@ const HeartRateIndicatorCardInner = ({
     // Prepare chart data
     const chartData = useMemo(() => {
         if (!chart || chart.length === 0) {
-            // Placeholder data
+            // Placeholder chart data
             return [
-                { time: '00:00', value: 65, range: [60, 70] as [number, number] },
-                { time: '04:00', value: 62, range: [58, 68] as [number, number] },
-                { time: '08:00', value: 75, range: [70, 85] as [number, number] },
-                { time: '12:00', value: 82, range: [75, 90] as [number, number] },
-                { time: '16:00', value: 78, range: [72, 88] as [number, number] },
-                { time: '20:00', value: 70, range: [65, 78] as [number, number] },
+                { time: '00:00', avg: 65, range: [60, 70] as [number, number] },
+                { time: '04:00', avg: 62, range: [58, 68] as [number, number] },
+                { time: '08:00', avg: 75, range: [70, 85] as [number, number] },
+                { time: '12:00', avg: 82, range: [75, 90] as [number, number] },
+                { time: '16:00', avg: 78, range: [72, 88] as [number, number] },
+                { time: '20:00', avg: 70, range: [65, 78] as [number, number] },
             ]
         }
         return chart.map((point) => ({
             time: point.time,
-            value: point.value ?? 0,
-            range: [Math.max(0, (point.value ?? 70) - 10), (point.value ?? 70) + 10] as [number, number],
+            avg: point.avg ?? 0,
+            range: [point.min ?? point.avg ?? 0, point.max ?? point.avg ?? 0] as [number, number],
         }))
     }, [chart])
 
-    // Calculate change from average
-    const getChange = () => {
-        if (latest === null || avg === null) return null
-        const diff = latest - avg
-        if (diff === 0) return null
+    // Change indicator element
+    const changeElement = useMemo(() => {
+        if (!change || change.value === null || change.trend === null) return null
 
-        const Icon = diff > 0 ? ArrowUp : ArrowDown
-        const color = diff > 0 ? UI_COLORS.trend.up : UI_COLORS.trend.down
+        const Icon = change.trend === 'up' ? ArrowUp : ArrowDown
+        const color = change.trend === 'up' ? '#EF4444' : '#10B981'
 
         return (
             <span className="flex items-center gap-0.5 text-sm" style={{ color }}>
                 <Icon className="w-3 h-3" />
-                {Math.abs(diff)}
+                {change.value}
             </span>
         )
-    }
+    }, [change])
+
+    // Y-axis domain
+    const yDomain = useMemo(() => {
+        if (yAxisRange) {
+            return [yAxisRange.min, yAxisRange.max] as [number, number]
+        }
+        return [40, 120] as [number, number]
+    }, [yAxisRange])
 
     return (
         <Card className={className}>
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" style={{ color: themeColor }} />
+                    <Heart className="w-5 h-5" style={{ color: themeColor }} />
                     <span className="text-base font-semibold text-slate-800">
                         {t('vitals.heartRate', 'Heart rate')}
                     </span>
@@ -134,26 +185,50 @@ const HeartRateIndicatorCardInner = ({
                 </span>
             </div>
 
-            {/* Stats row */}
-            <div className="flex gap-6 mb-4">
-                <div>
-                    <div className="flex items-baseline gap-1.5">
-                        <span className="text-3xl font-bold" style={{ color: themeColor }}>
-                            {latest ?? '--'}
-                        </span>
-                        {getChange()}
-                    </div>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                        {t('daily.newestValue', 'Newest value')}
-                    </p>
+            {/* Stats row - 4 columns */}
+            <StatBox>
+                <div className="flex divide-x divide-slate-200">
+                    <StatItem
+                        value={latest}
+                        label={t('daily.newestValue', 'Newest value')}
+                        isHighlighted
+                        themeColor={themeColor}
+                        changeIndicator={changeElement}
+                    />
+                    <StatItem
+                        value={avg}
+                        label={t('daily.average', 'Average')}
+                    />
+                    <StatItem
+                        value={max}
+                        label={t('daily.highest', 'Highest')}
+                    />
+                    <StatItem
+                        value={min}
+                        label={t('daily.lowest', 'Lowest')}
+                    />
                 </div>
-                <div>
-                    <span className="text-2xl font-semibold text-slate-700">
-                        {avg ?? '--'}
+            </StatBox>
+
+            {/* Legend */}
+            <div className="flex items-center gap-4 mb-2 px-1">
+                <div className="flex items-center gap-1.5">
+                    <span
+                        className="w-3 h-3 rounded-sm"
+                        style={{ backgroundColor: `${themeColor}40` }}
+                    />
+                    <span className="text-xs text-slate-500">
+                        {t('daily.range', 'Range')}
                     </span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                        {t('daily.average', 'Average')}
-                    </p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                    <span
+                        className="w-4 h-0.5"
+                        style={{ backgroundColor: themeColor }}
+                    />
+                    <span className="text-xs text-slate-500">
+                        {t('daily.mean', 'Mean')}
+                    </span>
                 </div>
             </div>
 
@@ -162,7 +237,7 @@ const HeartRateIndicatorCardInner = ({
                 data={chartData}
                 lines={[
                     {
-                        dataKey: 'value',
+                        dataKey: 'avg',
                         areaDataKey: 'range',
                         color: themeColor,
                         label: t('vitals.heartRate', 'Heart Rate'),
@@ -172,7 +247,7 @@ const HeartRateIndicatorCardInner = ({
                     },
                 ]}
                 xAxisKey="time"
-                yAxisDomain={[40, 120]}
+                yAxisDomain={yDomain}
                 renderTooltip={(props) => <CustomTooltip {...props} />}
                 height={180}
                 showLegend={false}

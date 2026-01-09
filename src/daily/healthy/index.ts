@@ -6,10 +6,19 @@
 export * from './types'
 
 // Adapter
-export { adaptHealthyDailyData, generateHealthyDemoData } from './adapter'
+export {
+    adaptHealthyDailyData,
+    generateHealthyDemoData,
+    generatePlaceholderData,
+    isDataEmpty,
+} from './adapter'
 
 // API
-export { fetchHealthyDailyData } from './api'
+export {
+    fetchHealthyDailyData,
+    isEmptyValue,
+    hasIndicatorData,
+} from './api'
 
 // Demo Mode
 export {
@@ -20,6 +29,7 @@ export {
 } from './demoMode'
 
 // Components
+export { StatBox } from './components/StatBox'
 export { BloodPressureIndicatorCard } from './components/BloodPressureIndicatorCard'
 export { HeartRateIndicatorCard } from './components/HeartRateIndicatorCard'
 export { BloodGlucoseIndicatorCard } from './components/BloodGlucoseIndicatorCard'
