@@ -185,7 +185,7 @@ export function DateRangePicker({
     <div
       className={cn(
         // Premium glassmorphic container with gradient border and hover effects
-        'group relative inline-flex items-center gap-0.5',
+        'group relative inline-flex items-center gap-0.5 flex-shrink-0',
         'bg-gradient-to-b from-white/90 to-white/70',
         'backdrop-blur-xl backdrop-saturate-150',
         'rounded-2xl p-1.5',
@@ -223,7 +223,7 @@ export function DateRangePicker({
           <button
             className={cn(
               'relative z-10 flex items-center justify-center gap-2.5 px-4 py-2 mx-0.5 rounded-xl',
-              'min-w-[180px]', // Fixed minimum width for stability
+              'w-[200px]', // Fixed width to prevent layout shift
               'transition-all duration-200 ease-out',
               'hover:bg-white/95 hover:shadow-md',
               'active:scale-[0.98]',
@@ -232,7 +232,7 @@ export function DateRangePicker({
             )}
           >
             {/* Text with premium typography and fixed width */}
-            <span className="text-[15px] font-semibold text-slate-700 tabular-nums tracking-tight whitespace-nowrap inline-block min-w-[130px] text-center">
+            <span className="text-[15px] font-semibold text-slate-700 tabular-nums tracking-tight whitespace-nowrap flex-1 text-center">
               {formattedStart}
               <span className="mx-1.5 text-slate-400 font-normal">–</span>
               {formattedEnd}
@@ -384,24 +384,28 @@ export function DateRangePicker({
       </Popover.Root>
 
       {/* Next Button */}
-      {!disableNext ? (
-        <button
-          onClick={onNext}
-          className={cn(
-            'relative z-10 flex items-center justify-center w-9 h-9 rounded-xl',
-            'transition-all duration-200 ease-out',
-            'text-slate-500 hover:text-slate-700',
-            'hover:bg-white/80 hover:shadow-sm',
-            'active:scale-95 active:shadow-inner',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
-          )}
-          aria-label="Next week"
-        >
-          <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
-        </button>
-      ) : (
-        <div className="relative z-10 w-9 h-9" />
-      )}
+      <button
+        onClick={onNext}
+        disabled={disableNext}
+        className={cn(
+          'relative z-10 flex items-center justify-center w-9 h-9 rounded-xl',
+          'transition-all duration-200 ease-out',
+          disableNext
+            ? [
+                'text-slate-300 cursor-not-allowed',
+                'opacity-50'
+              ]
+            : [
+                'text-slate-500 hover:text-slate-700',
+                'hover:bg-white/80 hover:shadow-sm',
+                'active:scale-95 active:shadow-inner',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
+              ]
+        )}
+        aria-label="Next week"
+      >
+        <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
+      </button>
     </div>
   )
 }
