@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { BPTrendyReportCard } from '@/features/blood-pressure/components/BPTrendyReportCard'
@@ -7,16 +7,10 @@ import { BPCompareCard } from '@/features/blood-pressure/components/BPCompareCar
 import { BPWeeklyOverviewCard } from '@/features/blood-pressure/components/BPWeeklyOverviewCard'
 import { useBPTrendData, usePrefetchBPData } from '@/features/blood-pressure/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useWeekNavigation } from '@/hooks/useWeekNavigation'
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { UI_STYLES } from '@/config/theme'
-import {
-  formatDateToAPI,
-  formatDateForDisplay,
-  getCurrentWeekDateRange,
-  getPreviousWeekRange,
-  getNextWeekRange,
-  canNavigateToNextWeek
-} from '@/lib/dateUtils'
 
 /**
  * Blood Pressure Details Page
@@ -30,46 +24,31 @@ export function BloodPressurePage() {
   const { theme } = useUrlConfig()
   const { prefetchPreviousWeeks } = usePrefetchBPData()
 
-  // Date range state - week-aligned (Monday to today or Sunday)
-  const [dateRange, setDateRange] = useState(() => getCurrentWeekDateRange())
+  // Week navigation (unified hook)
+  const {
+    dateRange,
+    apiDateRange,
+    displayDateRange,
+    canGoNext,
+    goToPreviousWeek,
+    goToNextWeek,
+  } = useWeekNavigation()
+
+  // Swipe navigation for touch devices
+  const { containerRef, swipeHandlers } = useSwipeNavigation({
+    onSwipeLeft: goToNextWeek,
+    onSwipeRight: goToPreviousWeek,
+    canSwipeLeft: canGoNext,
+    canSwipeRight: true,
+  })
 
   // Prefetch previous weeks - runs on mount AND when dateRange changes
   useEffect(() => {
     prefetchPreviousWeeks(dateRange.start, 3)
   }, [dateRange.start, prefetchPreviousWeeks])
 
-  // Check if we can navigate to next week
-  const canGoNext = useMemo(() => canNavigateToNextWeek(dateRange.start), [dateRange.start])
-
-  // Format dates for API
-  const apiDateRange = useMemo(() => ({
-    startDate: formatDateToAPI(dateRange.start),
-    endDate: formatDateToAPI(dateRange.end),
-  }), [dateRange])
-
-  // Format dates for display
-  const displayDateRange = useMemo(() => ({
-    start: formatDateForDisplay(dateRange.start),
-    end: formatDateForDisplay(dateRange.end),
-  }), [dateRange])
-
-  // Handle date navigation - week by week
-  const handlePrevious = () => {
-    setDateRange((prev) => getPreviousWeekRange(prev.start))
-  }
-
-  const handleNext = () => {
-    if (!canGoNext) return
-    setDateRange((prev) => {
-      const next = getNextWeekRange(prev.start)
-      return next || prev
-    })
-  }
-
   // Fetch BP data with date range - will refetch when dates change
-  const { data, isLoading, isFetching, error } = useBPTrendData(apiDateRange)
-
-
+  const { data, isLoading, error } = useBPTrendData(apiDateRange)
 
   // Error state
   if (error) {
@@ -90,23 +69,23 @@ export function BloodPressurePage() {
 
   return (
     <div
+      ref={containerRef}
       className="min-h-screen pb-20"
       style={{ backgroundColor: theme.background }}
+      {...swipeHandlers}
     >
       <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
         {/* Date Range Picker - Always visible, not affected by loading */}
         <div
           className="sticky top-0 z-20 py-3 px-4"
-          style={{
-            backgroundColor: theme.background
-          }}
+          style={{ backgroundColor: theme.background }}
         >
           <div className="flex justify-center">
             <DateRangePicker
               startDate={displayDateRange.start}
               endDate={displayDateRange.end}
-              onPrevious={handlePrevious}
-              onNext={handleNext}
+              onPrevious={goToPreviousWeek}
+              onNext={goToNextWeek}
               disableNext={!canGoNext}
             />
           </div>

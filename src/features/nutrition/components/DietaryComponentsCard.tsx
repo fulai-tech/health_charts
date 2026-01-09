@@ -1,40 +1,45 @@
 import { Card } from '@/components/ui/card'
-import type { MicroElementData } from '../types'
-import { LayoutGrid } from 'lucide-react'
+import type { DietaryComponentData } from '../types'
+import { Salad } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { UI_COLORS } from '@/config/theme'
 
-interface MicroElementStatusCardProps {
-    data?: MicroElementData[]
+interface DietaryComponentsCardProps {
+    data?: DietaryComponentData[]
     summary?: string | null
     className?: string
 }
 
-export const MicroElementStatusCard = ({ data, summary, className }: MicroElementStatusCardProps) => {
+export const DietaryComponentsCard = ({ data, summary, className }: DietaryComponentsCardProps) => {
     const { t } = useTranslation()
 
-    if (!data) return null
+    if (!data || data.length === 0) return null
 
     // Use backend summary if available, otherwise use default translation
-    const displaySummary = summary || t('nutrition.microElementsSummary', 'Monitor your micro-element intake to maintain optimal health.')
+    const displaySummary = summary || t('nutrition.dietaryComponentsSummary', 'Monitor your dietary fiber and purine intake for better digestive health.')
 
     return (
         <Card className={`${className} p-5`}>
             <div className="flex items-center gap-2 mb-4">
-                <LayoutGrid className="w-5 h-5 text-orange-500" />
-                <h3 className="text-base font-semibold text-slate-800">{t('nutrition.microElementStatus', 'Micro-element status')}</h3>
+                <Salad className="w-5 h-5 text-orange-500" />
+                <h3 className="text-base font-semibold text-slate-800">{t('nutrition.otherDietaryIngredients', 'Other dietary ingredients')}</h3>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
                 {data.map((item, index) => {
-                    // Simple status color logic
-                    const statusColor = item.status === 'normal' ? 'bg-green-100 text-green-600' : (item.status === 'low' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600')
-                    const statusLabel = item.status === 'normal' ? t('nutrition.normal', 'Normal') : (item.status === 'low' ? t('nutrition.insufficient', 'Insufficient') : t('nutrition.excess', 'Excess'))
-                    const barColor = item.status === 'normal' ? '#86EFAC' : (item.status === 'low' ? '#93C5FD' : '#FB923D')
+                    // Status color logic
+                    const statusColor = item.status === 'normal' 
+                        ? 'bg-green-100 text-green-600' 
+                        : (item.status === 'low' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600')
+                    const statusLabel = item.status === 'normal' 
+                        ? t('nutrition.goal', 'Goal') 
+                        : (item.status === 'low' ? t('nutrition.insufficient', 'Insufficient') : t('nutrition.excess', 'Excess'))
+                    const barColor = item.status === 'normal' 
+                        ? '#86EFAC' 
+                        : (item.status === 'low' ? '#93C5FD' : '#FB923D')
 
-                    // Calculate a simple position for the indicator bar (Mock visual)
-                    // If low: 20%, Normal: 50%, High: 80%
-                    const barWidth = item.status === 'low' ? '30%' : (item.status === 'normal' ? '60%' : '90%')
+                    // Calculate progress bar width based on percentage
+                    const percentage = Math.min(100, (item.value / item.target) * 100)
 
                     return (
                         <div key={index} className="p-3 rounded-xl border border-slate-100" style={{ backgroundColor: UI_COLORS.background.gray }}>
@@ -49,16 +54,15 @@ export const MicroElementStatusCard = ({ data, summary, className }: MicroElemen
                                 <span className="text-xs text-slate-400">{item.unit}</span>
                             </div>
 
-                            {/* Visual Range Indicator */}
+                            {/* Progress Bar */}
                             <div className="relative h-1.5 bg-slate-200 rounded-full w-full overflow-hidden">
                                 <div
                                     className="absolute h-full rounded-full"
-                                    style={{ width: barWidth, backgroundColor: barColor }}
+                                    style={{ width: `${percentage}%`, backgroundColor: barColor }}
                                 />
                             </div>
                             <div className="flex justify-between text-[10px] text-slate-400 mt-1">
-                                <span>{t('nutrition.range', 'Range')}</span>
-                                <span>{item.range[0]}-{item.range[1]}</span>
+                                <span>{t('nutrition.target', 'Target')}: {item.target} {item.unit}</span>
                             </div>
                         </div>
                     )
@@ -71,3 +75,4 @@ export const MicroElementStatusCard = ({ data, summary, className }: MicroElemen
         </Card>
     )
 }
+

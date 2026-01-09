@@ -12,8 +12,12 @@ import type {
   MetabolismTrendData,
   NutrientStructureData,
   MicroElementData,
+  DietaryComponentData,
   NutritionAnalysisData,
-  NutritionWeeklySummary
+  NutritionWeeklySummary,
+  CategoryEvaluations,
+  WeeklyComparisonData,
+  ComparisonDishData
 } from './types'
 import { WEEKDAY_LABEL_MAP, getCurrentWeekDateRange } from '@/lib/dateUtils'
 
@@ -269,7 +273,52 @@ function adaptMicroElements(backendData: BackendNutritionResponse | null, mockDa
 }
 
 /**
+ * Convert backend nutrition_status to DietaryComponentData
+ * Extracts dietary fiber (膳食纤维) and purine (嘌呤) data
+ */
+function adaptDietaryComponents(backendData: BackendNutritionResponse | null, mockData: DietaryComponentData[]): DietaryComponentData[] {
+  const ns = getNutritionStatus(backendData)
+  if (!ns) {
+    return mockData
+  }
+
+  const components: DietaryComponentData[] = []
+
+  // Mapping of backend keys to display names
+  const dietaryComponentMap: Array<{ newKey: string; oldKey: string; name: string; unit: string }> = [
+    { newKey: '膳食纤维(g)', oldKey: '膳食纤维', name: 'Dietary fiber', unit: 'g' },
+    { newKey: '嘌呤(mg)', oldKey: '嘌呤', name: 'Purine', unit: 'mg' },
+  ]
+
+  dietaryComponentMap.forEach(({ newKey, oldKey, name, unit }) => {
+    // Try new format first, then old format
+    const item = ns[newKey] || ns[oldKey]
+    if (item) {
+      // Convert status from Chinese to English
+      let status: 'low' | 'normal' | 'high' = 'normal'
+      if (item.status === '不足') {
+        status = 'low'
+      } else if (item.status === '超标') {
+        status = 'high'
+      }
+
+      components.push({
+        name,
+        value: Math.round(item.value * 10) / 10,
+        target: item.target,
+        unit,
+        status
+      })
+    }
+  })
+
+  // If backend doesn't provide data, use mock as fallback
+  return components.length > 0 ? components : mockData
+}
+
+/**
  * Convert backend data to NutritionAnalysisData
+ * Only uses data_analysis field - category_evaluations are displayed separately
  */
 function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: NutritionAnalysisData): NutritionAnalysisData {
   if (!backendData?.data) {
@@ -291,8 +340,6 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
 
   // Handle report-level fields which might also be directly under data now
   const dataAnalysis = report?.data_analysis || (backendData.data as any).data_analysis
-  const dietaryInsights = report?.dietary_insights || (backendData.data as any).dietary_insights
-  const categoryEvaluations = report?.category_evaluations || (backendData.data as any).category_evaluations
 
   // Use data_analysis as summary (can be string or array)
   let summary: string = mockData.summary
@@ -303,28 +350,14 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
     summary = dataAnalysis[0]
   }
 
-  // Combine dietary_insights with category_evaluations
+  // Only use data_analysis for details (category_evaluations are shown separately in element cards)
   const details: string[] = []
 
   // If data_analysis is an array, use all items as details
   if (Array.isArray(dataAnalysis) && dataAnalysis.length > 0) {
     details.push(...dataAnalysis)
-  }
-
-  if (dietaryInsights && dietaryInsights.length > 0) {
-    details.push(...dietaryInsights)
-  }
-
-  if (categoryEvaluations) {
-    if (categoryEvaluations.macro_nutrients) {
-      details.push(categoryEvaluations.macro_nutrients)
-    }
-    if (categoryEvaluations.micro_nutrients) {
-      details.push(categoryEvaluations.micro_nutrients)
-    }
-    if (categoryEvaluations.dietary_components) {
-      details.push(categoryEvaluations.dietary_components)
-    }
+  } else if (typeof dataAnalysis === 'string') {
+    details.push(dataAnalysis)
   }
 
   // If no details, use mock
@@ -373,6 +406,87 @@ function adaptWeeklySummary(backendData: BackendNutritionResponse | null, mockDa
 }
 
 /**
+ * Convert backend category_evaluations to CategoryEvaluations
+ */
+function adaptCategoryEvaluations(backendData: BackendNutritionResponse | null): CategoryEvaluations {
+  const defaultEvaluations: CategoryEvaluations = {
+    macroNutrients: null,
+    microNutrients: null,
+    dietaryComponents: null
+  }
+
+  if (!backendData?.data) {
+    return defaultEvaluations
+  }
+
+  const report = backendData.data.report
+  const categoryEvaluations = report?.category_evaluations || (backendData.data as any).category_evaluations
+
+  if (!categoryEvaluations) {
+    return defaultEvaluations
+  }
+
+  return {
+    macroNutrients: categoryEvaluations.macro_nutrients || null,
+    microNutrients: categoryEvaluations.micro_nutrients || null,
+    dietaryComponents: categoryEvaluations.dietary_components || null
+  }
+}
+
+/**
+ * Map Chinese meal type to frontend enum
+ */
+const MEAL_TYPE_MAP: Record<string, 'breakfast' | 'lunch' | 'dinner' | 'snacks'> = {
+  '早餐': 'breakfast',
+  '午餐': 'lunch',
+  '晚餐': 'dinner',
+  '加餐': 'snacks',
+  '零食': 'snacks',
+}
+
+/**
+ * Convert backend comparison_with_last_week to WeeklyComparisonData
+ */
+function adaptWeeklyComparison(backendData: BackendNutritionResponse | null): WeeklyComparisonData | undefined {
+  if (!backendData?.data?.report?.comparison_with_last_week) {
+    return undefined
+  }
+
+  const comparison = backendData.data.report.comparison_with_last_week
+
+  // Check if we have the required fields
+  if (
+    comparison.last_week_calories === undefined ||
+    comparison.this_week_calories === undefined
+  ) {
+    return undefined
+  }
+
+  // Adapt main cause dishes
+  const mainCauseDishes: ComparisonDishData[] = []
+  if (comparison.main_cause_dishes && comparison.main_cause_dishes.length > 0) {
+    comparison.main_cause_dishes.forEach((dish) => {
+      mainCauseDishes.push({
+        dishName: dish.dish_name,
+        calories: dish.calories,
+        mealType: MEAL_TYPE_MAP[dish.meal_type] || 'dinner',
+        date: new Date(dish.date),
+        remark: dish.remark,
+        imageUrl: dish.image_url
+      })
+    })
+  }
+
+  return {
+    calorieChange: comparison.calories_change ?? (comparison.this_week_calories - comparison.last_week_calories),
+    lastWeekCalories: comparison.last_week_calories,
+    thisWeekCalories: comparison.this_week_calories,
+    trendAnalysis: comparison.trend_analysis || '',
+    mainCauseDishes
+  }
+}
+
+/**
  * Main adapter function
  * Merges backend data with mock data to ensure complete NutritionDomainModel
  */
@@ -387,8 +501,11 @@ export const adaptNutritionData = (
     metabolismTrend: adaptMetabolismTrend(backendData, mockData.metabolismTrend),
     nutrientStructure: adaptNutrientStructure(backendData, mockData.nutrientStructure),
     microElements: adaptMicroElements(backendData, mockData.microElements),
+    dietaryComponents: adaptDietaryComponents(backendData, mockData.dietaryComponents),
     recipes: mockData.recipes, // Backend doesn't provide recipes, always use mock
     analysis: adaptAnalysis(backendData, mockData.analysis),
-    weeklySummary: adaptWeeklySummary(backendData, mockData.weeklySummary)
+    weeklySummary: adaptWeeklySummary(backendData, mockData.weeklySummary),
+    categoryEvaluations: adaptCategoryEvaluations(backendData),
+    weeklyComparison: adaptWeeklyComparison(backendData)
   }
 }

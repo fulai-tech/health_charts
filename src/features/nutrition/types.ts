@@ -186,6 +186,31 @@ export interface RecipeData {
   tags: string[]
 }
 
+/**
+ * Frontend Domain Type - Comparison Main Cause Dish
+ * Adapted from BackendMainCauseDishNew
+ */
+export interface ComparisonDishData {
+  dishName: string
+  calories: number
+  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snacks'
+  date: Date
+  remark: string
+  imageUrl?: string
+}
+
+/**
+ * Frontend Domain Type - Weekly Comparison Data
+ * For the "Compare with last week" card
+ */
+export interface WeeklyComparisonData {
+  calorieChange: number
+  lastWeekCalories: number
+  thisWeekCalories: number
+  trendAnalysis: string
+  mainCauseDishes: ComparisonDishData[]
+}
+
 export interface NutritionAnalysisData {
   score: number
   summary: string
@@ -198,12 +223,29 @@ export interface NutritionWeeklySummary {
   suggestions: string[]
 }
 
+export interface CategoryEvaluations {
+  macroNutrients: string | null
+  microNutrients: string | null
+  dietaryComponents: string | null
+}
+
+export interface DietaryComponentData {
+  name: string
+  value: number
+  target: number
+  unit: string
+  status: 'low' | 'normal' | 'high'
+}
+
 export interface NutritionDomainModel {
   weeklyManagement: WeeklyManagementData
   metabolismTrend: MetabolismTrendData[]
   nutrientStructure: NutrientStructureData[]
   microElements: MicroElementData[]
+  dietaryComponents: DietaryComponentData[]
   recipes: RecipeData[]
   analysis: NutritionAnalysisData
   weeklySummary: NutritionWeeklySummary
+  categoryEvaluations: CategoryEvaluations
+  weeklyComparison?: WeeklyComparisonData
 }

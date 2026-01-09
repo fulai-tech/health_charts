@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { SleepTrendyReportCard } from '@/features/sleep/components/SleepTrendyReportCard'
@@ -8,16 +8,10 @@ import { SleepCompareCard } from '@/features/sleep/components/SleepCompareCard'
 import { SleepWeeklyOverviewCard } from '@/features/sleep/components/SleepWeeklyOverviewCard'
 import { useSleepTrendData, usePrefetchSleepData } from '@/features/sleep/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useWeekNavigation } from '@/hooks/useWeekNavigation'
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { UI_STYLES } from '@/config/theme'
-import {
-    formatDateToAPI,
-    formatDateForDisplay,
-    getCurrentWeekDateRange,
-    getPreviousWeekRange,
-    getNextWeekRange,
-    canNavigateToNextWeek
-} from '@/lib/dateUtils'
 
 /**
  * Sleep Details Page
@@ -27,112 +21,97 @@ import {
  * - ?theme=light or ?theme=dark (theme mode)
  */
 export function SleepPage() {
-    const { t } = useTranslation()
-    const { theme } = useUrlConfig()
-    const { prefetchPreviousWeeks } = usePrefetchSleepData()
+  const { t } = useTranslation()
+  const { theme } = useUrlConfig()
+  const { prefetchPreviousWeeks } = usePrefetchSleepData()
 
-    // Date range state - week-aligned (Monday to today or Sunday)
-    const [dateRange, setDateRange] = useState(() => getCurrentWeekDateRange())
+  // Week navigation (unified hook)
+  const {
+    dateRange,
+    apiDateRange,
+    displayDateRange,
+    canGoNext,
+    goToPreviousWeek,
+    goToNextWeek,
+  } = useWeekNavigation()
 
-    // Prefetch previous weeks - runs on mount AND when dateRange changes
-    useEffect(() => {
-        prefetchPreviousWeeks(dateRange.start, 3)
-    }, [dateRange.start, prefetchPreviousWeeks])
+  // Swipe navigation for touch devices
+  const { containerRef, swipeHandlers } = useSwipeNavigation({
+    onSwipeLeft: goToNextWeek,
+    onSwipeRight: goToPreviousWeek,
+    canSwipeLeft: canGoNext,
+    canSwipeRight: true,
+  })
 
-    // Check if we can navigate to next week
-    const canGoNext = useMemo(() => canNavigateToNextWeek(dateRange.start), [dateRange.start])
+  // Prefetch previous weeks - runs on mount AND when dateRange changes
+  useEffect(() => {
+    prefetchPreviousWeeks(dateRange.start, 3)
+  }, [dateRange.start, prefetchPreviousWeeks])
 
-    // Format dates for API
-    const apiDateRange = useMemo(() => ({
-        startDate: formatDateToAPI(dateRange.start),
-        endDate: formatDateToAPI(dateRange.end),
-    }), [dateRange])
+  // Fetch Sleep data with date range - will refetch when dates change
+  const { data, isLoading, error } = useSleepTrendData(apiDateRange)
 
-    // Format dates for display
-    const displayDateRange = useMemo(() => ({
-        start: formatDateForDisplay(dateRange.start),
-        end: formatDateForDisplay(dateRange.end),
-    }), [dateRange])
-
-    // Handle date navigation - week by week
-    const handlePrevious = () => {
-        setDateRange((prev) => getPreviousWeekRange(prev.start))
-    }
-
-    const handleNext = () => {
-        if (!canGoNext) return
-        setDateRange((prev) => {
-            const next = getNextWeekRange(prev.start)
-            return next || prev
-        })
-    }
-
-    // Fetch Sleep data with date range - will refetch when dates change
-    const { data, isLoading, isFetching, error } = useSleepTrendData(apiDateRange)
-
-
-
-    // Error state
-    if (error) {
-        return (
-            <div
-                className="min-h-screen flex items-center justify-center p-4"
-                style={{ backgroundColor: theme.background }}
-            >
-                <div className="text-center">
-                    <p className="text-red-500 mb-2">{t('common.error')}</p>
-                    <p className="text-sm" style={{ color: theme.textSecondary }}>
-                        {String(error)}
-                    </p>
-                </div>
-            </div>
-        )
-    }
-
+  // Error state
+  if (error) {
     return (
-        <div
-            className="min-h-screen pb-20"
-            style={{ backgroundColor: theme.background }}
-        >
-            <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
-                {/* Date Range Picker - Always visible, not affected by loading */}
-                <div
-                    className="sticky top-0 z-20 py-3 px-4"
-                    style={{
-                        backgroundColor: theme.background
-                    }}
-                >
-                    <div className="flex justify-center">
-                        <DateRangePicker
-                            startDate={displayDateRange.start}
-                            endDate={displayDateRange.end}
-                            onPrevious={handlePrevious}
-                            onNext={handleNext}
-                            disableNext={!canGoNext}
-                        />
-                    </div>
-                </div>
-
-                {/* Content - Shows loading or data */}
-                <div className="px-4 space-y-4">
-                    {!data && !isLoading ? (
-                        // No data state (after loading completes with no data)
-                        <div className="flex items-center justify-center py-20">
-                            <p style={{ color: theme.textSecondary }}>{t('common.noData')}</p>
-                        </div>
-                    ) : (
-                        // Always show cards - with skeleton content when no data, with overlay when loading
-                        <div className="space-y-4">
-                            <SleepTrendyReportCard data={data} />
-                            <SleepStructureCard data={data} />
-                            <SleepDataAnalysisCard data={data} />
-                            <SleepCompareCard data={data} />
-                            <SleepWeeklyOverviewCard data={data} />
-                            <DisclaimerBox />
-                        </div>
-                    )}
-                </div>
-            </div>
+      <div
+        className="min-h-screen flex items-center justify-center p-4"
+        style={{ backgroundColor: theme.background }}
+      >
+        <div className="text-center">
+          <p className="text-red-500 mb-2">{t('common.error')}</p>
+          <p className="text-sm" style={{ color: theme.textSecondary }}>
+            {String(error)}
+          </p>
         </div>
+      </div>
     )
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className="min-h-screen pb-20"
+      style={{ backgroundColor: theme.background }}
+      {...swipeHandlers}
+    >
+      <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
+        {/* Date Range Picker - Always visible, not affected by loading */}
+        <div
+          className="sticky top-0 z-20 py-3 px-4"
+          style={{ backgroundColor: theme.background }}
+        >
+          <div className="flex justify-center">
+            <DateRangePicker
+              startDate={displayDateRange.start}
+              endDate={displayDateRange.end}
+              onPrevious={goToPreviousWeek}
+              onNext={goToNextWeek}
+              disableNext={!canGoNext}
+            />
+          </div>
+        </div>
+
+        {/* Content - Shows loading or data */}
+        <div className="px-4 space-y-4">
+          {!data && !isLoading ? (
+            // No data state (after loading completes with no data)
+            <div className="flex items-center justify-center py-20">
+              <p style={{ color: theme.textSecondary }}>{t('common.noData')}</p>
+            </div>
+          ) : (
+            // Always show cards - with skeleton content when no data, with overlay when loading
+            <div className="space-y-4">
+              <SleepTrendyReportCard data={data} />
+              <SleepStructureCard data={data} />
+              <SleepDataAnalysisCard data={data} />
+              <SleepCompareCard data={data} />
+              <SleepWeeklyOverviewCard data={data} />
+              <DisclaimerBox />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }

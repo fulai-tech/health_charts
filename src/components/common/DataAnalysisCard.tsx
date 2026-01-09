@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui/card'
-import { UI_STYLES } from '@/config/theme'
+import { UI_STYLES, UI_COLORS } from '@/config/theme'
 import { Loader2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { memo } from 'react'
@@ -68,7 +68,7 @@ const DataAnalysisCardInner = ({
                     <div
                         key={index}
                         className="flex items-start gap-3 rounded-xl px-4 py-3"
-                        style={{ backgroundColor: '#F8F8F8' }}
+                        style={{ backgroundColor: UI_COLORS.background.gray }}
                     >
                         <span
                             className="w-1.5 h-1.5 rounded-full mt-2 flex-shrink-0"

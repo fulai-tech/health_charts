@@ -330,9 +330,21 @@
     "macronutrientStructure": "宏量营养素结构",
     "ingestTargetStatistics": "摄入目标统计",
     "balancedIntakeSummary": "您的碳水化合物、蛋白质和脂肪摄入相对均衡。继续关注维生素摄入。",
-    "complicatedRecipes": "推荐食谱",
+    "complicatedRecipes": "本周vs上周",
     "kcal": "千卡",
     "goal": "达标",
-    "exceed": "超标"
+    "exceed": "超标",
+    "comparison": {
+      "title": "与上周对比",
+      "avgCaloriesCompare": "平均卡路里与上周对比",
+      "lastWeek": "上周",
+      "thisWeek": "本周",
+      "lastWeekValue": "上周",
+      "mainCause": "数据归因：主要由以下食物导致",
+      "breakfast": "早餐",
+      "lunch": "午餐",
+      "dinner": "晚餐",
+      "snacks": "加餐"
+    }
   }
 }

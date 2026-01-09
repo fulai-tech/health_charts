@@ -308,7 +308,7 @@ export function VitalTrendChart({
   }
 
   return (
-    <div ref={chartContainerRef} className={cn('w-full transform-gpu will-change-transform', className)} style={{ height }}>
+    <div ref={chartContainerRef} className={cn('w-full transform-gpu will-change-transform', className)} style={{ height }} data-swipe-ignore>
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         {renderChart()}
       </ResponsiveContainer>

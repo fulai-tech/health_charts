@@ -165,7 +165,7 @@ const TimeAxisBarChartInner = ({
             )}
 
             {/* Chart */}
-            <div ref={chartContainerRef} style={{ height }} className="-mx-2">
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2" data-swipe-ignore>
                 <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                         data={chartData}

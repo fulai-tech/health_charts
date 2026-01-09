@@ -382,7 +382,7 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
   const handleMouseLeave = () => setTooltip(prev => ({ ...prev, visible: false }))
 
   return (
-    <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }}>
+    <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }} data-swipe-ignore>
       <canvas
         ref={canvasRef}
         className="w-full h-full block"

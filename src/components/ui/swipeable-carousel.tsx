@@ -1,36 +1,84 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { Card } from '@/components/ui/card'
 import { UI_STYLES } from '@/config/theme'
 import { Loader2 } from 'lucide-react'
 
+/**
+ * Hook to manage carousel state externally
+ * Useful when indicators need to be rendered outside the carousel
+ */
+export function useCarouselState(itemCount: number) {
+    const [currentIndex, setCurrentIndex] = useState(0)
+
+    // Reset index when item count changes
+    useEffect(() => {
+        if (currentIndex >= itemCount && itemCount > 0) {
+            setCurrentIndex(itemCount - 1)
+        }
+    }, [itemCount, currentIndex])
+
+    const goToSlide = useCallback((index: number) => {
+        if (index >= 0 && index < itemCount) {
+            setCurrentIndex(index)
+        }
+    }, [itemCount])
+
+    const goToNext = useCallback(() => {
+        if (currentIndex < itemCount - 1) {
+            setCurrentIndex(prev => prev + 1)
+        }
+    }, [currentIndex, itemCount])
+
+    const goToPrev = useCallback(() => {
+        if (currentIndex > 0) {
+            setCurrentIndex(prev => prev - 1)
+        }
+    }, [currentIndex])
+
+    return useMemo(() => ({
+        currentIndex,
+        setCurrentIndex: goToSlide,
+        goToNext,
+        goToPrev,
+        isFirst: currentIndex === 0,
+        isLast: currentIndex === itemCount - 1,
+        total: itemCount
+    }), [currentIndex, goToSlide, goToNext, goToPrev, itemCount])
+}
+
 // Indicator colors
 const INDICATOR_ACTIVE_COLOR = '#FB923D'
 const INDICATOR_INACTIVE_COLOR = '#D1D5DB'
 
-interface CarouselIndicatorProps {
+export interface CarouselIndicatorProps {
     total: number
     current: number
-    onSelect: (index: number) => void
+    onSelect?: (index: number) => void
     activeColor?: string
     inactiveColor?: string
+    className?: string
 }
 
-const CarouselIndicator = ({
+/**
+ * Carousel Indicator component - can be used standalone or within SwipeableCarousel
+ */
+export const CarouselIndicator = ({
     total,
     current,
     onSelect,
     activeColor = INDICATOR_ACTIVE_COLOR,
-    inactiveColor = INDICATOR_INACTIVE_COLOR
+    inactiveColor = INDICATOR_INACTIVE_COLOR,
+    className = ''
 }: CarouselIndicatorProps) => {
     if (total <= 1) return null
 
     return (
-        <div className="flex justify-center items-center gap-2 mt-4">
+        <div className={`flex justify-center items-center gap-2 ${className}`}>
             {Array.from({ length: total }).map((_, index) => (
                 <button
                     key={index}
-                    onClick={() => onSelect(index)}
+                    onClick={() => onSelect?.(index)}
                     className="transition-all duration-300"
                     style={{
                         width: index === current ? 24 : 8,
@@ -54,6 +102,14 @@ export interface SwipeableCarouselProps {
     emptyMessage?: string
     indicatorActiveColor?: string
     indicatorInactiveColor?: string
+    /** Hide indicators (useful when using external CarouselIndicator) */
+    hideIndicators?: boolean
+    /** Controlled mode: current index */
+    currentIndex?: number
+    /** Controlled mode: callback when index changes */
+    onIndexChange?: (index: number) => void
+    /** Whether to wrap content in a Card component */
+    wrapInCard?: boolean
 }
 
 export const SwipeableCarousel = ({
@@ -64,9 +120,28 @@ export const SwipeableCarousel = ({
     header,
     emptyMessage = 'No data available',
     indicatorActiveColor,
-    indicatorInactiveColor
+    indicatorInactiveColor,
+    hideIndicators = false,
+    currentIndex: controlledIndex,
+    onIndexChange,
+    wrapInCard = true
 }: SwipeableCarouselProps) => {
-    const [currentIndex, setCurrentIndex] = useState(0)
+    // Support both controlled and uncontrolled modes
+    const [internalIndex, setInternalIndex] = useState(0)
+    const isControlled = controlledIndex !== undefined
+    const currentIndex = isControlled ? controlledIndex : internalIndex
+    
+    const setCurrentIndex = useCallback((indexOrUpdater: number | ((prev: number) => number)) => {
+        const newIndex = typeof indexOrUpdater === 'function' 
+            ? indexOrUpdater(currentIndex) 
+            : indexOrUpdater
+        
+        if (!isControlled) {
+            setInternalIndex(newIndex)
+        }
+        onIndexChange?.(newIndex)
+    }, [currentIndex, isControlled, onIndexChange])
+
     const containerRef = useRef<HTMLDivElement>(null)
 
     // Touch state
@@ -76,10 +151,12 @@ export const SwipeableCarousel = ({
     const isSwiping = useRef<boolean>(false)
     const [translateX, setTranslateX] = useState(0)
 
-    // Reset index when items change
+    // Reset index when items change (only in uncontrolled mode)
     useEffect(() => {
-        setCurrentIndex(0)
-    }, [items.length])
+        if (!isControlled) {
+            setInternalIndex(0)
+        }
+    }, [items.length, isControlled])
 
     // Handle touch start
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -143,8 +220,8 @@ export const SwipeableCarousel = ({
 
     const baseTranslate = -currentIndex * 100
 
-    return (
-        <Card className={`${className} relative overflow-hidden`}>
+    const content = (
+        <>
             {/* Loading overlay */}
             <div
                 className={`absolute inset-0 rounded-2xl flex items-center justify-center z-10 transition-all duration-300 ease-in-out ${isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -167,6 +244,7 @@ export const SwipeableCarousel = ({
                         onTouchMove={handleTouchMove}
                         onTouchEnd={handleTouchEnd}
                         style={{ touchAction: 'pan-y pinch-zoom' }}
+                        data-swipe-ignore
                     >
                         <div
                             className="flex"
@@ -176,27 +254,44 @@ export const SwipeableCarousel = ({
                             }}
                         >
                             {items.map((item, index) => (
-                                <div key={index} className="w-full flex-shrink-0 px-1">
+                                <div key={index} className="w-full flex-shrink-0 px-0">
                                     {renderItem(item, index)}
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    {/* Indicator Dots */}
-                    <CarouselIndicator
-                        total={items.length}
-                        current={currentIndex}
-                        onSelect={handleIndicatorSelect}
-                        activeColor={indicatorActiveColor}
-                        inactiveColor={indicatorInactiveColor}
-                    />
+                    {/* Indicator Dots - only render if not hidden */}
+                    {!hideIndicators && (
+                        <CarouselIndicator
+                            total={items.length}
+                            current={currentIndex}
+                            onSelect={handleIndicatorSelect}
+                            activeColor={indicatorActiveColor}
+                            inactiveColor={indicatorInactiveColor}
+                            className="mt-4"
+                        />
+                    )}
                 </>
             ) : (
                 <div className="text-center py-8 text-slate-400 text-sm">
                     {emptyMessage}
                 </div>
             )}
-        </Card>
+        </>
+    )
+
+    if (wrapInCard) {
+        return (
+            <Card className={`${className} relative overflow-hidden`}>
+                {content}
+            </Card>
+        )
+    }
+
+    return (
+        <div className={`${className} relative overflow-hidden`}>
+            {content}
+        </div>
     )
 }

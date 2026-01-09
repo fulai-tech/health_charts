@@ -98,6 +98,10 @@ const MOCK_DATA: NutritionDomainModel = {
     { name: 'Vitamin D', value: 22, unit: 'μg', range: [10, 20], status: 'high' },
     { name: 'Vitamin E', value: 18, unit: 'mg', range: [12, 20], status: 'normal' },
   ],
+  dietaryComponents: [
+    { name: 'Dietary fiber', value: 12, target: 25, unit: 'g', status: 'low' },
+    { name: 'Purine', value: 280, target: 150, unit: 'mg', status: 'high' },
+  ],
   recipes: [
     {
       id: '1',
@@ -136,6 +140,11 @@ const MOCK_DATA: NutritionDomainModel = {
     overview: 'Your nutritional intake this week has been generally balanced. Total calorie consumption fluctuated slightly but remained within the target range. Most macronutrient goals were met, with a slight variation in fat intake.',
     highlights: 'Analysis indicates consistent protein intake throughout the week. However, fat consumption exceeded recommended levels on the weekend. We suggest incorporating more vegetables to optimize micronutrient balance and offset calorie surplus.',
     suggestions: []
+  },
+  categoryEvaluations: {
+    macroNutrients: null,
+    microNutrients: null,
+    dietaryComponents: null
   }
 }
 

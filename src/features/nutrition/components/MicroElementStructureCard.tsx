@@ -2,9 +2,11 @@ import { Card } from '@/components/ui/card'
 import type { NutrientStructureData } from '../types'
 import { PieChart as PieChartIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { VITAL_COLORS, UI_COLORS } from '@/config/theme'
 
 interface MicroElementStructureCardProps {
     data?: NutrientStructureData[]
+    summary?: string | null
     className?: string
 }
 
@@ -40,10 +42,13 @@ function getStatusBadge(status: 'goal' | 'exceed' | 'insufficient', t: any) {
     }
 }
 
-export const MicroElementStructureCard = ({ data, className }: MicroElementStructureCardProps) => {
+export const MicroElementStructureCard = ({ data, summary, className }: MicroElementStructureCardProps) => {
     const { t } = useTranslation()
 
     if (!data) return null
+
+    // Use backend summary if available, otherwise use default translation
+    const displaySummary = summary || t('nutrition.balancedIntakeSummary', 'Your macronutrient balance is generally good. Protein intake hits the target, while fat intake is slightly high. We recommend maintaining current protein levels while reducing fat consumption.')
 
     return (
         <Card className={`${className} p-5`}>
@@ -58,19 +63,21 @@ export const MicroElementStructureCard = ({ data, className }: MicroElementStruc
                     const badge = getStatusBadge(status, t)
 
                     return (
-                        <div key={index} className="bg-slate-50 rounded-xl p-4">
-                            {/* Top row: Name and Status Badge */}
-                            <div className="flex justify-between items-center mb-2">
+                        <div key={index} className="rounded-xl p-4 relative" style={{ backgroundColor: UI_COLORS.background.gray }}>
+                            {/* Status Badge - positioned at top right */}
+                            <span className={`absolute top-4 right-4 text-xs font-medium px-3 py-1 rounded-md ${badge.bg} ${badge.text}`}>
+                                {badge.label}
+                            </span>
+
+                            {/* Top row: Name */}
+                            <div className="flex justify-between items-center">
                                 <span className="text-sm font-medium text-slate-700">{item.label}</span>
-                                <span className={`text-xs font-medium px-3 py-1 rounded-full ${badge.bg} ${badge.text}`}>
-                                    {badge.label}
-                                </span>
                             </div>
 
                             {/* Middle row: Large number and Target */}
                             <div className="flex justify-between items-baseline mb-3">
                                 <div>
-                                    <span className="text-3xl font-bold" style={{ color: item.color }}>
+                                    <span className="text-3xl font-bold" style={{ color: VITAL_COLORS.nutrition }}>
                                         {item.current}
                                     </span>
                                     <span className="text-sm text-slate-500 ml-1">{item.unit}</span>
@@ -96,7 +103,7 @@ export const MicroElementStructureCard = ({ data, className }: MicroElementStruc
             </div>
 
             <div className="mt-4 p-3 bg-blue-50 rounded-xl text-sm text-slate-600 leading-relaxed">
-                {t('nutrition.balancedIntakeSummary', 'Your macronutrient balance is generally good. Protein intake hits the target, while fat intake is slightly high. We recommend maintaining current protein levels while reducing fat consumption.')}
+                {displaySummary}
             </div>
         </Card>
     )

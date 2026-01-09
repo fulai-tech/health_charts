@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/business/DateRangePicker'
 import { EmotionTrendyReportCard } from '@/features/emotion/components/EmotionTrendyReportCard'
@@ -10,16 +10,10 @@ import { EmotionDiaryCard } from '@/features/emotion/components/EmotionDiaryCard
 import { EmotionDemoModeToggle } from '@/features/emotion/components/EmotionDemoModeToggle'
 import { useEmotionTrendData, usePrefetchEmotionData } from '@/features/emotion/api'
 import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useWeekNavigation } from '@/hooks/useWeekNavigation'
+import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { UI_STYLES } from '@/config/theme'
-import {
-  formatDateToAPI,
-  formatDateForDisplay,
-  getCurrentWeekDateRange,
-  getPreviousWeekRange,
-  getNextWeekRange,
-  canNavigateToNextWeek
-} from '@/lib/dateUtils'
 
 /**
  * Emotion Details Page
@@ -29,52 +23,31 @@ export function EmotionPage() {
   const { theme } = useUrlConfig()
   const { prefetchPreviousWeeks } = usePrefetchEmotionData()
 
-  // Date range state - week-aligned (Monday to today or Sunday)
-  const [dateRange, setDateRange] = useState(() => getCurrentWeekDateRange())
+  // Week navigation (unified hook)
+  const {
+    dateRange,
+    apiDateRange,
+    displayDateRange,
+    canGoNext,
+    goToPreviousWeek,
+    goToNextWeek,
+  } = useWeekNavigation()
+
+  // Swipe navigation for touch devices
+  const { containerRef, swipeHandlers } = useSwipeNavigation({
+    onSwipeLeft: goToNextWeek,
+    onSwipeRight: goToPreviousWeek,
+    canSwipeLeft: canGoNext,
+    canSwipeRight: true,
+  })
 
   // Prefetch previous weeks
   useEffect(() => {
     prefetchPreviousWeeks(dateRange.start, 3)
   }, [dateRange.start, prefetchPreviousWeeks])
 
-  // Check if we can navigate to next week
-  const canGoNext = useMemo(() => canNavigateToNextWeek(dateRange.start), [dateRange.start])
-
-  // Format dates for API
-  const apiDateRange = useMemo(
-    () => ({
-      startDate: formatDateToAPI(dateRange.start),
-      endDate: formatDateToAPI(dateRange.end),
-    }),
-    [dateRange]
-  )
-
-  // Format dates for display
-  const displayDateRange = useMemo(
-    () => ({
-      start: formatDateForDisplay(dateRange.start),
-      end: formatDateForDisplay(dateRange.end),
-    }),
-    [dateRange]
-  )
-
-  // Handle date navigation - week by week
-  const handlePrevious = () => {
-    setDateRange((prev) => getPreviousWeekRange(prev.start))
-  }
-
-  const handleNext = () => {
-    if (!canGoNext) return
-    setDateRange((prev) => {
-      const next = getNextWeekRange(prev.start)
-      return next || prev
-    })
-  }
-
   // Fetch Emotion data
-  const { data, isLoading, isFetching, error } = useEmotionTrendData(apiDateRange)
-
-
+  const { data, isLoading, error } = useEmotionTrendData(apiDateRange)
 
   // Error state
   if (error) {
@@ -95,8 +68,10 @@ export function EmotionPage() {
 
   return (
     <div
+      ref={containerRef}
       className="min-h-screen pb-20"
       style={{ backgroundColor: theme.background }}
+      {...swipeHandlers}
     >
       <div className={`${UI_STYLES.pageMaxWidth} mx-auto`}>
         {/* Date Range Picker */}
@@ -108,8 +83,8 @@ export function EmotionPage() {
             <DateRangePicker
               startDate={displayDateRange.start}
               endDate={displayDateRange.end}
-              onPrevious={handlePrevious}
-              onNext={handleNext}
+              onPrevious={goToPreviousWeek}
+              onNext={goToNextWeek}
               disableNext={!canGoNext}
             />
           </div>

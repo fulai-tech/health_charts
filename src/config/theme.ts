@@ -143,6 +143,8 @@ export const UI_COLORS = {
   },
   /** 背景颜色 */
   background: {
+    /** 统一灰色背景 - #F8F8F8，用于卡片内部元素、统计卡片等 */
+    gray: 'rgb(248, 248, 248)',
     warning: 'rgb(248, 248, 248)',
     neutral: 'rgb(248, 248, 248)',
     summaryBox: 'rgb(248, 248, 248)',

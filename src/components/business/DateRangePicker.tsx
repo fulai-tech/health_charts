@@ -1,6 +1,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+const ICON_MUTED = '#918D8A'
+
 interface DateRangePickerProps {
   startDate: string
   endDate: string
@@ -31,7 +33,8 @@ export function DateRangePicker({
     >
       <button
         onClick={onPrevious}
-        className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+        className="p-1 transition-colors"
+        style={{ color: ICON_MUTED }}
         aria-label="Previous period"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -44,7 +47,8 @@ export function DateRangePicker({
       {!disableNext ? (
         <button
           onClick={onNext}
-          className="p-1 text-slate-400 hover:text-slate-600 transition-colors"
+          className="p-1 transition-colors"
+          style={{ color: ICON_MUTED }}
           aria-label="Next period"
         >
           <ChevronRight className="w-5 h-5" />

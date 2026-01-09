@@ -339,6 +339,18 @@
     "complicatedRecipes": "Complicated recipes",
     "kcal": "kcal",
     "goal": "Goal",
-    "exceed": "Exceed"
+    "exceed": "Exceed",
+    "comparison": {
+      "title": "Compare with last week",
+      "avgCaloriesCompare": "Average calories compare to last week",
+      "lastWeek": "Last week",
+      "thisWeek": "This week",
+      "lastWeekValue": "Last week",
+      "mainCause": "Data attribution: Primarily caused by...",
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snacks": "Snacks"
+    }
   }
 }
