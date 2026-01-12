@@ -108,6 +108,13 @@
     "sat": "Sat",
     "sun": "Sun"
   },
+  "datePicker": {
+    "previousWeek": "Previous week",
+    "nextWeek": "Next week",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "selectWeek": "Click a row to select week"
+  },
   "page": {
     "bloodPressure": {
       "title": "Blood Pressure Details",
@@ -292,6 +299,16 @@
     "aiAnalysis": "AI Analysis",
     "aiHealthInsights": "AI health related insights",
     "personalizedSuggestions": "Personalized suggestions",
+    "defaultSuggestions": {
+      "soakingFeet": {
+        "title": "Soaking feet before bed",
+        "description": "Relieve current anxiety and lower heart rate."
+      },
+      "napSuggestion": {
+        "title": "Today's nap suggestion",
+        "description": "Relieve current anxiety and lower heart rate."
+      }
+    },
     "emotionProportion": "Emotional proportion analysis",
     "emotionDistribution": "Emotion distribution",
     "asMain": "as main",

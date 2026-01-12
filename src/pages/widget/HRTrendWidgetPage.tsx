@@ -1,15 +1,23 @@
 import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { HRTrendWidget } from '@/features/heart-rate'
+import { HRTrendyReportCard, type HRDomainModel } from '@/features/heart-rate'
+import { parseUrlJsonData } from '@/lib/utils'
 
 /**
  * Heart Rate Trend Widget Page
  * Route: /widget/heart-rate/trend
+ * 
+ * Accepts data via URL parameter:
+ * - data: JSON string containing HRDomainModel
+ * 
+ * @see src/pages/widget/README.md for JSON format documentation
  */
 export function HRTrendWidgetPage() {
+  const data = parseUrlJsonData<HRDomainModel>('data')
+
   return (
     <WidgetLayout>
-      <div className="w-full max-w-md p-4">
-        <HRTrendWidget showCard={false} height={200} />
+      <div className="w-full max-w-md p-2">
+        <HRTrendyReportCard data={data || undefined} />
       </div>
     </WidgetLayout>
   )

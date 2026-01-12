@@ -2,7 +2,8 @@
 export * from './types'
 export * from './adapter'
 export * from './api'
-export { GlucoseTrendWidget } from './components/GlucoseTrendWidget'
+
+// Components
 export { GlucoseSummaryCard } from './components/GlucoseSummaryCard'
 export { GlucoseTrendyReportCard } from './components/GlucoseTrendyReportCard'
 export { GlucoseStatisticsCard } from './components/GlucoseStatisticsCard'

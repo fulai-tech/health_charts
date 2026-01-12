@@ -108,6 +108,13 @@
     "sat": "周六",
     "sun": "周日"
   },
+  "datePicker": {
+    "previousWeek": "上一周",
+    "nextWeek": "下一周",
+    "previousMonth": "上一月",
+    "nextMonth": "下一月",
+    "selectWeek": "点击选择一周"
+  },
   "page": {
     "bloodPressure": {
       "title": "血压详情",
@@ -261,6 +268,16 @@
     "aiAnalysis": "AI 分析",
     "aiHealthInsights": "AI 健康相关见解",
     "personalizedSuggestions": "个性化建议",
+    "defaultSuggestions": {
+      "soakingFeet": {
+        "title": "睡前泡脚",
+        "description": "缓解当前焦虑，降低心率。"
+      },
+      "napSuggestion": {
+        "title": "今日午睡建议",
+        "description": "缓解当前焦虑，降低心率。"
+      }
+    },
     "emotionProportion": "情绪比例分析",
     "emotionDistribution": "情绪分布",
     "asMain": "为主",

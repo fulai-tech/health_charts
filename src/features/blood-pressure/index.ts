@@ -2,6 +2,8 @@
 export * from './types'
 export * from './adapter'
 export * from './api'
-export { BPTrendWidget } from './components/BPTrendWidget'
+
+// Components
 export { BPSummaryCard } from './components/BPSummaryCard'
+export { BPTrendyReportCard } from './components/BPTrendyReportCard'
 

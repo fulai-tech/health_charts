@@ -34,16 +34,29 @@ const SuggestionsListInner = ({
 }: SuggestionsListProps) => {
     const { t } = useTranslation()
 
-    if (!suggestions || suggestions.length === 0) {
-        return null
-    }
+    // 当后端返回空数组时，使用 i18n 假数据
+    const displaySuggestions: Suggestion[] = 
+        !suggestions || suggestions.length === 0
+            ? [
+                  {
+                      icon: '/images/daily_report/1.webp', // 使用与 demo 模式相同的图标
+                      title: t('daily.defaultSuggestions.soakingFeet.title', 'Soaking feet before bed'),
+                      description: t('daily.defaultSuggestions.soakingFeet.description', 'Relieve current anxiety and lower heart rate.'),
+                  },
+                  {
+                      icon: '/images/daily_report/2.webp', // 使用与 demo 模式相同的图标
+                      title: t('daily.defaultSuggestions.napSuggestion.title', "Today's nap suggestion"),
+                      description: t('daily.defaultSuggestions.napSuggestion.description', 'Relieve current anxiety and lower heart rate.'),
+                  },
+              ]
+            : suggestions
 
     const handleAdd = (index: number) => {
         if (onAdd) {
             onAdd(index)
         } else {
             // Default: show alert
-            alert(`Added suggestion: ${suggestions[index].title}`)
+            alert(`Added suggestion: ${displaySuggestions[index].title}`)
         }
     }
 
@@ -56,7 +69,7 @@ const SuggestionsListInner = ({
 
             {/* Suggestion items */}
             <div className="space-y-3">
-                {suggestions.map((suggestion, index) => (
+                {displaySuggestions.map((suggestion, index) => (
                     <div
                         key={index}
                         className="bg-white py-4 shadow-sm border border-slate-100 flex items-center gap-4"

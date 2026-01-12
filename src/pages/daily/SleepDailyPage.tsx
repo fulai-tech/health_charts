@@ -101,9 +101,7 @@ export default function SleepDailyPage() {
                     )}
 
                     {/* Suggestions */}
-                    {data.suggestions.length > 0 && (
-                        <SuggestionsList suggestions={data.suggestions} />
-                    )}
+                    <SuggestionsList suggestions={data.suggestions || []} />
 
                     {/* Disclaimer */}
                     <p className="text-xs text-slate-400 text-center px-4 py-2">

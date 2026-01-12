@@ -2,7 +2,8 @@
 export * from './types'
 export * from './adapter'
 export * from './api'
-export { HRTrendWidget } from './components/HRTrendWidget'
+
+// Components
 export { HRSummaryCard } from './components/HRSummaryCard'
 export { HRTrendyReportCard } from './components/HRTrendyReportCard'
 export { HRStatisticsCard } from './components/HRStatisticsCard'

@@ -1,16 +1,23 @@
 import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { BPTrendWidget } from '@/features/blood-pressure'
+import { BPTrendyReportCard, type BPDomainModel } from '@/features/blood-pressure'
+import { parseUrlJsonData } from '@/lib/utils'
 
 /**
  * Blood Pressure Trend Widget Page
- * Renders only the trend chart for iframe embedding
  * Route: /widget/blood-pressure/trend
+ * 
+ * Accepts data via URL parameter:
+ * - data: JSON string containing BPDomainModel
+ * 
+ * @see src/pages/widget/README.md for JSON format documentation
  */
 export function BPTrendWidgetPage() {
+  const data = parseUrlJsonData<BPDomainModel>('data')
+
   return (
     <WidgetLayout>
-      <div className="w-full max-w-md p-4">
-        <BPTrendWidget showCard={false} height={200} />
+      <div className="w-full max-w-md p-2">
+        <BPTrendyReportCard data={data || undefined} />
       </div>
     </WidgetLayout>
   )

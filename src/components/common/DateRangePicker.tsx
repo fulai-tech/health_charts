@@ -19,7 +19,7 @@ interface DateRangePickerProps {
 }
 
 /**
- * Format date to short display format (e.g., "Jan 05")
+ * Format date to short display format (e.g., "Jan 05" or "1月05日")
  */
 function formatShortDate(dateStr: string, locale: string): string {
   // Parse YYYY/MM/DD format
@@ -29,7 +29,10 @@ function formatShortDate(dateStr: string, locale: string): string {
   const [year, month, day] = parts.map(Number)
   const date = new Date(year, month - 1, day)
   
-  return date.toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
+  // Normalize locale: 'zh' or 'zh-CN' -> 'zh-CN', otherwise 'en-US'
+  const normalizedLocale = locale.startsWith('zh') ? 'zh-CN' : 'en-US'
+  
+  return date.toLocaleDateString(normalizedLocale, {
     month: 'short',
     day: '2-digit',
   })
@@ -90,7 +93,8 @@ export function DateRangePicker({
     return new Date()
   })
 
-  const locale = i18n.language || 'en'
+  // Use resolvedLanguage which returns the actual language being used
+  const locale = i18n.resolvedLanguage || i18n.language || 'zh'
   
   // Format dates for display
   const formattedStart = formatShortDate(startDate, locale)
@@ -117,10 +121,17 @@ export function DateRangePicker({
     [viewDate]
   )
 
-  const monthYearLabel = viewDate.toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US', {
-    year: 'numeric',
-    month: 'long',
-  })
+  // Normalize locale for date formatting and memoize month/year label
+  const normalizedLocale = useMemo(() => {
+    return locale.startsWith('zh') ? 'zh-CN' : 'en-US'
+  }, [locale])
+  
+  const monthYearLabel = useMemo(() => {
+    return viewDate.toLocaleDateString(normalizedLocale, {
+      year: 'numeric',
+      month: 'long',
+    })
+  }, [viewDate, normalizedLocale])
 
   // Weekday headers
   const weekdayHeaders = [
@@ -138,8 +149,23 @@ export function DateRangePicker({
   }
 
   const handleNextMonth = () => {
-    setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+    const nextMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)
+    const today = new Date()
+    const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    
+    // Don't allow navigating to future months
+    if (nextMonth > currentMonth) return
+    
+    setViewDate(nextMonth)
   }
+
+  // Check if we can navigate to next month
+  const canGoNextMonth = useMemo(() => {
+    const nextMonth = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)
+    const today = new Date()
+    const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    return nextMonth <= currentMonth
+  }, [viewDate])
 
   // Swipe gesture handling for month navigation
   const swipeStartX = useRef<number>(0)
@@ -189,7 +215,16 @@ export function DateRangePicker({
         setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
       } else {
         // Swipe left → go to next month
-        setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+        setViewDate(prev => {
+          const nextMonth = new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+          const today = new Date()
+          const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+          
+          // Don't allow swiping to future months
+          if (nextMonth > currentMonth) return prev
+          
+          return nextMonth
+        })
       }
     }
 
@@ -289,7 +324,7 @@ export function DateRangePicker({
           'active:scale-95 active:shadow-inner',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
         )}
-        aria-label="Previous week"
+        aria-label={t('datePicker.previousWeek')}
       >
         <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
       </button>
@@ -303,8 +338,7 @@ export function DateRangePicker({
               'w-[200px]', // Fixed width to prevent layout shift
               'transition-all duration-200 ease-out',
               'hover:bg-white/95 hover:shadow-md',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1',
-              open && 'bg-white/95'
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
             )}
           >
             {/* Text with premium typography and fixed width */}
@@ -351,6 +385,7 @@ export function DateRangePicker({
             <div className="relative flex items-center justify-between mb-5">
               <button
                 onClick={handlePrevMonth}
+                aria-label={t('datePicker.previousMonth')}
                 className={cn(
                   'flex items-center justify-center w-8 h-8 rounded-lg',
                   'text-slate-600 hover:text-slate-800',
@@ -367,11 +402,18 @@ export function DateRangePicker({
               
               <button
                 onClick={handleNextMonth}
+                disabled={!canGoNextMonth}
+                aria-label={t('datePicker.nextMonth')}
                 className={cn(
                   'flex items-center justify-center w-8 h-8 rounded-lg',
-                  'text-slate-600 hover:text-slate-800',
-                  'hover:bg-slate-100/70 transition-all duration-150',
-                  'active:scale-95'
+                  'transition-all duration-150',
+                  canGoNextMonth ? [
+                    'text-slate-600 hover:text-slate-800',
+                    'hover:bg-slate-100/70',
+                    'active:scale-95'
+                  ] : [
+                    'text-slate-300 cursor-not-allowed opacity-50'
+                  ]
                 )}
               >
                 <ChevronRight className="w-4 h-4" strokeWidth={2.5} />
@@ -450,7 +492,7 @@ export function DateRangePicker({
             <div className="relative flex items-center justify-center gap-2 mt-5 pt-4 border-t border-slate-100/80">
               <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 animate-pulse" />
               <p className="text-xs font-medium text-slate-400 tracking-wide">
-                {locale === 'zh' ? '点击选择一周' : 'Click a row to select week'}
+                {t('datePicker.selectWeek')}
               </p>
             </div>
 
@@ -479,7 +521,7 @@ export function DateRangePicker({
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
               ]
         )}
-        aria-label="Next week"
+        aria-label={t('datePicker.nextWeek')}
       >
         <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
       </button>
