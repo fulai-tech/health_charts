@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { MetricSummaryCard } from '@/components/business/MetricSummaryCard'
+import { MetricSummaryCard } from '@/components/common/MetricSummaryCard'
 import { VITAL_COLORS } from '@/config/theme'
 import { useSpO2TrendData } from '../api'
 import { Card, CardContent } from '@/components/ui/card'

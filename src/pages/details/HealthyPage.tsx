@@ -14,7 +14,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { useHealthyData } from '@/features/healthy/api'

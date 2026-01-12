@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { EmotionTrendyReportCard } from '@/features/emotion/components/EmotionTrendyReportCard'
 import { EmotionStatisticsCard } from '@/features/emotion/components/EmotionStatisticsCard'
 import { EmotionDistributionCard } from '@/features/emotion/components/EmotionDistributionCard'

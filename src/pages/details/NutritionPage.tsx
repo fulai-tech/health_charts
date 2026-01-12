@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { NutritionWeeklyGaugeCard } from '@/features/nutrition/components/NutritionWeeklyGaugeCard'
 import { NutritionStatisticsCard } from '@/features/nutrition/components/NutritionStatisticsCard'
 import { NutritionDataAnalysisCard } from '@/features/nutrition/components/NutritionDataAnalysisCard'

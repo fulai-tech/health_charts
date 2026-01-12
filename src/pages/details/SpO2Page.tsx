@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { SpO2TrendyReportCard } from '@/features/spo2/components/SpO2TrendyReportCard'
 import { SpO2StatisticsCard } from '@/features/spo2/components/SpO2StatisticsCard'
 import { SpO2DataAnalysisCard } from '@/features/spo2/components/SpO2DataAnalysisCard'

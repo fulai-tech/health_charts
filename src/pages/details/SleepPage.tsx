@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { SleepTrendyReportCard } from '@/features/sleep/components/SleepTrendyReportCard'
 import { SleepStructureCard } from '@/features/sleep/components/SleepStructureCard'
 import { SleepDataAnalysisCard } from '@/features/sleep/components/SleepDataAnalysisCard'

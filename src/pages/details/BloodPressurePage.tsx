@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DateRangePicker } from '@/components/business/DateRangePicker'
+import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { BPTrendyReportCard } from '@/features/blood-pressure/components/BPTrendyReportCard'
 import { BPStatisticsCard } from '@/features/blood-pressure/components/BPStatisticsCard'
 import { BPCompareCard } from '@/features/blood-pressure/components/BPCompareCard'

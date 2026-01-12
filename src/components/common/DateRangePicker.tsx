@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import * as Popover from '@radix-ui/react-popover'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { getWeekBounds } from '@/lib/dateUtils'
+import type { TouchEvent } from 'react'
 
 interface DateRangePickerProps {
   startDate: string
@@ -140,6 +141,66 @@ export function DateRangePicker({
     setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
   }
 
+  // Swipe gesture handling for month navigation
+  const swipeStartX = useRef<number>(0)
+  const swipeStartY = useRef<number>(0)
+  const swipeEndX = useRef<number>(0)
+  const swipeEndY = useRef<number>(0)
+  const isSwiping = useRef<boolean>(false)
+  const SWIPE_THRESHOLD = 50
+  const HORIZONTAL_RATIO = 1.2
+
+  const handleSwipeStart = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0]
+    swipeStartX.current = touch.clientX
+    swipeStartY.current = touch.clientY
+    swipeEndX.current = touch.clientX
+    swipeEndY.current = touch.clientY
+    isSwiping.current = false
+  }, [])
+
+  const handleSwipeMove = useCallback((e: TouchEvent<HTMLDivElement>) => {
+    const touch = e.touches[0]
+    swipeEndX.current = touch.clientX
+    swipeEndY.current = touch.clientY
+
+    const diffX = Math.abs(touch.clientX - swipeStartX.current)
+    const diffY = Math.abs(touch.clientY - swipeStartY.current)
+
+    // Mark as swiping if horizontal movement is dominant
+    if (diffX > diffY * HORIZONTAL_RATIO && diffX > 10) {
+      isSwiping.current = true
+    }
+  }, [])
+
+  const handleSwipeEnd = useCallback(() => {
+    if (!isSwiping.current) return
+
+    const diffX = swipeEndX.current - swipeStartX.current
+    const diffY = Math.abs(swipeEndY.current - swipeStartY.current)
+    const absDiffX = Math.abs(diffX)
+
+    // Only trigger if:
+    // 1. Horizontal distance exceeds threshold
+    // 2. Horizontal movement is dominant
+    if (absDiffX >= SWIPE_THRESHOLD && absDiffX > diffY * HORIZONTAL_RATIO) {
+      if (diffX > 0) {
+        // Swipe right → go to previous month
+        setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
+      } else {
+        // Swipe left → go to next month
+        setViewDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
+      }
+    }
+
+    // Reset state
+    isSwiping.current = false
+    swipeStartX.current = 0
+    swipeStartY.current = 0
+    swipeEndX.current = 0
+    swipeEndY.current = 0
+  }, [])
+
   const handleWeekSelect = (weekDates: Date[]) => {
     if (onSelectWeek && weekDates.length === 7) {
       const monday = weekDates[0]
@@ -181,6 +242,20 @@ export function DateRangePicker({
     return monday > today
   }
 
+  // Close popover on scroll
+  useEffect(() => {
+    if (!open) return
+
+    const handleScroll = () => {
+      setOpen(false)
+    }
+
+    window.addEventListener('scroll', handleScroll, true)
+    return () => {
+      window.removeEventListener('scroll', handleScroll, true)
+    }
+  }, [open])
+
   return (
     <div
       className={cn(
@@ -195,6 +270,8 @@ export function DateRangePicker({
         // Enhanced hover effects for entire component
         'hover:bg-gradient-to-b hover:from-white hover:to-white/80',
         'hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.04)]',
+        // Deeper shadow when popover is open (selecting date)
+        open && 'shadow-[0_12px_40px_-8px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)]',
         className
       )}
     >
@@ -226,9 +303,8 @@ export function DateRangePicker({
               'w-[200px]', // Fixed width to prevent layout shift
               'transition-all duration-200 ease-out',
               'hover:bg-white/95 hover:shadow-md',
-              'active:scale-[0.98]',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1',
-              open && 'bg-white/95 shadow-lg'
+              open && 'bg-white/95'
             )}
           >
             {/* Text with premium typography and fixed width */}
@@ -252,20 +328,21 @@ export function DateRangePicker({
         <Popover.Portal>
           <Popover.Content
             className={cn(
+              'date-range-picker-popover',
               'z-50 w-[340px]',
               // Premium glassmorphic card
               'bg-gradient-to-br from-white via-white to-slate-50/50',
               'backdrop-blur-2xl backdrop-saturate-150',
               'rounded-3xl p-5',
               'shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.03)]',
-              'border border-white/80',
-              // Smooth animations
-              'animate-in fade-in-0 zoom-in-95 slide-in-from-top-2',
-              'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
-              'duration-200'
+              'border border-white/80'
             )}
             sideOffset={12}
             align="center"
+            data-swipe-ignore
+            onTouchStart={handleSwipeStart}
+            onTouchMove={handleSwipeMove}
+            onTouchEnd={handleSwipeEnd}
           >
             {/* Decorative gradient background */}
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/[0.03] via-transparent to-purple-500/[0.03] pointer-events-none" />
