@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, FileText } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme'
 
 // Emotion color (not in VITAL_COLORS yet)
@@ -45,6 +45,12 @@ export function HomePage() {
         { path: '/widget/spo2/trend', label: t('nav.spo2TrendWidget'), icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
         { path: '/widget/heart-rate/trend', label: t('nav.hrTrendWidget'), icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
         { path: '/widget/glucose/trend', label: t('nav.glucoseTrendWidget'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
+      ],
+    },
+    {
+      category: 'Single Cards (静态 HTML)',
+      items: [
+        { path: '/single-cards/music.html', label: '音乐推荐', icon: FileText, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA, isExternal: true },
       ],
     },
   ]
@@ -103,11 +109,45 @@ export function HomePage() {
             <div className="grid gap-3">
               {category.items.map((route) => {
                 const Icon = route.icon
+                const isExternal = (route as any).isExternal
+                const linkClassName = "flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                
+                if (isExternal) {
+                  return (
+                    <a
+                      key={route.path}
+                      href={route.path}
+                      className={linkClassName}
+                    >
+                      <div
+                        className="w-12 h-12 rounded-xl flex items-center justify-center"
+                        style={{ backgroundColor: route.alphaColor }}
+                      >
+                        <Icon className="w-6 h-6" style={{ color: route.color }} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-slate-800 group-hover:text-slate-900">
+                          {route.label}
+                        </p>
+                        <p className="text-sm text-slate-400 font-mono">{route.path}</p>
+                      </div>
+                      <svg
+                        className="w-5 h-5 text-slate-300 group-hover:text-slate-400 transition-colors"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </a>
+                  )
+                }
+                
                 return (
                   <Link
                     key={route.path}
                     to={route.path}
-                    className="flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                    className={linkClassName}
                   >
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center"
