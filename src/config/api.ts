@@ -25,8 +25,8 @@ export const API_CONFIG = {
 
   /** Device credentials (for demo/testing) */
   device: {
-    username: 'ceshi001',
-    password: 'ceshi001',
+    username: 'ceshi003',
+    password: 'ceshi003',
   },
 } as const
 
