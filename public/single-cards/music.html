@@ -157,15 +157,23 @@
 
     /* 音乐推荐卡片网格 */
     .music-grid {
-      display: grid;
-      grid-template-columns: 1fr;
+      display: flex;
       gap: 1rem;
       width: 100%;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE/Edge */
+    }
+
+    .music-grid::-webkit-scrollbar {
+      display: none; /* Chrome/Safari */
     }
 
     @media (min-width: 640px) {
       .music-grid {
-        grid-template-columns: repeat(2, 1fr);
         gap: 1.25rem;
       }
     }
@@ -185,6 +193,9 @@
       border-radius: 0;
       box-shadow: none;
       width: 100%;
+      flex: 0 0 calc(50% - 0.5rem);
+      min-width: 280px;
+      scroll-snap-align: start;
     }
 
     .music-card-wrapper {
@@ -262,22 +273,6 @@
   <div class="container">
     <!-- 主卡片容器 -->
     <div class="main-card">
-      <!-- 顶部标题区域 -->
-      <div class="header">
-        <div class="header-left">
-          <div class="hexagon-icon"></div>
-          <h1 class="title">Thinking complete</h1>
-        </div>
-        <svg class="expand-icon" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-        </svg>
-      </div>
-      
-      <!-- 介绍文字 -->
-      <p class="intro-text">
-        现在让我为您推荐一些高质量的音乐资源和建议。您可以选择最适合您的方式来放松。
-      </p>
-      
       <!-- 音乐推荐标题 -->
       <h2 class="section-title">Music Recommendations</h2>
       
@@ -287,6 +282,7 @@
         <div class="music-card">
           <div class="music-card-wrapper">
             <img 
+              id="music-card-1-img"
               src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=300&fit=crop&q=80" 
               alt="田野与罂粟花" 
               class="music-card-image"
@@ -296,7 +292,7 @@
               <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
             </svg>
             <div class="music-card-overlay">
-              <p class="music-card-text">
+              <p id="music-card-1-text" class="music-card-text">
                 [轻音乐] (放松、舒缓、减压、治愈)
               </p>
             </div>
@@ -307,6 +303,7 @@
         <div class="music-card">
           <div class="music-card-wrapper">
             <img 
+              id="music-card-2-img"
               src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop&q=80" 
               alt="绿色山丘" 
               class="music-card-image"
@@ -316,7 +313,7 @@
               <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z"></path>
             </svg>
             <div class="music-card-overlay">
-              <p class="music-card-text">
+              <p id="music-card-2-text" class="music-card-text">
                 禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐
               </p>
             </div>
@@ -325,5 +322,66 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // 全局默认数据
+    const defaultMusicCards = [
+      {
+        imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&q=80',
+        alt: '田野与罂粟花',
+        text: '[轻音乐] (放松、舒缓、减压、治愈)'
+      },
+      {
+        imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
+        alt: '绿色山丘',
+        text: '禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐'
+      }
+    ];
+
+    const cardTargets = [
+      { img: 'music-card-1-img', text: 'music-card-1-text' },
+      { img: 'music-card-2-img', text: 'music-card-2-text' }
+    ];
+
+    function renderCards(imageUrls) {
+      cardTargets.forEach((target, index) => {
+        const fallback = defaultMusicCards[index];
+        const imgEl = document.getElementById(target.img);
+        const textEl = document.getElementById(target.text);
+
+        const source = Array.isArray(imageUrls) && typeof imageUrls[index] === 'string' && imageUrls[index].trim()
+          ? imageUrls[index].trim()
+          : fallback.imageUrl;
+
+        if (imgEl) {
+          imgEl.src = source;
+          imgEl.alt = fallback.alt;
+        }
+
+        if (textEl) {
+          textEl.textContent = fallback.text;
+        }
+      });
+    }
+
+    // X5 可调用的全局接口
+    window.updateMusicCardsFromX5 = function (payload) {
+      try {
+        const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload;
+        if (!parsed) return;
+
+        const list = Array.isArray(parsed) ? parsed : [parsed];
+        const imageUrls = list.map(item => (typeof item === 'string' ? item : item?.imageUrl)).slice(0, cardTargets.length);
+
+        renderCards(imageUrls);
+      } catch (error) {
+        console.error('更新音乐卡片失败: ', error);
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCards();
+    });
+  </script>
 </body>
 </html>

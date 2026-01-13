@@ -45,15 +45,12 @@ export function MainLayout({ children, className }: MainLayoutProps) {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-slate-800">{pageTitle}</h1>
-          <div className="flex items-center gap-2">
-            <AuthButton />
-            <button
-              onClick={toggleLanguage}
-              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              {i18n.language === 'zh' ? 'EN' : '中文'}
-            </button>
-          </div>
+          <button
+            onClick={toggleLanguage}
+            className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            {i18n.language === 'zh' ? 'EN' : '中文'}
+          </button>
         </div>
       </header>
 
