@@ -158,14 +158,16 @@
     /* 音乐推荐卡片网格 */
     .music-grid {
       display: flex;
-      gap: 1rem;
+      gap: 0.75rem;
       width: 100%;
       overflow-x: auto;
-      padding-bottom: 0.25rem;
+      padding: 0.25rem 0.25rem 0.5rem;
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none; /* IE/Edge */
+      scroll-padding-left: 0.25rem;
+      scroll-padding-right: 0.25rem;
     }
 
     .music-grid::-webkit-scrollbar {
@@ -174,13 +176,19 @@
 
     @media (min-width: 640px) {
       .music-grid {
-        gap: 1.25rem;
+        gap: 1rem;
+        padding: 0.25rem 0.5rem 0.75rem;
+        scroll-padding-left: 0.5rem;
+        scroll-padding-right: 0.5rem;
       }
     }
 
     @media (min-width: 768px) {
       .music-grid {
-        gap: 1.5rem;
+        gap: 1.25rem;
+        padding: 0.25rem 0.75rem 0.75rem;
+        scroll-padding-left: 0.75rem;
+        scroll-padding-right: 0.75rem;
       }
     }
 
@@ -192,10 +200,24 @@
       border: none;
       border-radius: 0;
       box-shadow: none;
-      width: 100%;
-      flex: 0 0 calc(50% - 0.5rem);
+      width: auto;
+      flex: 0 0 280px;
       min-width: 280px;
       scroll-snap-align: start;
+    }
+
+    @media (min-width: 768px) {
+      .music-card {
+        flex-basis: 320px;
+        min-width: 320px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .music-card {
+        flex-basis: 360px;
+        min-width: 360px;
+      }
     }
 
     .music-card-wrapper {
@@ -204,8 +226,7 @@
 
     .music-card-image {
       width: 100%;
-      height: auto;
-      aspect-ratio: 4 / 3;
+      height: 210px;
       object-fit: cover;
       display: block;
       border-radius: 0.75rem;
@@ -213,6 +234,7 @@
 
     @media (min-width: 768px) {
       .music-card-image {
+        height: 240px;
         border-radius: 1rem;
       }
     }
@@ -325,180 +347,236 @@
 
   <script>
     /**
-     * ======================================
-     * 音乐卡片 - 双向交互接口定义
-     * ======================================
+     * ========================================================
+     * 【通信层】NativeBridge - 纯通信模块（与业务完全解耦）
+     * ========================================================
      * 
-     * Android -> JS: evaluateJavascript
-     *   - MusicCardBridge.updateMusicCards(imageUrls, callback)
+     * 职责：仅负责 Android ↔ JS 的数据传输
+     * 不包含任何业务逻辑、渲染逻辑
      * 
-     * JS -> Android: JavaScriptInterface
-     *   - android.onMusicCardClick(index)
-     *   - android.requestMusicData()
+     * 使用方式：
+     *   NativeBridge.onDataReceived = (data) => { 你的业务逻辑 }
+     *   NativeBridge.send('eventName', data)
      */
+    (function() {
+      'use strict';
 
-    // ===== 全局状态管理 =====
-    const MusicCardState = {
-      currentData: [],
-      isLoading: false,
-      lastUpdateTime: null
-    };
+      // ===== 通信层核心 =====
+      const NativeBridge = {
+        // 版本号
+        version: '1.0.0',
 
-    // 默认卡片数据
-    const defaultMusicCards = [
-      {
-        id: 1,
-        imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&q=80',
-        alt: '田野与罂粟花',
-        text: '[轻音乐] (放松、舒缓、减压、治愈)'
-      },
-      {
-        id: 2,
-        imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
-        alt: '绿色山丘',
-        text: '禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐'
-      }
-    ];
+        // 日志开关
+        debug: true,
 
-    const cardTargets = [
-      { img: 'music-card-1-img', text: 'music-card-1-text', wrapper: 'music-card-1-wrapper' },
-      { img: 'music-card-2-img', text: 'music-card-2-text', wrapper: 'music-card-2-wrapper' }
-    ];
+        // 回调注册表
+        _callbacks: {},
 
-    // ===== 内部渲染函数 =====
-    function renderCards(imageUrls) {
-      cardTargets.forEach((target, index) => {
-        const fallback = defaultMusicCards[index];
-        const imgEl = document.getElementById(target.img);
-        const textEl = document.getElementById(target.text);
+        // ===== 日志工具 =====
+        _log: function(level, ...args) {
+          if (!this.debug) return;
+          const prefix = `[NativeBridge][${level}]`;
+          console[level === 'ERROR' ? 'error' : 'log'](prefix, ...args);
+        },
 
-        const source = Array.isArray(imageUrls) && typeof imageUrls[index] === 'string' && imageUrls[index].trim()
-          ? imageUrls[index].trim()
-          : fallback.imageUrl;
+        // ===== 注册数据接收回调（业务层调用） =====
+        onDataReceived: null, // 主回调：收到数据时触发
 
-        if (imgEl) {
-          imgEl.src = source;
-          imgEl.alt = fallback.alt;
-        }
-
-        if (textEl) {
-          textEl.textContent = fallback.text;
-        }
-      });
-
-      MusicCardState.lastUpdateTime = new Date().getTime();
-    }
-
-    // ===== 卡片点击处理 =====
-    function setupCardClickHandlers() {
-      cardTargets.forEach((target, index) => {
-        const wrapper = document.querySelector(`.music-card`);
-        if (wrapper) {
-          const clickHandler = () => {
-            console.log(`[MusicCard] 点击卡片 ${index}`);
-            // JS -> Android: 通知点击事件
-            if (typeof android !== 'undefined' && android.onMusicCardClick) {
-              android.onMusicCardClick(index);
+        // ===== Android -> JS：接收数据入口 =====
+        receiveData: function(payload) {
+          this._log('INFO', '收到原生数据', payload);
+          
+          let data = payload;
+          
+          // 自动解析 JSON 字符串
+          if (typeof payload === 'string') {
+            try {
+              data = JSON.parse(payload);
+            } catch (e) {
+              this._log('ERROR', 'JSON 解析失败', e);
+              this._notifyError({ code: 'PARSE_ERROR', message: e.message, raw: payload });
+              return;
             }
-          };
-          wrapper.addEventListener('click', clickHandler);
+          }
+
+          // 打印解析后的对象
+          this._log('INFO', '解析后的数据对象：', data);
+          console.log('═══════════════════════════════════════');
+          console.log('📦 NativeBridge 收到数据：');
+          console.log(JSON.stringify(data, null, 2));
+          console.log('═══════════════════════════════════════');
+
+          // 触发业务层回调
+          if (typeof this.onDataReceived === 'function') {
+            this.onDataReceived(data);
+          } else {
+            this._log('WARN', '未注册 onDataReceived 回调，数据未被处理');
+          }
+
+          // 通知原生：数据已接收
+          this.send('dataReceived', { success: true, timestamp: Date.now() });
+        },
+
+        // ===== JS -> Android：发送数据 =====
+        send: function(eventName, data) {
+          this._log('INFO', `发送事件: ${eventName}`, data);
+          
+          const payload = JSON.stringify({
+            event: eventName,
+            data: data,
+            timestamp: Date.now()
+          });
+
+          // 调用原生接口
+          if (typeof android !== 'undefined' && typeof android.onJsMessage === 'function') {
+            android.onJsMessage(payload);
+          } else {
+            this._log('WARN', '原生接口 android.onJsMessage 不存在');
+          }
+        },
+
+        // ===== JS -> Android：请求数据 =====
+        requestData: function(params) {
+          this._log('INFO', '请求原生数据', params);
+          this.send('requestData', params || {});
+        },
+
+        // ===== 错误通知 =====
+        _notifyError: function(error) {
+          this.send('error', error);
+          if (typeof this.onError === 'function') {
+            this.onError(error);
+          }
+        },
+
+        // 错误回调（业务层可选注册）
+        onError: null,
+
+        // ===== 页面就绪通知 =====
+        notifyReady: function(pageInfo) {
+          this._log('INFO', '通知原生页面已就绪', pageInfo);
+          this.send('pageReady', pageInfo || { page: 'unknown' });
         }
+      };
+
+      // 暴露到全局
+      window.NativeBridge = NativeBridge;
+    })();
+  </script>
+
+  <script>
+    /**
+     * ========================================================
+     * 【业务层】音乐推荐页面 - 渲染逻辑
+     * ========================================================
+     * 
+     * 职责：接收通信层传来的数据，执行页面渲染
+     * 与通信层完全解耦，可独立修改
+     */
+    (function() {
+      'use strict';
+
+      // ===== 页面配置 =====
+      const PAGE_CONFIG = {
+        pageId: 'music',
+        pageName: '音乐推荐'
+      };
+
+      // ===== 默认数据 =====
+      const defaultCards = [
+        {
+          id: 1,
+          imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&q=80',
+          title: '轻音乐',
+          text: '[轻音乐] (放松、舒缓、减压、治愈)'
+        },
+        {
+          id: 2,
+          imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
+          title: '禅音疗法',
+          text: '禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐'
+        }
+      ];
+
+      // DOM 元素映射
+      const cardElements = [
+        { img: 'music-card-1-img', text: 'music-card-1-text' },
+        { img: 'music-card-2-img', text: 'music-card-2-text' }
+      ];
+
+      // ===== 渲染函数 =====
+      function renderCards(items) {
+        const cards = items && items.length ? items : defaultCards;
+        
+        cardElements.forEach((el, index) => {
+          const card = cards[index] || defaultCards[index];
+          const imgEl = document.getElementById(el.img);
+          const textEl = document.getElementById(el.text);
+
+          if (imgEl) {
+            imgEl.src = card.imageUrl || card.imageBase64 || defaultCards[index].imageUrl;
+            imgEl.alt = card.title || '';
+          }
+
+          if (textEl) {
+            textEl.textContent = card.text || card.description || defaultCards[index].text;
+          }
+        });
+
+        console.log('[MusicPage] 渲染完成，共', cards.length, '张卡片');
+      }
+
+      // ===== 点击事件处理 =====
+      function setupClickHandlers() {
+        document.querySelectorAll('.music-card').forEach((card, index) => {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', () => {
+            console.log('[MusicPage] 卡片点击:', index);
+            NativeBridge.send('cardClick', { 
+              pageId: PAGE_CONFIG.pageId,
+              cardIndex: index 
+            });
+          });
+        });
+      }
+
+      // ===== 注册通信层回调 =====
+      NativeBridge.onDataReceived = function(data) {
+        console.log('[MusicPage] 收到数据，开始渲染');
+        
+        // 根据数据结构渲染
+        // 支持多种格式：数组 / { items: [] } / { data: [] }
+        let items = [];
+        if (Array.isArray(data)) {
+          items = data;
+        } else if (data.items && Array.isArray(data.items)) {
+          items = data.items;
+        } else if (data.data && Array.isArray(data.data)) {
+          items = data.data;
+        }
+
+        renderCards(items);
+      };
+
+      NativeBridge.onError = function(error) {
+        console.error('[MusicPage] 通信错误:', error);
+      };
+
+      // ===== 页面初始化 =====
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('[MusicPage] 页面加载完成');
+        
+        // 1. 渲染默认数据
+        renderCards(defaultCards);
+        
+        // 2. 设置点击事件
+        setupClickHandlers();
+        
+        // 3. 通知原生页面已就绪，可以发送数据了
+        NativeBridge.notifyReady(PAGE_CONFIG);
       });
-    }
 
-    // ===== 公开接口：Android 调用 JS =====
-    window.MusicCardBridge = {
-      /**
-       * 更新音乐卡片
-       * @param {Array|string} imageUrls - 图片URL数组或JSON字符串
-       * @param {Function} callback - 更新完成回调
-       */
-      updateMusicCards: function(imageUrls, callback) {
-        try {
-          MusicCardState.isLoading = true;
-          console.log('[MusicCardBridge] 收到更新请求', imageUrls);
-
-          const parsed = typeof imageUrls === 'string' ? JSON.parse(imageUrls) : imageUrls;
-          if (!parsed) return;
-
-          const list = Array.isArray(parsed) ? parsed : [parsed];
-          const urls = list.map(item => (typeof item === 'string' ? item : item?.imageUrl)).slice(0, cardTargets.length);
-
-          renderCards(urls);
-          MusicCardState.currentData = urls;
-          MusicCardState.isLoading = false;
-
-          // 数据加载完成回调 JS -> Android
-          if (typeof android !== 'undefined' && android.onMusicDataLoaded) {
-            android.onMusicDataLoaded(JSON.stringify({
-              success: true,
-              cardCount: urls.length,
-              timestamp: MusicCardState.lastUpdateTime
-            }));
-          }
-
-          // 执行回调函数
-          if (typeof callback === 'function') {
-            callback({ success: true, cardCount: urls.length });
-          }
-
-          console.log('[MusicCardBridge] 更新完成', urls.length, '张卡片');
-        } catch (error) {
-          console.error('[MusicCardBridge] 更新失败: ', error);
-          MusicCardState.isLoading = false;
-
-          if (typeof android !== 'undefined' && android.onMusicDataLoaded) {
-            android.onMusicDataLoaded(JSON.stringify({
-              success: false,
-              error: error.message
-            }));
-          }
-
-          if (typeof callback === 'function') {
-            callback({ success: false, error: error.message });
-          }
-        }
-      },
-
-      /**
-       * 获取当前卡片状态
-       * @returns {Object} 状态对象
-       */
-      getState: function() {
-        return {
-          currentData: MusicCardState.currentData,
-          isLoading: MusicCardState.isLoading,
-          lastUpdateTime: MusicCardState.lastUpdateTime,
-          cardCount: cardTargets.length
-        };
-      },
-
-      /**
-       * 重置为默认卡片
-       */
-      resetToDefault: function() {
-        console.log('[MusicCardBridge] 重置为默认卡片');
-        renderCards(defaultMusicCards.map(card => card.imageUrl));
-        MusicCardState.currentData = [];
-      }
-    };
-
-    // ===== 页面加载完成 =====
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('[MusicCard] DOM加载完成');
-      
-      // 1. 初始化：加载默认数据
-      renderCards();
-      
-      // 2. 设置卡片点击处理
-      setupCardClickHandlers();
-
-      // 3. JS -> Android: 页面加载完成，请求数据
-      if (typeof android !== 'undefined' && android.requestMusicData) {
-        console.log('[MusicCard] 请求 Android 提供数据');
-        android.requestMusicData();
-      }
-    });
+    })();
   </script>
 </body>
 </html>
