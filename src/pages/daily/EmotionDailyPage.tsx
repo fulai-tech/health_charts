@@ -3,6 +3,7 @@
  */
 
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { Moon } from 'lucide-react'
 import { DailyScoreCard } from '@/components/common/DailyScoreCard'
 import { AIInsightsCard } from '@/components/common/AIInsightsCard'
@@ -17,7 +18,9 @@ import { useEmotionDailyData } from '@/hooks/useDailyData'
 
 export default function EmotionDailyPage() {
     const { t } = useTranslation()
-    const { data, isLoading, isError, error, isDemoMode, invalidate } = useEmotionDailyData()
+    const [searchParams] = useSearchParams()
+    const dateParam = searchParams.get('date')
+    const { data, isLoading, isError, error, isDemoMode, invalidate } = useEmotionDailyData(dateParam || undefined)
 
     const handleToggleDemo = () => {
         toggleDemoMode()

@@ -298,7 +298,7 @@ export function DateRangePicker({
         'group relative inline-flex items-center gap-0.5 flex-shrink-0',
         'bg-gradient-to-b from-white/90 to-white/70',
         'backdrop-blur-xl backdrop-saturate-150',
-        'rounded-2xl p-1.5',
+        'rounded-full p-1.5',
         'shadow-[0_2px_16px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.02)]',
         'border border-white/60',
         'transition-all duration-300 ease-out',
@@ -311,13 +311,13 @@ export function DateRangePicker({
       )}
     >
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-500/[0.02] via-transparent to-purple-500/[0.02] pointer-events-none transition-opacity duration-300 group-hover:opacity-80" />
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500/[0.02] via-transparent to-purple-500/[0.02] pointer-events-none transition-opacity duration-300 group-hover:opacity-80" />
 
       {/* Previous Button */}
       <button
         onClick={onPrevious}
         className={cn(
-          'relative z-10 flex items-center justify-center w-9 h-9 rounded-xl',
+          'relative z-10 flex items-center justify-center w-9 h-9 rounded-full',
           'transition-all duration-200 ease-out',
           'text-slate-500 hover:text-slate-700',
           'hover:bg-white/80 hover:shadow-sm',
@@ -334,7 +334,7 @@ export function DateRangePicker({
         <Popover.Trigger asChild>
           <button
             className={cn(
-              'relative z-10 flex items-center justify-center gap-2.5 px-4 py-2 mx-0.5 rounded-xl',
+              'relative z-10 flex items-center justify-center gap-2.5 px-4 py-2 mx-0.5 rounded-full',
               'w-[200px]', // Fixed width to prevent layout shift
               'transition-all duration-200 ease-out',
               'hover:bg-white/95 hover:shadow-md',
@@ -507,7 +507,7 @@ export function DateRangePicker({
         onClick={onNext}
         disabled={disableNext}
         className={cn(
-          'relative z-10 flex items-center justify-center w-9 h-9 rounded-xl',
+          'relative z-10 flex items-center justify-center w-9 h-9 rounded-full',
           'transition-all duration-200 ease-out',
           disableNext
             ? [

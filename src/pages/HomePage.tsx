@@ -2,6 +2,8 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, FileText } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme'
+import { AuthButton } from '@/components/ui/AuthButton'
+import { useTokenValidation } from '@/hooks/useTokenValidation'
 
 // Emotion color (not in VITAL_COLORS yet)
 const EMOTION_COLOR = 'rgb(251, 146, 61)'
@@ -11,6 +13,9 @@ const EMOTION_COLOR_ALPHA = 'rgba(251, 146, 61, 0.125)'
 
 export function HomePage() {
   const { t, i18n } = useTranslation()
+
+  // Token validation hook - auto checks and refreshes token
+  useTokenValidation()
 
   const toggleLanguage = () => {
     i18n.changeLanguage(i18n.language.startsWith('en') ? 'zh' : 'en')
@@ -92,12 +97,15 @@ export function HomePage() {
             <h1 className="text-3xl font-bold text-slate-800">{t('home.title')}</h1>
             <p className="text-slate-500 mt-1">{t('home.subtitle')}</p>
           </div>
-          <button
-            onClick={toggleLanguage}
-            className="px-4 py-2 bg-white rounded-xl shadow-sm text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            {i18n.language.startsWith('en') ? '中文' : 'English'}
-          </button>
+          <div className="flex items-center gap-2">
+            <AuthButton />
+            <button
+              onClick={toggleLanguage}
+              className="px-4 py-2 bg-white rounded-xl shadow-sm text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              {i18n.language.startsWith('en') ? '中文' : 'English'}
+            </button>
+          </div>
         </div>
 
         {/* Route Categories */}

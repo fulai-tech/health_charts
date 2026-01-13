@@ -59,6 +59,7 @@ const ComparisonBarChart = ({ lastWeekValue, thisWeekValue }: ComparisonBarChart
     
     // Fixed container height in pixels
     const containerHeight = 64 // h-16 = 64px
+    const minVisibleHeight = 4 // tiny stub so zero values are still visible
     
     // Calculate heights in pixels (max value gets full container height)
     const lastWeekHeight = maxValue > 0 ? (lastWeekValue / maxValue) * containerHeight : 0
@@ -67,29 +68,31 @@ const ComparisonBarChart = ({ lastWeekValue, thisWeekValue }: ComparisonBarChart
     return (
         <div className="flex items-end gap-3 h-20">
             {/* Last week bar */}
-            <div className="flex flex-col items-center gap-1 h-16">
-                <div 
-                    className="w-4 rounded-t-full transition-all duration-300"
-                    style={{ 
-                        height: `${lastWeekHeight}px`,
-                        minHeight: 8,
-                        backgroundColor: BAR_GREY 
-                    }}
-                />
+            <div className="flex flex-col items-center gap-1">
+                <div className="flex items-end h-16">
+                    <div 
+                        className="w-4 rounded-t-full transition-all duration-300"
+                        style={{ 
+                            height: `${Math.max(lastWeekHeight, lastWeekHeight > 0 ? minVisibleHeight : 0)}px`,
+                            backgroundColor: BAR_GREY 
+                        }}
+                    />
+                </div>
                 <span className="text-[10px] whitespace-nowrap" style={{ color: TEXT_MUTED }}>
                     {t('nutrition.comparison.lastWeek', 'Last week')}
                 </span>
             </div>
             {/* This week bar */}
-            <div className="flex flex-col items-center gap-1 h-16">
-                <div 
-                    className="w-4 rounded-t-full transition-all duration-300"
-                    style={{ 
-                        height: `${thisWeekHeight}px`,
-                        minHeight: 8,
-                        backgroundColor: BRAND_ORANGE 
-                    }}
-                />
+            <div className="flex flex-col items-center gap-1">
+                <div className="flex items-end h-16">
+                    <div 
+                        className="w-4 rounded-t-full transition-all duration-300"
+                        style={{ 
+                            height: `${Math.max(thisWeekHeight, thisWeekHeight > 0 ? minVisibleHeight : 0)}px`,
+                            backgroundColor: BRAND_ORANGE 
+                        }}
+                    />
+                </div>
                 <span className="text-[10px] whitespace-nowrap" style={{ color: TEXT_MUTED }}>
                     {t('nutrition.comparison.thisWeek', 'This week')}
                 </span>
@@ -336,16 +339,39 @@ const ComparisonSlide = ({ data, dish }: ComparisonSlideProps) => {
  */
 export const NutritionComparisonCard = ({ data, className, isLoading }: NutritionComparisonCardProps) => {
     const { t } = useTranslation()
+    const isPlaceholder = !data
+
+    // Placeholder content when no data is provided
+    const placeholderDish: ComparisonDishData = {
+        dishName: t('nutrition.comparison.sampleDish', 'Sample high-calorie dinner'),
+        calories: 680,
+        mealType: 'dinner',
+        date: new Date(),
+        remark: t('nutrition.comparison.placeholderRemark', 'Likely the main contributor'),
+    }
+
+    const placeholderData: WeeklyComparisonData = {
+        lastWeekCalories: 2100,
+        thisWeekCalories: 1800,
+        calorieChange: 1800 - 2100,
+        trendAnalysis: t(
+            'nutrition.comparison.placeholderTrend',
+            'This week is slightly lower than last week. Watch dinner calories to keep the downward trend.'
+        ),
+        mainCauseDishes: [placeholderDish],
+    }
+
+    const effectiveData = data ?? placeholderData
     
     // Since backend only returns one dish, duplicate it for demo (as per requirement)
-    const slides = data?.mainCauseDishes && data.mainCauseDishes.length > 0
-        ? [data.mainCauseDishes[0], data.mainCauseDishes[0], data.mainCauseDishes[0]]
-        : []
+    const slidesSource = effectiveData.mainCauseDishes && effectiveData.mainCauseDishes.length > 0
+        ? effectiveData.mainCauseDishes
+        : [placeholderDish]
+
+    const slides = [slidesSource[0], slidesSource[0], slidesSource[0]]
     
     // Use external carousel state
     const carouselState = useCarouselState(slides.length)
-    
-    if (!data) return null
     
     return (
         <Card className={`${className} flex flex-col gap-4`}>
@@ -368,7 +394,7 @@ export const NutritionComparisonCard = ({ data, className, isLoading }: Nutritio
                     <SwipeableCarousel
                         items={slides}
                         renderItem={(dish: ComparisonDishData) => (
-                            <ComparisonSlide data={data} dish={dish} />
+                            <ComparisonSlide data={effectiveData} dish={dish} />
                         )}
                         currentIndex={carouselState.currentIndex}
                         onIndexChange={carouselState.setCurrentIndex}
@@ -381,13 +407,13 @@ export const NutritionComparisonCard = ({ data, className, isLoading }: Nutritio
             )}
             
             {/* 3. Static Evaluation Box */}
-            {data.trendAnalysis && (
+            {effectiveData.trendAnalysis && (
                 <div 
                     className="rounded-xl p-4"
                     style={{ backgroundColor: LIGHT_BLUE_BG }}
                 >
                     <p className="text-sm text-slate-600 leading-relaxed">
-                        {data.trendAnalysis}
+                        {effectiveData.trendAnalysis}
                     </p>
                 </div>
             )}

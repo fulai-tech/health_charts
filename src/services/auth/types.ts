@@ -36,6 +36,8 @@ export interface StoredAuthData {
   accessTokenExpiry: number
   /** Timestamp when refresh token expires */
   refreshTokenExpiry: number
+  /** Username used for login */
+  username?: string
 }
 
 /** Token expiry durations in milliseconds */

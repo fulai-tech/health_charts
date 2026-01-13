@@ -44,6 +44,20 @@
     "close": "关闭",
     "disclaimer": "本产品的监测结果仅供参考。部分内容由 AI 生成，请仔细核实。不应用于医疗诊断。如果您感到不适，请及时就医。"
   },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "username": "用户名",
+    "password": "密码",
+    "usernamePlaceholder": "请输入用户名",
+    "passwordPlaceholder": "请输入密码",
+    "loginDescription": "请输入您的账户信息",
+    "testCredentials": "测试账号信息：",
+    "cancel": "取消",
+    "loggingIn": "登录中...",
+    "loginFailed": "登录失败，请重试",
+    "tokenExpired": "登录已过期，请重新登录"
+  },
   "vitals": {
     "bloodPressure": "血压",
     "systolic": "收缩压",

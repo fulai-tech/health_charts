@@ -3,6 +3,7 @@
  */
 
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import { Moon } from 'lucide-react'
 import { DailyScoreCard } from '@/components/common/DailyScoreCard'
 import { AIInsightsCard } from '@/components/common/AIInsightsCard'
@@ -18,7 +19,9 @@ import { useSleepDailyData } from '@/hooks/useDailyData'
 
 export default function SleepDailyPage() {
     const { t } = useTranslation()
-    const { data, isLoading, isError, error, isDemoMode, invalidate } = useSleepDailyData()
+    const [searchParams] = useSearchParams()
+    const dateParam = searchParams.get('date')
+    const { data, isLoading, isError, error, isDemoMode, invalidate } = useSleepDailyData(dateParam || undefined)
 
     const handleToggleDemo = () => {
         toggleDemoMode()

@@ -79,6 +79,7 @@ class AuthService {
       refreshToken: response.data.data.refreshToken,
       accessTokenExpiry: now + TOKEN_EXPIRY.accessToken,
       refreshTokenExpiry: now + TOKEN_EXPIRY.refreshToken,
+      username: loginData.username,
     }
 
     this.saveToStorage()

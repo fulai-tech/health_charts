@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useLocation, Link } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { VITAL_COLORS } from '@/config/theme'
+import { AuthButton } from '@/components/ui/AuthButton'
+import { useTokenValidation } from '@/hooks/useTokenValidation'
 
 interface MainLayoutProps {
   children: ReactNode
@@ -25,6 +27,9 @@ export function MainLayout({ children, className }: MainLayoutProps) {
   const { t, i18n } = useTranslation()
   const location = useLocation()
 
+  // Token validation hook - auto checks and refreshes token
+  useTokenValidation()
+
   const toggleLanguage = () => {
     const newLang = i18n.language === 'zh' ? 'en' : 'zh'
     i18n.changeLanguage(newLang)
@@ -40,12 +45,15 @@ export function MainLayout({ children, className }: MainLayoutProps) {
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
         <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
           <h1 className="text-lg font-semibold text-slate-800">{pageTitle}</h1>
-          <button
-            onClick={toggleLanguage}
-            className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            {i18n.language === 'zh' ? 'EN' : '中文'}
-          </button>
+          <div className="flex items-center gap-2">
+            <AuthButton />
+            <button
+              onClick={toggleLanguage}
+              className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+            >
+              {i18n.language === 'zh' ? 'EN' : '中文'}
+            </button>
+          </div>
         </div>
       </header>
 
