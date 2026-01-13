@@ -38,6 +38,9 @@ import HealthyDailyPage from '@/pages/daily/HealthyDailyPage'
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
+// Super Panel (Test Environment Only)
+import { SuperPanel } from '@/components/common/SuperPanel'
+
 // Initialize i18n
 import '@/i18n'
 
@@ -69,6 +72,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
+        {/* Super Panel - Floating control panel for test environment */}
+        <SuperPanel />
         <Suspense fallback={<PageLoading />}>
           <Routes>
             {/* Home Page - Route Navigation */}

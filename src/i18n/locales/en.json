@@ -407,5 +407,13 @@
       "dinner": "Dinner",
       "snacks": "Snacks"
     }
+  },
+  "superPanel": {
+    "language": "Language",
+    "user": "User",
+    "theme": "Theme",
+    "demoMode": "Demo Mode",
+    "mockData": "Mock Data",
+    "realData": "Real Data"
   }
 }

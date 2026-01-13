@@ -15,6 +15,25 @@ const BAR_GREY = '#D1D5DB'
 const DATA_ATTRIBUTION_BG = '#F8F8F8'
 const TEXT_MUTED = '#918D8A'
 
+// Card theme colors (for up to 3 cards)
+const CARD_THEME_COLORS = [
+    {
+        primary: '#FB923D', // Orange - 第1个卡片
+        bg: '#FEE4CD', // Light orange background
+        inactive: '#FED7AA', // Inactive indicator color
+    },
+    {
+        primary: '#A78BFA', // Blue-purple - 第2个卡片
+        bg: '#EDE9FE', // Light purple background
+        inactive: '#DDD6FE', // Inactive indicator color
+    },
+    {
+        primary: '#10B981', // Green - 第3个卡片
+        bg: '#D1FAE5', // Light green background
+        inactive: '#A7F3D0', // Inactive indicator color
+    },
+]
+
 interface NutritionComparisonCardProps {
     data?: WeeklyComparisonData
     className?: string
@@ -51,9 +70,10 @@ function formatDishDate(date: Date): string {
 interface ComparisonBarChartProps {
     lastWeekValue: number
     thisWeekValue: number
+    themeColor?: string
 }
 
-const ComparisonBarChart = ({ lastWeekValue, thisWeekValue }: ComparisonBarChartProps) => {
+const ComparisonBarChart = ({ lastWeekValue, thisWeekValue, themeColor = BRAND_ORANGE }: ComparisonBarChartProps) => {
     const { t } = useTranslation()
     const maxValue = Math.max(lastWeekValue, thisWeekValue)
     
@@ -89,7 +109,7 @@ const ComparisonBarChart = ({ lastWeekValue, thisWeekValue }: ComparisonBarChart
                         className="w-4 rounded-t-full transition-all duration-300"
                         style={{ 
                             height: `${Math.max(thisWeekHeight, thisWeekHeight > 0 ? minVisibleHeight : 0)}px`,
-                            backgroundColor: BRAND_ORANGE 
+                            backgroundColor: themeColor 
                         }}
                     />
                 </div>
@@ -222,13 +242,18 @@ function useAnimatedNumber(targetValue: number) {
 interface ComparisonSlideProps {
     data: WeeklyComparisonData
     dish: ComparisonDishData
+    index?: number
 }
 
-const ComparisonSlide = ({ data, dish }: ComparisonSlideProps) => {
+const ComparisonSlide = ({ data, dish, index = 0 }: ComparisonSlideProps) => {
     const { t } = useTranslation()
     const animatedCalorieChange = useAnimatedNumber(data.calorieChange)
     const isPositiveChange = animatedCalorieChange > 0
     const changeSign = isPositiveChange ? '+' : ''
+    
+    // Get theme colors based on index (0, 1, or 2)
+    const themeIndex = Math.min(index, 2)
+    const theme = CARD_THEME_COLORS[themeIndex]
     
     // Format meal type
     const mealTypeKey = MEAL_TYPE_KEYS[dish.mealType] || 'nutrition.comparison.dinner'
@@ -241,10 +266,10 @@ const ComparisonSlide = ({ data, dish }: ComparisonSlideProps) => {
         <div className="px-[25px]">
             <div className="rounded-2xl overflow-hidden">
                 <div className="flex flex-col">
-                    {/* Top Half - Peach Background */}
+                    {/* Top Half - Theme Background */}
                     <div 
                         className="px-5 py-3 flex justify-between items-start"
-                        style={{ backgroundColor: PEACH_BG }}
+                        style={{ backgroundColor: theme.bg }}
                     >
                         {/* Left Stats */}
                         <div className="flex flex-col gap-1 flex-1">
@@ -254,7 +279,7 @@ const ComparisonSlide = ({ data, dish }: ComparisonSlideProps) => {
                             <div className="flex items-baseline gap-1">
                                 <span 
                                     className="text-3xl font-bold"
-                                    style={{ color: BRAND_ORANGE }}
+                                    style={{ color: theme.primary }}
                                 >
                                     {changeSign}{animatedCalorieChange}
                                 </span>
@@ -271,6 +296,7 @@ const ComparisonSlide = ({ data, dish }: ComparisonSlideProps) => {
                         <ComparisonBarChart 
                             lastWeekValue={data.lastWeekCalories}
                             thisWeekValue={data.thisWeekCalories}
+                            themeColor={theme.primary}
                         />
                     </div>
                     
@@ -311,7 +337,7 @@ const ComparisonSlide = ({ data, dish }: ComparisonSlideProps) => {
                             {/* Status Badge */}
                             <div 
                                 className="flex flex-col items-center px-3 py-1.5 rounded-lg"
-                                style={{ backgroundColor: BRAND_ORANGE }}
+                                style={{ backgroundColor: theme.primary }}
                             >
                                 <span className="text-xs font-medium text-white">
                                     {dish.calories} {t('nutrition.kcal', 'kcal')}
@@ -363,14 +389,16 @@ export const NutritionComparisonCard = ({ data, className, isLoading }: Nutritio
 
     const effectiveData = data ?? placeholderData
     
-    // Since backend only returns one dish, duplicate it for demo (as per requirement)
-    const slidesSource = effectiveData.mainCauseDishes && effectiveData.mainCauseDishes.length > 0
+    // Get actual dishes from backend (max 3)
+    const dishesSource = effectiveData.mainCauseDishes && effectiveData.mainCauseDishes.length > 0
         ? effectiveData.mainCauseDishes
         : [placeholderDish]
-
-    const slides = [slidesSource[0], slidesSource[0], slidesSource[0]]
     
-    // Use external carousel state
+    // Limit to 3 dishes maximum
+    const slides = dishesSource.slice(0, 3)
+    const hasMultipleSlides = slides.length >= 2
+    
+    // Use external carousel state (only needed when there are multiple slides)
     const carouselState = useCarouselState(slides.length)
     
     return (
@@ -388,21 +416,27 @@ export const NutritionComparisonCard = ({ data, className, isLoading }: Nutritio
                 </h3>
             </div>
             
-            {/* 2. Carousel Container - Break out of card padding for full-width slides */}
+            {/* 2. Content Container */}
             {slides.length > 0 && (
                 <div className="-mx-[25px]">
-                    <SwipeableCarousel
-                        items={slides}
-                        renderItem={(dish: ComparisonDishData) => (
-                            <ComparisonSlide data={effectiveData} dish={dish} />
-                        )}
-                        currentIndex={carouselState.currentIndex}
-                        onIndexChange={carouselState.setCurrentIndex}
-                        hideIndicators
-                        wrapInCard={false}
-                        isLoading={isLoading}
-                        emptyMessage={t('common.noData', 'No data available')}
-                    />
+                    {hasMultipleSlides ? (
+                        // Multiple slides: Use carousel
+                        <SwipeableCarousel
+                            items={slides}
+                            renderItem={(dish: ComparisonDishData, index: number) => (
+                                <ComparisonSlide data={effectiveData} dish={dish} index={index} />
+                            )}
+                            currentIndex={carouselState.currentIndex}
+                            onIndexChange={carouselState.setCurrentIndex}
+                            hideIndicators
+                            wrapInCard={false}
+                            isLoading={isLoading}
+                            emptyMessage={t('common.noData', 'No data available')}
+                        />
+                    ) : (
+                        // Single slide: Render directly without carousel
+                        <ComparisonSlide data={effectiveData} dish={slides[0]} index={0} />
+                    )}
                 </div>
             )}
             
@@ -418,15 +452,17 @@ export const NutritionComparisonCard = ({ data, className, isLoading }: Nutritio
                 </div>
             )}
             
-            {/* 4. Carousel Indicators */}
-            <CarouselIndicator
-                total={slides.length}
-                current={carouselState.currentIndex}
-                onSelect={carouselState.setCurrentIndex}
-                activeColor={BRAND_ORANGE}
-                inactiveColor="#FED7AA"
-                className="mt-2"
-            />
+            {/* 4. Carousel Indicators - Only show when there are 2+ slides */}
+            {hasMultipleSlides && (
+                <CarouselIndicator
+                    total={slides.length}
+                    current={carouselState.currentIndex}
+                    onSelect={carouselState.setCurrentIndex}
+                    activeColor={BRAND_ORANGE}
+                    inactiveColor="#FED7AA"
+                    className="mt-2"
+                />
+            )}
         </Card>
     )
 }

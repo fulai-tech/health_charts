@@ -88,7 +88,7 @@
   "status": {
     "normal": "正常",
     "elevated": "偏高",
-    "high": "过高",
+    "high": "高",
     "low": "偏低",
     "slow": "过缓",
     "good": "良好",
@@ -407,5 +407,13 @@
       "dinner": "晚餐",
       "snacks": "加餐"
     }
+  },
+  "superPanel": {
+    "language": "语言",
+    "user": "用户",
+    "theme": "主题",
+    "demoMode": "Demo 模式",
+    "mockData": "假数据",
+    "realData": "真数据"
   }
 }
