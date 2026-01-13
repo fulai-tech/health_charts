@@ -324,14 +324,36 @@
   </div>
 
   <script>
-    // 全局默认数据
+    /**
+     * ======================================
+     * 音乐卡片 - 双向交互接口定义
+     * ======================================
+     * 
+     * Android -> JS: evaluateJavascript
+     *   - MusicCardBridge.updateMusicCards(imageUrls, callback)
+     * 
+     * JS -> Android: JavaScriptInterface
+     *   - android.onMusicCardClick(index)
+     *   - android.requestMusicData()
+     */
+
+    // ===== 全局状态管理 =====
+    const MusicCardState = {
+      currentData: [],
+      isLoading: false,
+      lastUpdateTime: null
+    };
+
+    // 默认卡片数据
     const defaultMusicCards = [
       {
+        id: 1,
         imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&q=80',
         alt: '田野与罂粟花',
         text: '[轻音乐] (放松、舒缓、减压、治愈)'
       },
       {
+        id: 2,
         imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
         alt: '绿色山丘',
         text: '禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐'
@@ -339,10 +361,11 @@
     ];
 
     const cardTargets = [
-      { img: 'music-card-1-img', text: 'music-card-1-text' },
-      { img: 'music-card-2-img', text: 'music-card-2-text' }
+      { img: 'music-card-1-img', text: 'music-card-1-text', wrapper: 'music-card-1-wrapper' },
+      { img: 'music-card-2-img', text: 'music-card-2-text', wrapper: 'music-card-2-wrapper' }
     ];
 
+    // ===== 内部渲染函数 =====
     function renderCards(imageUrls) {
       cardTargets.forEach((target, index) => {
         const fallback = defaultMusicCards[index];
@@ -362,25 +385,119 @@
           textEl.textContent = fallback.text;
         }
       });
+
+      MusicCardState.lastUpdateTime = new Date().getTime();
     }
 
-    // X5 可调用的全局接口
-    window.updateMusicCardsFromX5 = function (payload) {
-      try {
-        const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload;
-        if (!parsed) return;
+    // ===== 卡片点击处理 =====
+    function setupCardClickHandlers() {
+      cardTargets.forEach((target, index) => {
+        const wrapper = document.querySelector(`.music-card`);
+        if (wrapper) {
+          const clickHandler = () => {
+            console.log(`[MusicCard] 点击卡片 ${index}`);
+            // JS -> Android: 通知点击事件
+            if (typeof android !== 'undefined' && android.onMusicCardClick) {
+              android.onMusicCardClick(index);
+            }
+          };
+          wrapper.addEventListener('click', clickHandler);
+        }
+      });
+    }
 
-        const list = Array.isArray(parsed) ? parsed : [parsed];
-        const imageUrls = list.map(item => (typeof item === 'string' ? item : item?.imageUrl)).slice(0, cardTargets.length);
+    // ===== 公开接口：Android 调用 JS =====
+    window.MusicCardBridge = {
+      /**
+       * 更新音乐卡片
+       * @param {Array|string} imageUrls - 图片URL数组或JSON字符串
+       * @param {Function} callback - 更新完成回调
+       */
+      updateMusicCards: function(imageUrls, callback) {
+        try {
+          MusicCardState.isLoading = true;
+          console.log('[MusicCardBridge] 收到更新请求', imageUrls);
 
-        renderCards(imageUrls);
-      } catch (error) {
-        console.error('更新音乐卡片失败: ', error);
+          const parsed = typeof imageUrls === 'string' ? JSON.parse(imageUrls) : imageUrls;
+          if (!parsed) return;
+
+          const list = Array.isArray(parsed) ? parsed : [parsed];
+          const urls = list.map(item => (typeof item === 'string' ? item : item?.imageUrl)).slice(0, cardTargets.length);
+
+          renderCards(urls);
+          MusicCardState.currentData = urls;
+          MusicCardState.isLoading = false;
+
+          // 数据加载完成回调 JS -> Android
+          if (typeof android !== 'undefined' && android.onMusicDataLoaded) {
+            android.onMusicDataLoaded(JSON.stringify({
+              success: true,
+              cardCount: urls.length,
+              timestamp: MusicCardState.lastUpdateTime
+            }));
+          }
+
+          // 执行回调函数
+          if (typeof callback === 'function') {
+            callback({ success: true, cardCount: urls.length });
+          }
+
+          console.log('[MusicCardBridge] 更新完成', urls.length, '张卡片');
+        } catch (error) {
+          console.error('[MusicCardBridge] 更新失败: ', error);
+          MusicCardState.isLoading = false;
+
+          if (typeof android !== 'undefined' && android.onMusicDataLoaded) {
+            android.onMusicDataLoaded(JSON.stringify({
+              success: false,
+              error: error.message
+            }));
+          }
+
+          if (typeof callback === 'function') {
+            callback({ success: false, error: error.message });
+          }
+        }
+      },
+
+      /**
+       * 获取当前卡片状态
+       * @returns {Object} 状态对象
+       */
+      getState: function() {
+        return {
+          currentData: MusicCardState.currentData,
+          isLoading: MusicCardState.isLoading,
+          lastUpdateTime: MusicCardState.lastUpdateTime,
+          cardCount: cardTargets.length
+        };
+      },
+
+      /**
+       * 重置为默认卡片
+       */
+      resetToDefault: function() {
+        console.log('[MusicCardBridge] 重置为默认卡片');
+        renderCards(defaultMusicCards.map(card => card.imageUrl));
+        MusicCardState.currentData = [];
       }
     };
 
+    // ===== 页面加载完成 =====
     document.addEventListener('DOMContentLoaded', () => {
+      console.log('[MusicCard] DOM加载完成');
+      
+      // 1. 初始化：加载默认数据
       renderCards();
+      
+      // 2. 设置卡片点击处理
+      setupCardClickHandlers();
+
+      // 3. JS -> Android: 页面加载完成，请求数据
+      if (typeof android !== 'undefined' && android.requestMusicData) {
+        console.log('[MusicCard] 请求 Android 提供数据');
+        android.requestMusicData();
+      }
     });
   </script>
 </body>
