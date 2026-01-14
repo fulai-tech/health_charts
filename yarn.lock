@@ -2627,6 +2627,11 @@ download@^7.1.0:
     p-event "^2.1.0"
     pify "^3.0.0"
 
+dsbridge@^3.1.4:
+  version "3.1.4"
+  resolved "https://registry.npmmirror.com/dsbridge/-/dsbridge-3.1.4.tgz#2cd598def017df8f729b40d33bc9c72934d44e19"
+  integrity sha512-0PczJDk+SRiJjyfTRIVvAsdmC4CbSb4nbfa/ajr3ZbluCpkIiiftDLBITygj0KIKvNvXHqMdXbBQGn99rWKT9A==
+
 dunder-proto@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmmirror.com/dunder-proto/-/dunder-proto-1.0.1.tgz#d7ae667e1dc83482f8b70fd0f6eefc50da30f58a"

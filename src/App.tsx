@@ -18,6 +18,9 @@ import { HRTrendWidgetPage } from '@/pages/widget/HRTrendWidgetPage'
 import { GlucosePage } from '@/pages/details/GlucosePage'
 import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
 
+// Music Widget Page
+import { MusicWidgetPage } from '@/pages/widget/MusicWidgetPage'
+
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
 
@@ -130,6 +133,9 @@ function App() {
 
             {/* Glucose Widget */}
             <Route path="/widget/glucose/trend" element={<GlucoseTrendWidgetPage />} />
+
+            {/* Music Widget */}
+            <Route path="/widget/music" element={<MusicWidgetPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
