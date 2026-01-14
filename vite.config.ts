@@ -11,15 +11,15 @@ export default defineConfig({
   plugins: [
     react(),
     legacy({
-      // 针对腾讯 X5 内核优化（基于 Chromium 83+）
-      // X5 4.x 内核已支持大部分 ES2020 特性，无需额外 polyfill
-      targets: ['chrome 83'],
-      // 关闭现代浏览器 polyfill，X5 83+ 不需要
-      modernPolyfills: false,
-      // 保留 legacy chunks 以防万一有更老的 WebView
+      // 兼容老版本 Android 原生 WebView（基于 Chrome 61+）
+      // 以及腾讯 X5 内核（Chromium 83+）
+      targets: ['chrome >= 61', 'android >= 5'],
+      // 启用现代浏览器 polyfill 以防万一
+      modernPolyfills: true,
+      // 保留 legacy chunks 支持老 WebView
       renderLegacyChunks: true,
-      // 移除不必要的 polyfills，Chrome 83 已原生支持这些特性
-      polyfills: false,
+      // 添加必要的 polyfills
+      polyfills: true,
     }),
     viteCompression({
       verbose: true,
@@ -54,7 +54,10 @@ export default defineConfig({
   },
   build: {
     outDir: 'docs',
-    cssTarget: 'chrome80',
+    // 降低 CSS 目标版本，兼容老版本 Android WebView
+    cssTarget: 'chrome61',
+    // 降低 JS 目标版本
+    target: 'chrome61',
     modulePreload: {
       polyfill: true,
     },
