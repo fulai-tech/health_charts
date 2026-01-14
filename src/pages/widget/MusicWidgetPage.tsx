@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { useDSBridge } from '@/hooks/useDSBridge'
+import { useNativeBridge } from '@/hooks/useNativeBridge'
 
 // ============================================
 // 业务层类型定义
@@ -157,32 +157,32 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
  * 路由: /widget/music
  * 
  * 架构说明：
- * - 通信层 (useDSBridge): 只负责收发数据，不解析不处理
- * - 业务层 (本组件): 负责注册处理方法、解析数据、渲染 UI
+ * - 通信层 (useNativeBridge): 使用原生 JS 方式，window.NativeBridge + window.android
+ * - 业务层 (本组件): 负责注册处理回调、解析数据、渲染 UI
  * 
- * 原生调用方式:
- * - Android: dsBridge.callHandler("setData", jsonString, callback)
- * - iOS: [bridge callHandler:@"setData" data:jsonString callback:callback]
+ * 通信方式（与原 music.html 完全一致）:
+ * - Android -> JS: webView.evaluateJavascript("NativeBridge.receiveData('...')", null)
+ * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function MusicWidgetPage() {
   const [cards, setCards] = useState<MusicCardItem[]>(DEFAULT_CARDS)
 
   // ============================================
-  // 通信层：初始化 DSBridge
+  // 通信层：初始化 NativeBridge（原生 JS 方式）
   // ============================================
-  const { register, send, isReady } = useDSBridge({
+  const { onData, send, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
     pageName: PAGE_CONFIG.pageName,
     debug: import.meta.env.DEV,
   })
 
   // ============================================
-  // 业务层：注册数据接收方法
+  // 业务层：注册数据接收回调
   // ============================================
   useEffect(() => {
-    // 注册 setData 方法供原生调用
-    // 原生只需要调用: dsBridge.callHandler("setData", jsonData)
-    register<unknown, { success: boolean; count: number }>('setData', (rawData) => {
+    // 注册数据接收回调
+    // Android 调用 NativeBridge.receiveData(jsonData) 时触发
+    onData((rawData) => {
       console.log('[MusicWidgetPage] 收到原生数据')
       
       // 业务层自己解析数据
@@ -191,20 +191,11 @@ export function MusicWidgetPage() {
       if (items.length > 0) {
         setCards(items)
         console.log('[MusicWidgetPage] 渲染完成，共', items.length, '张卡片')
-        return { success: true, count: items.length }
+      } else {
+        console.warn('[MusicWidgetPage] 解析后数据为空，使用默认数据')
       }
-      
-      console.warn('[MusicWidgetPage] 解析后数据为空，使用默认数据')
-      return { success: false, count: 0 }
     })
-
-    // 也可以注册其他方法供原生调用
-    register('getPageInfo', () => ({
-      pageId: PAGE_CONFIG.pageId,
-      pageName: PAGE_CONFIG.pageName,
-      cardCount: cards.length,
-    }))
-  }, [register, cards.length])
+  }, [onData])
 
   // ============================================
   // 业务层：事件处理
@@ -247,7 +238,7 @@ export function MusicWidgetPage() {
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400">
-            DSBridge Ready: {isReady ? '✅' : '⏳'}
+            NativeBridge Ready: {isReady ? '✅' : '⏳'}
           </div>
         )}
       </div>
