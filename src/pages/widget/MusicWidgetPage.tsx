@@ -106,7 +106,7 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
 
   return (
     <div
-      className="group relative overflow-visible bg-white/60 backdrop-blur-sm flex-shrink-0 w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] lg:w-[360px] lg:min-w-[360px] snap-start cursor-pointer rounded-2xl md:rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 ease-out"
+      className="group relative overflow-hidden bg-white/60 backdrop-blur-sm flex-shrink-0 w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] lg:w-[360px] lg:min-w-[360px] snap-start cursor-pointer rounded-2xl md:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-1"
       onClick={() => onCardClick(index)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -257,8 +257,8 @@ export function MusicWidgetPage() {
   }, [cards])
 
   return (
-    <WidgetLayout className="bg-gradient-to-br from-[#F8F6F5] via-[#F1EFEE] to-[#E8E4E1] overflow-hidden">
-      <div className="w-full max-w-full md:max-w-[720px] mx-auto p-4 sm:p-5 md:p-6 overflow-hidden">
+    <WidgetLayout className="bg-gradient-to-br from-[#F8F6F5] via-[#F1EFEE] to-[#E8E4E1]">
+      <div className="w-full max-w-full md:max-w-[720px] mx-auto p-4 sm:p-5 md:p-6">
         {/* 标题区域 */}
         <div className="flex items-center justify-between mb-5 md:mb-6">
           <div className="flex items-center gap-3">
@@ -284,28 +284,17 @@ export function MusicWidgetPage() {
           </button>
         </div>
 
-        {/* 音乐卡片滚动容器 - 修复右侧白边 */}
-        <div className="overflow-hidden -mx-4 sm:-mx-5 md:-mx-6 -my-2">
-          <div 
-            className="flex gap-4 sm:gap-5 md:gap-6 overflow-x-auto py-4 px-4 sm:px-5 md:px-6 snap-x snap-mandatory touch-pan-x overscroll-x-contain"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none',
-            }}
-          >
-            {displayCards.map((card, index) => (
-              <MusicCard
-                key={card.id || index}
-                item={card}
-                index={index}
-                defaultItem={DEFAULT_CARDS[index] || DEFAULT_CARDS[0]}
-                onCardClick={handleCardClick}
-              />
-            ))}
-            {/* 右侧占位，补偿 padding 让最后一张卡片完整显示 */}
-            <div className="flex-shrink-0 w-4 sm:w-5 md:w-6" aria-hidden="true" />
-          </div>
+        {/* 音乐卡片网格 - 横向滚动 */}
+        <div className="flex gap-4 sm:gap-5 md:gap-6 w-full overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
+          {displayCards.map((card, index) => (
+            <MusicCard
+              key={card.id || index}
+              item={card}
+              index={index}
+              defaultItem={DEFAULT_CARDS[index] || DEFAULT_CARDS[0]}
+              onCardClick={handleCardClick}
+            />
+          ))}
         </div>
 
         {/* 调试信息（仅开发环境） */}
