@@ -24,6 +24,9 @@ import { MusicWidgetPage } from '@/pages/widget/MusicWidgetPage'
 // Questionnaire Widget Page
 import { QuestionnaireWidgetPage } from '@/pages/widget/QuestionnaireWidgetPage'
 
+// Sleep BP Chart Widget Page
+import { SleepBPChartPage } from '@/pages/widget/SleepBPChartPage'
+
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
 
@@ -142,6 +145,9 @@ function App() {
 
             {/* Questionnaire Widget */}
             <Route path="/widget/questionnaire" element={<QuestionnaireWidgetPage />} />
+
+            {/* Sleep BP Chart Widget */}
+            <Route path="/widget/sleep-bp-chart" element={<SleepBPChartPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

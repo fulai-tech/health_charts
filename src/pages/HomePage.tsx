@@ -52,6 +52,7 @@ export function HomePage() {
         { path: '/widget/glucose/trend', label: t('nav.glucoseTrendWidget'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
         { path: '/widget/music', label: '音乐推荐 Widget', icon: Music, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
         { path: '/widget/questionnaire', label: '问卷 Widget', icon: FileText, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+        { path: '/widget/sleep-bp-chart', label: '睡眠血压关系图表 Widget', icon: FileText, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
       ],
     },
   ]
