@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme'
 import { AuthButton } from '@/components/ui/AuthButton'
 import { useTokenValidation } from '@/hooks/useTokenValidation'
@@ -46,11 +46,16 @@ export function HomePage() {
     {
       category: t('home.widgetPages'),
       items: [
-        { path: '/widget/blood-pressure/trend', label: t('nav.bpTrendWidget'), icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
-        { path: '/widget/spo2/trend', label: t('nav.spo2TrendWidget'), icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
-        { path: '/widget/heart-rate/trend', label: t('nav.hrTrendWidget'), icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
-        { path: '/widget/glucose/trend', label: t('nav.glucoseTrendWidget'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
-        { path: '/widget/music', label: '音乐推荐 Widget', icon: Music, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+        // { path: '/widget/blood-pressure/trend', label: t('nav.bpTrendWidget'), icon: Heart, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp },
+        // { path: '/widget/spo2/trend', label: t('nav.spo2TrendWidget'), icon: Droplets, color: VITAL_COLORS.spo2, alphaColor: VITAL_COLORS_ALPHA.spo2 },
+        // { path: '/widget/heart-rate/trend', label: t('nav.hrTrendWidget'), icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
+        // { path: '/widget/glucose/trend', label: t('nav.glucoseTrendWidget'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
+        { path: '/widget/type-1', label: '睡眠评分 Widget', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep, type: 1 },
+        { path: '/widget/type-2', label: '柱状图对比 Widget', icon: GitCompare, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep, type: 2 },
+        { path: '/widget/type-3', label: '营养摄入 Widget', icon: Utensils, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition, type: 3 },
+        { path: '/widget/type-4', label: '音乐推荐 Widget', icon: Music, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA, type: 4 },
+        { path: '/widget/type-5', label: '健康体征总览 Widget', icon: Grid2X2, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha, type: 5 },
+        { path: '/widget/type-6', label: '钠摄入血压关联 Widget', icon: FlaskConical, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition, type: 6 },
       ],
     },
   ]

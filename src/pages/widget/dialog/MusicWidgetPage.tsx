@@ -9,9 +9,29 @@ import { Music, Play, Headphones, Sparkles } from 'lucide-react'
 
 /**
  * 音乐卡片数据类型
+ * 
+ * JSON 数据格式规范（最外层必须是 JSON 对象，不支持数组）：
+ * {
+ *   "items": [
+ *     {
+ *       "order": 1,                    // 卡片顺序（1=第一个，2=第二个...）
+ *       "songId": "song_001",          // 歌曲唯一标识
+ *       "imageUrl": "https://...",     // 封面图片URL
+ *       "imageBase64": "data:...",     // 或 Base64 图片
+ *       "title": "轻音乐",              // 标题
+ *       "text": "放松、舒缓..."         // 描述文字
+ *     },
+ *     {
+ *       "order": 2,
+ *       "songId": "song_002",
+ *       ...
+ *     }
+ *   ]
+ * }
  */
 interface MusicCardItem {
-  id?: number
+  order: number           // 卡片顺序（1=第一个，2=第二个...）
+  songId?: string         // 歌曲唯一标识
   imageUrl?: string
   imageBase64?: string
   title?: string
@@ -20,10 +40,12 @@ interface MusicCardItem {
 }
 
 /**
- * 原生传入的数据结构（业务层自己定义，通信层不关心）
- * 支持多种格式：数组 / { items: [] } / { data: [] }
+ * 原生传入的数据结构
+ * 必须是 JSON 对象格式：{ items: MusicCardItem[] }
  */
-type MusicNativeData = MusicCardItem[] | { items: MusicCardItem[] } | { data: MusicCardItem[] }
+interface MusicNativeData {
+  items: MusicCardItem[]
+}
 
 // ============================================
 // 业务层配置
@@ -32,22 +54,27 @@ type MusicNativeData = MusicCardItem[] | { items: MusicCardItem[] } | { data: Mu
 const PAGE_CONFIG = {
   pageId: 'music',
   pageName: '音乐推荐',
+  type: 4, // 音乐推荐卡片类型标识
 } as const
 
-const DEFAULT_CARDS: MusicCardItem[] = [
-  {
-    id: 1,
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
-    title: '轻音乐',
-    text: '[轻音乐] (放松、舒缓、减压、治愈)',
-  },
-  {
-    id: 2,
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
-    title: '禅音疗法',
-    text: '禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐',
-  },
-]
+const DEFAULT_DATA: MusicNativeData = {
+  items: [
+    {
+      order: 1,
+      songId: 'song_001',
+      imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
+      title: '轻音乐',
+      text: '[轻音乐] (放松、舒缓、减压、治愈)',
+    },
+    {
+      order: 2,
+      songId: 'song_002',
+      imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80',
+      title: '禅音疗法',
+      text: '禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐',
+    },
+  ],
+}
 
 // ============================================
 // 业务层数据解析（每个 Widget 自己实现）
@@ -56,8 +83,16 @@ const DEFAULT_CARDS: MusicCardItem[] = [
 /**
  * 解析原生传来的 JSON 数据
  * 这是业务层的职责，通信层只负责传递原始数据
+ * 
+ * 期望的数据格式：
+ * {
+ *   "items": [
+ *     { "order": 1, "songId": "...", ... },
+ *     { "order": 2, "songId": "...", ... }
+ *   ]
+ * }
  */
-function parseMusicData(raw: unknown): MusicCardItem[] {
+function parseMusicData(raw: unknown): MusicNativeData | null {
   // 如果是字符串，先尝试 JSON 解析
   let data = raw
   if (typeof raw === 'string') {
@@ -65,25 +100,49 @@ function parseMusicData(raw: unknown): MusicCardItem[] {
       data = JSON.parse(raw)
     } catch {
       console.error('[MusicWidgetPage] JSON 解析失败:', raw)
-      return []
+      return null
     }
   }
 
-  // 支持多种数据格式
-  if (Array.isArray(data)) {
-    return data as MusicCardItem[]
+  // 验证数据格式：最外层必须是 JSON 对象，不支持数组
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    console.warn('[MusicWidgetPage] 数据格式错误，期望 JSON 对象（最外层）:', data)
+    return null
   }
-  if (data && typeof data === 'object') {
-    if ('items' in data && Array.isArray((data as { items: unknown }).items)) {
-      return (data as { items: MusicCardItem[] }).items
-    }
-    if ('data' in data && Array.isArray((data as { data: unknown }).data)) {
-      return (data as { data: MusicCardItem[] }).data
-    }
+
+  // 验证 items 字段：必须是数组
+  if (!('items' in data)) {
+    console.warn('[MusicWidgetPage] 缺少必需字段 items:', data)
+    return null
   }
-  
-  console.warn('[MusicWidgetPage] 未知的数据格式:', data)
-  return []
+
+  const items = (data as { items: unknown }).items
+  if (!Array.isArray(items)) {
+    console.warn('[MusicWidgetPage] items 必须是数组:', data)
+    return null
+  }
+
+  return data as MusicNativeData
+}
+
+/**
+ * 将 items 数组按 order 排序
+ * 限制最多显示 10 个卡片，防止性能问题
+ */
+function getOrderedCards(data: MusicNativeData): MusicCardItem[] {
+  if (!data.items || !Array.isArray(data.items)) {
+    return []
+  }
+  return [...data.items].sort((a, b) => a.order - b.order).slice(0, 10)
+}
+
+/**
+ * 截断文本，避免溢出
+ */
+function truncateText(text: string, maxLength: number): string {
+  if (!text) return ''
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength - 3) + '...'
 }
 
 /**
@@ -93,7 +152,7 @@ interface MusicCardProps {
   item: MusicCardItem
   index: number
   defaultItem: MusicCardItem
-  onCardClick: (index: number) => void
+  onCardClick: () => void
 }
 
 function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
@@ -101,34 +160,37 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false)
   
   const imageUrl = item.imageUrl || item.imageBase64 || defaultItem.imageUrl
-  const text = item.text || item.description || defaultItem.text
-  const title = item.title || defaultItem.title || ''
+  // 截断文本，防止过长溢出
+  const rawText = item.text || item.description || defaultItem.text || ''
+  const text = truncateText(rawText, 80)
+  const title = truncateText(item.title || defaultItem.title || '', 12)
 
   return (
     <div
-      className="group relative overflow-hidden bg-white/60 backdrop-blur-sm flex-shrink-0 w-[280px] min-w-[280px] md:w-[320px] md:min-w-[320px] lg:w-[360px] lg:min-w-[360px] snap-start cursor-pointer rounded-2xl md:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-1"
-      onClick={() => onCardClick(index)}
+      className="group relative overflow-hidden bg-white/60 backdrop-blur-sm flex-shrink-0 w-[calc(50%-0.5rem)] min-w-[calc(50%-0.5rem)] md:w-[calc(50%-1rem)] md:min-w-[calc(50%-1rem)] snap-start cursor-pointer rounded-2xl md:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-1"
+      style={{ aspectRatio: '3/4' }}
+      onClick={onCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          onCardClick(index)
+          onCardClick()
         }
       }}
     >
-      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl">
+      <div className="relative overflow-hidden rounded-2xl md:rounded-3xl h-full w-full">
         {/* 图片骨架屏 */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse" />
         )}
         
-        {/* 卡片图片 */}
+        {/* 卡片图片 - 竖长型，高度大于宽度 */}
         <img
           src={imageUrl}
           alt={title}
-          className={`w-full h-[200px] md:h-[220px] object-cover block transition-all duration-700 ease-out ${
+          className={`w-full h-full object-cover block transition-all duration-700 ease-out ${
             isHovered ? 'scale-110 brightness-75' : 'scale-100 brightness-100'
           } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           loading="lazy"
@@ -171,8 +233,8 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
             <Sparkles className="w-3 h-3 text-yellow-400 animate-pulse" />
           </div>
           
-          {/* 描述文字 */}
-          <p className={`text-sm md:text-[0.9375rem] font-medium leading-relaxed text-white transition-all duration-300 ${
+          {/* 描述文字 - 限制最多3行 */}
+          <p className={`text-sm md:text-[0.9375rem] font-medium leading-relaxed text-white transition-all duration-300 break-words whitespace-normal line-clamp-3 ${
             isHovered ? 'translate-y-0' : 'translate-y-1'
           }`}>
             {text}
@@ -207,7 +269,7 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function MusicWidgetPage() {
-  const [cards, setCards] = useState<MusicCardItem[]>(DEFAULT_CARDS)
+  const [data, setData] = useState<MusicNativeData>(DEFAULT_DATA)
 
   // ============================================
   // 通信层：初始化 NativeBridge（原生 JS 方式）
@@ -228,11 +290,11 @@ export function MusicWidgetPage() {
       console.log('[MusicWidgetPage] 收到原生数据')
       
       // 业务层自己解析数据
-      const items = parseMusicData(rawData)
+      const parsed = parseMusicData(rawData)
       
-      if (items.length > 0) {
-        setCards(items)
-        console.log('[MusicWidgetPage] 渲染完成，共', items.length, '张卡片')
+      if (parsed && parsed.items.length > 0) {
+        setData(parsed)
+        console.log('[MusicWidgetPage] 渲染完成，共', parsed.items.length, '张卡片')
       } else {
         console.warn('[MusicWidgetPage] 解析后数据为空，使用默认数据')
       }
@@ -242,19 +304,23 @@ export function MusicWidgetPage() {
   // ============================================
   // 业务层：事件处理
   // ============================================
-  const handleCardClick = useCallback((index: number) => {
-    console.log('[MusicWidgetPage] 卡片点击:', index)
+  const handleCardClick = useCallback((card: MusicCardItem) => {
+    console.log('[MusicWidgetPage] 卡片点击:', card.order, card.songId)
     // 通过通信层发送事件到原生
     send('cardClick', {
-      cardIndex: index,
-      card: cards[index],
+      order: card.order,
+      songId: card.songId,
+      card,
     })
-  }, [send, cards])
+  }, [send])
 
-  // 渲染的卡片数据
+  // 渲染的卡片数据（按 order 排序）
   const displayCards = useMemo(() => {
-    return cards.length > 0 ? cards : DEFAULT_CARDS
-  }, [cards])
+    return getOrderedCards(data)
+  }, [data])
+
+  // 获取默认卡片数据（用于 fallback）
+  const defaultCards = useMemo(() => getOrderedCards(DEFAULT_DATA), [])
 
   return (
     <WidgetLayout className="bg-gradient-to-br from-[#F8F6F5] via-[#F1EFEE] to-[#E8E4E1]">
@@ -284,18 +350,24 @@ export function MusicWidgetPage() {
           </button>
         </div>
 
-        {/* 音乐卡片网格 - 横向滚动 */}
-        <div className="flex gap-4 sm:gap-5 md:gap-6 w-full overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
-          {displayCards.map((card, index) => (
-            <MusicCard
-              key={card.id || index}
-              item={card}
-              index={index}
-              defaultItem={DEFAULT_CARDS[index] || DEFAULT_CARDS[0]}
-              onCardClick={handleCardClick}
-            />
-          ))}
-        </div>
+        {/* 音乐卡片网格 - 两个并排，超过两个时横向滚动 */}
+        {displayCards.length > 0 ? (
+          <div className="flex gap-2 md:gap-4 w-full overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
+            {displayCards.map((card, index) => (
+              <MusicCard
+                key={card.songId || card.order || index}
+                item={card}
+                index={index}
+                defaultItem={defaultCards[index] || defaultCards[0]}
+                onCardClick={() => handleCardClick(card)}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center justify-center py-8 text-gray-400 text-sm">
+            暂无音乐推荐
+          </div>
+        )}
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
