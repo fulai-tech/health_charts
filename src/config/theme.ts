@@ -217,6 +217,8 @@ export const SLEEP_COLORS = {
 export const EMOTION_COLORS = {
   /** 情绪主题色 - 橙色，用于情绪页面的图标、标题等 */
   primary: 'rgb(251, 146, 61)',
+  /** 情绪主题色半透明 - 橙色，用于图标背景 */
+  alpha: 'rgba(251, 146, 61, 0.125)',
   /** 积极情绪 - 橙色 #FB923C，用于显示积极情绪状态 */
   positive: 'rgb(251, 146, 60)',
   /** 中性情绪 - 绿色 #B2EDB5，用于显示中性情绪状态 */

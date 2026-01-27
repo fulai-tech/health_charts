@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { WidgetLayout } from '@/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
-import { Music, Play, Headphones, Sparkles } from 'lucide-react'
+import { Music, Headphones, Sparkles } from 'lucide-react'
 
 // ============================================
 // 业务层类型定义
@@ -210,15 +210,6 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
           }`}>
             <Music className="w-3.5 h-3.5 text-white" />
             <span className="text-xs font-medium text-white">{title}</span>
-          </div>
-          
-          {/* 播放按钮 */}
-          <div className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 transition-all duration-300 ${
-            isHovered ? 'bg-orange-500 border-orange-400 scale-110 rotate-0' : 'rotate-[-10deg]'
-          }`}>
-            <Play className={`w-4 h-4 text-white transition-transform duration-300 ${
-              isHovered ? 'scale-110 translate-x-0.5' : ''
-            }`} fill={isHovered ? 'white' : 'none'} />
           </div>
         </div>
         

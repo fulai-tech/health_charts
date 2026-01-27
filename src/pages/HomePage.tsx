@@ -1,13 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical } from 'lucide-react'
-import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS } from '@/config/theme'
+import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { AuthButton } from '@/components/ui/AuthButton'
 import { useTokenValidation } from '@/hooks/useTokenValidation'
-
-// Emotion color (not in VITAL_COLORS yet)
-const EMOTION_COLOR = 'rgb(251, 146, 61)'
-const EMOTION_COLOR_ALPHA = 'rgba(251, 146, 61, 0.125)'
 
 
 
@@ -31,7 +27,7 @@ export function HomePage() {
         { path: '/details/heart-rate', label: t('nav.heartRate'), icon: Activity, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate },
         { path: '/details/glucose', label: t('nav.glucose'), icon: Pill, color: VITAL_COLORS.glucose, alphaColor: VITAL_COLORS_ALPHA.glucose },
         { path: '/details/sleep', label: t('vitals.sleep'), icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
-        { path: '/details/emotion', label: t('vitals.emotion'), icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+        { path: '/details/emotion', label: t('vitals.emotion'), icon: Smile, color: EMOTION_COLORS.primary, alphaColor: EMOTION_COLORS.alpha },
         { path: '/details/nutrition', label: t('vitals.nutrition'), icon: Utensils, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition },
       ],
     },
@@ -39,7 +35,7 @@ export function HomePage() {
       category: t('home.dailyReportPages'),
       items: [
         { path: '/daily/healthy', label: t('nav.healthyDailyReport'), icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
-        { path: '/daily/emotion', label: t('nav.emotionDailyReport'), icon: Smile, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA },
+        { path: '/daily/emotion', label: t('nav.emotionDailyReport'), icon: Smile, color: EMOTION_COLORS.primary, alphaColor: EMOTION_COLORS.alpha },
         { path: '/daily/sleep', label: t('nav.sleepDailyReport'), icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
       ],
     },
@@ -53,40 +49,13 @@ export function HomePage() {
         { path: '/widget/type-1', label: '睡眠评分 Widget', icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep, type: 1 },
         { path: '/widget/type-2', label: '柱状图对比 Widget', icon: GitCompare, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep, type: 2 },
         { path: '/widget/type-3', label: '营养摄入 Widget', icon: Utensils, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition, type: 3 },
-        { path: '/widget/type-4', label: '音乐推荐 Widget', icon: Music, color: EMOTION_COLOR, alphaColor: EMOTION_COLOR_ALPHA, type: 4 },
+        { path: '/widget/type-4', label: '音乐推荐 Widget', icon: Music, color: EMOTION_COLORS.primary, alphaColor: EMOTION_COLORS.alpha, type: 4 },
         { path: '/widget/type-5', label: '健康体征总览 Widget', icon: Grid2X2, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha, type: 5 },
         { path: '/widget/type-6', label: '钠摄入血压关联 Widget', icon: FlaskConical, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition, type: 6 },
       ],
     },
   ]
 
-  const handleTestClick = () => {
-    // @ts-ignore
-    // 优先调用原生方法（如果 App 注入了 AppBridge）
-    if (window.AppBridge?.invoke) {
-      try {
-        // 调用原生弹窗或原生跳转
-        // @ts-ignore
-
-        window.AppBridge.invoke('showNativeDialog', {
-          message: 'hello world',
-          source: 'home',
-          timestamp: Date.now()
-        })
-        return
-      } catch (error) {
-        console.error('Failed to invoke AppBridge:', error)
-      }
-    }
-
-    // Fallback: Web 端弹窗（App 未注入时的降级方案）
-    alert('hello world')
-
-    // 发送自定义事件（用于监听/埋点）
-    window.dispatchEvent(
-      new CustomEvent('test-button-click', { detail: { source: 'home', label: 'hello-world' } })
-    )
-  }
 
   return (
     <div className="min-h-screen bg-[#F1EFEE] p-6">
@@ -183,16 +152,6 @@ export function HomePage() {
             </div>
           </div>
         ))}
-        {/* Test button for X5 intercept */}
-        {/* <button
-          onClick={handleTestClick}
-          className="test-button mt-4 w-full py-3 bg-slate-800 text-white rounded-2xl shadow-sm hover:shadow-md transition-all"
-          id="test-button"
-          data-action="test-button-click"
-        >
-          Test Button (alert hello world)
-        </button> */}
-        {/* URL Parameters Info */}
         <div className="p-4 bg-white/50 rounded-2xl border border-slate-200">
           <h3 className="text-sm font-semibold text-slate-600 mb-2">{t('home.urlParameters')}</h3>
           <div className="text-sm text-slate-500 space-y-1 font-mono">
