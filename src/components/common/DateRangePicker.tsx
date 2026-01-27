@@ -336,7 +336,7 @@ export function DateRangePicker({
               'relative z-10 flex items-center justify-center gap-2.5 px-4 py-2 mx-0.5 rounded-full',
               'w-[200px]', // Fixed width to prevent layout shift
               'transition-all duration-200 ease-out',
-              'hover:bg-white/95 hover:shadow-md',
+              'hover:bg-white/95',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
             )}
           >
