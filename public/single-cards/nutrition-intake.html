@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>营养摄入卡片</title>
+  <style>
+    /* 重置样式 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      background: #F5F5F5;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 主容器 */
+    .container {
+      width: 100%;
+      max-width: 100%;
+      padding: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        max-width: 420px;
+        margin: 0 auto;
+        padding: 1.5rem;
+      }
+    }
+
+    /* 营养摄入卡片 */
+    .nutrition-card {
+      background: #FFFFFF;
+      border-radius: 1rem;
+      padding: 1.25rem;
+    }
+
+    /* 顶部统计行 */
+    .stats-row {
+      display: flex;
+      justify-content: flex-start;
+      gap: 2.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: baseline;
+      gap: 0.375rem;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: #4ADE80;
+    }
+
+    .stat-label {
+      font-size: 0.875rem;
+      color: #6B7280;
+    }
+
+    /* 警告区域 */
+    .warning-section {
+      margin-bottom: 1rem;
+    }
+
+    .warning-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .warning-icon {
+      width: 1rem;
+      height: 1rem;
+      color: #F97316;
+    }
+
+    .warning-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: #F97316;
+    }
+
+    /* 摄入条目 */
+    .intake-item {
+      margin-bottom: 1rem;
+    }
+
+    .intake-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .intake-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.375rem;
+    }
+
+    .intake-label {
+      font-size: 0.9375rem;
+      color: #374151;
+    }
+
+    .intake-value {
+      display: flex;
+      align-items: baseline;
+      gap: 0.25rem;
+    }
+
+    .intake-number {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1F2937;
+    }
+
+    .intake-unit {
+      font-size: 0.875rem;
+      color: #6B7280;
+    }
+
+    /* 进度条 */
+    .progress-bar {
+      height: 0.5rem;
+      background: #E5E7EB;
+      border-radius: 0.25rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 0.25rem;
+      transition: width 0.3s ease;
+    }
+
+    .progress-fill.exceed {
+      background: linear-gradient(90deg, #FBBF24 0%, #F97316 60%, #EF4444 100%);
+    }
+
+    .progress-fill.normal {
+      background: linear-gradient(90deg, #4ADE80 0%, #22C55E 100%);
+    }
+
+    /* 摄入说明行 */
+    .intake-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.375rem;
+    }
+
+    .recommend-text {
+      font-size: 0.75rem;
+      color: #9CA3AF;
+    }
+
+    .exceed-text {
+      font-size: 0.75rem;
+      color: #F97316;
+      font-weight: 500;
+    }
+
+    /* 提示卡片 */
+    .tip-card {
+      background: #FEF3E2;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .tip-text {
+      font-size: 0.875rem;
+      color: #92400E;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nutrition-card">
+      <!-- 顶部统计 -->
+      <div class="stats-row">
+        <div class="stat-item">
+          <span id="nutrition-score" class="stat-value">85</span>
+          <span class="stat-label">nutritional score</span>
+        </div>
+        <div class="stat-item">
+          <span id="total-calories" class="stat-value" style="color: #1F2937;">880</span>
+          <span class="stat-label">total calories</span>
+        </div>
+      </div>
+
+      <!-- 警告区域 -->
+      <div class="warning-section">
+        <div class="warning-header">
+          <svg class="warning-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L1 21h22L12 2zm0 3.83L19.53 19H4.47L12 5.83zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/>
+          </svg>
+          <span id="warning-title" class="warning-title">Sodium intake seriously exceeded</span>
+        </div>
+
+        <!-- 本餐摄入 -->
+        <div class="intake-item">
+          <div class="intake-header">
+            <span class="intake-label">This meal intake</span>
+            <div class="intake-value">
+              <span id="meal-intake" class="intake-number">8</span>
+              <span class="intake-unit">mg</span>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div id="meal-progress" class="progress-fill exceed" style="width: 100%;"></div>
+          </div>
+          <div class="intake-info">
+            <span id="meal-recommend" class="recommend-text">Recommended intake: 5 mg</span>
+            <span id="meal-exceed" class="exceed-text">Exceed 40%</span>
+          </div>
+        </div>
+
+        <!-- 每日总摄入 -->
+        <div class="intake-item">
+          <div class="intake-header">
+            <span class="intake-label">Total daily intake</span>
+            <div class="intake-value">
+              <span id="daily-intake" class="intake-number">28</span>
+              <span class="intake-unit">mg</span>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div id="daily-progress" class="progress-fill exceed" style="width: 100%;"></div>
+          </div>
+          <div class="intake-info">
+            <span id="daily-recommend" class="recommend-text">Recommended intake: 20 mg</span>
+            <span id="daily-exceed" class="exceed-text">Exceed 27%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 提示卡片 -->
+      <div class="tip-card">
+        <p id="tip-text" class="tip-text">
+          Your sodium intake exceeds the daily baseline by 14%, and also surpasses the daily baseline. The excess sodium primarily comes from Kung Pao Chicken and soy sauce.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 引入通信层 -->
+  <script src="js/app.js"></script>
+
+  <!--
+  ========================================================
+  【业务层 JSON 数据格式规范】
+  ========================================================
+  
+  字段说明：
+  - nutritionScore: number     营养评分 (0-100)
+  - totalCalories: number      总热量
+  - warningTitle: string       警告标题
+  - warningType: string        警告类型（用于扩展）
+  - mealIntake: object         本餐摄入
+    - value: number            摄入值
+    - unit: string             单位
+    - recommended: number      推荐值
+    - exceedPercent: number    超标百分比（可选，负数表示未超标）
+  - dailyIntake: object        每日总摄入
+    - value: number            摄入值
+    - unit: string             单位
+    - recommended: number      推荐值
+    - exceedPercent: number    超标百分比（可选，负数表示未超标）
+  - tipText: string            提示文字
+
+  示例 JSON：
+  {
+    "nutritionScore": 85,
+    "totalCalories": 880,
+    "warningTitle": "Sodium intake seriously exceeded",
+    "mealIntake": {
+      "value": 8,
+      "unit": "mg",
+      "recommended": 5,
+      "exceedPercent": 40
+    },
+    "dailyIntake": {
+      "value": 28,
+      "unit": "mg",
+      "recommended": 20,
+      "exceedPercent": 27
+    },
+    "tipText": "Your sodium intake exceeds the daily baseline by 14%, and also surpasses the daily baseline. The excess sodium primarily comes from Kung Pao Chicken and soy sauce."
+  }
+  ========================================================
+  -->
+
+  <script>
+    /**
+     * 【业务层】营养摄入卡片 - 渲染逻辑
+     */
+    (function() {
+      'use strict';
+
+      const PAGE_CONFIG = {
+        pageId: 'nutrition-intake',
+        pageName: '营养摄入卡片'
+      };
+
+      // 默认数据
+      const defaultData = {
+        nutritionScore: 85,
+        totalCalories: 880,
+        warningTitle: 'Sodium intake seriously exceeded',
+        mealIntake: {
+          value: 8,
+          unit: 'mg',
+          recommended: 5,
+          exceedPercent: 40
+        },
+        dailyIntake: {
+          value: 28,
+          unit: 'mg',
+          recommended: 20,
+          exceedPercent: 27
+        },
+        tipText: 'Your sodium intake exceeds the daily baseline by 14%, and also surpasses the daily baseline. The excess sodium primarily comes from Kung Pao Chicken and soy sauce.'
+      };
+
+      // 计算进度条宽度（最大100%）
+      function calcProgress(value, recommended) {
+        return Math.min((value / recommended) * 100, 100);
+      }
+
+      // 渲染函数
+      function render(data) {
+        const d = data || defaultData;
+        
+        // 渲染顶部统计
+        document.getElementById('nutrition-score').textContent = d.nutritionScore || 0;
+        document.getElementById('total-calories').textContent = d.totalCalories || 0;
+        
+        // 渲染警告标题
+        document.getElementById('warning-title').textContent = d.warningTitle || '';
+        
+        // 渲染本餐摄入
+        const meal = d.mealIntake || {};
+        document.getElementById('meal-intake').textContent = meal.value || 0;
+        document.getElementById('meal-recommend').textContent = `Recommended intake: ${meal.recommended || 0} ${meal.unit || 'mg'}`;
+        
+        const mealProgress = document.getElementById('meal-progress');
+        mealProgress.style.width = calcProgress(meal.value, meal.recommended) + '%';
+        mealProgress.className = 'progress-fill ' + (meal.exceedPercent > 0 ? 'exceed' : 'normal');
+        
+        if (meal.exceedPercent > 0) {
+          document.getElementById('meal-exceed').textContent = `Exceed ${meal.exceedPercent}%`;
+          document.getElementById('meal-exceed').style.display = 'block';
+        } else {
+          document.getElementById('meal-exceed').style.display = 'none';
+        }
+        
+        // 渲染每日总摄入
+        const daily = d.dailyIntake || {};
+        document.getElementById('daily-intake').textContent = daily.value || 0;
+        document.getElementById('daily-recommend').textContent = `Recommended intake: ${daily.recommended || 0} ${daily.unit || 'mg'}`;
+        
+        const dailyProgress = document.getElementById('daily-progress');
+        dailyProgress.style.width = calcProgress(daily.value, daily.recommended) + '%';
+        dailyProgress.className = 'progress-fill ' + (daily.exceedPercent > 0 ? 'exceed' : 'normal');
+        
+        if (daily.exceedPercent > 0) {
+          document.getElementById('daily-exceed').textContent = `Exceed ${daily.exceedPercent}%`;
+          document.getElementById('daily-exceed').style.display = 'block';
+        } else {
+          document.getElementById('daily-exceed').style.display = 'none';
+        }
+        
+        // 渲染提示文字
+        document.getElementById('tip-text').textContent = d.tipText || '';
+
+        console.log('[NutritionCard] 渲染完成');
+      }
+
+      // 注册通信层回调
+      NativeBridge.onDataReceived = function(data) {
+        console.log('[NutritionCard] 收到数据，开始渲染');
+        render(data);
+      };
+
+      NativeBridge.onError = function(error) {
+        console.error('[NutritionCard] 通信错误:', error);
+      };
+
+      // 页面初始化
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log('[NutritionCard] 页面加载完成');
+        render(defaultData);
+        NativeBridge.notifyReady(PAGE_CONFIG);
+      });
+
+    })();
+  </script>
+</body>
+</html>

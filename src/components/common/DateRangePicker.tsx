@@ -304,7 +304,6 @@ export function DateRangePicker({
         'transition-all duration-300 ease-out',
         // Enhanced hover effects for entire component
         'hover:bg-gradient-to-b hover:from-white hover:to-white/80',
-        'hover:shadow-[0_8px_30px_-6px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.04)]',
         // Deeper shadow when popover is open (selecting date)
         open && 'shadow-[0_12px_40px_-8px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)]',
         className
