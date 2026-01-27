@@ -26,6 +26,12 @@ import { SleepFatigueComparisonWidgetPage } from '@/pages/widget/dialog/Comparis
 import { VitalOverviewWidgetPage } from '@/pages/widget/dialog/VitalOverviewWidgetPage'
 import { SodiumBPWidgetPage } from '@/pages/widget/dialog/SodiumBPWidgetPage'
 
+// Questionnaire Widget Page
+import { QuestionnaireWidgetPage } from '@/pages/widget/QuestionnaireWidgetPage'
+
+// Weekly Health Score Widget Page
+import { WeeklyHealthScorePage } from '@/pages/widget/WeeklyHealthScorePage'
+
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
 
@@ -157,6 +163,12 @@ function App() {
             {/* Type 6 - Sodium BP Widget */}
             <Route path="/widget/type-6" element={<SodiumBPWidgetPage />} />
 
+            {/* Questionnaire Widget */}
+            <Route path="/widget/questionnaire" element={<QuestionnaireWidgetPage />} />
+
+            {/* Weekly Health Score Widget */}
+            <Route path="/widget/weekly-health-score" element={<WeeklyHealthScorePage />} />
+            
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
