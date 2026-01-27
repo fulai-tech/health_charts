@@ -74,7 +74,7 @@ export default function SleepDailyPage() {
                         percentile={data.percentile}
                         percentileMessage={data.percentileMessage}
                         aiTags={data.aiTags}
-                        themeColor="#A37EFE"
+                        themeColor={VITAL_COLORS.sleep}
                         title={t('daily.todayScore', "Today's score")}
                         icon={<Moon className="w-6 h-6 text-white" />}
                     />

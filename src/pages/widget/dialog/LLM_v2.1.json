@@ -1,0 +1,711 @@
+[
+  {
+    "type": 1,
+    "enabled": true,
+    "name": "sleep_score_card",
+    "url": "/widget/type-1",
+    "description": "展示用户某天的睡眠评分、总睡眠时长、深睡时长与状态标签。",
+    "llm_extract_params": [
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期。用户说\"今天/昨天/前天/上周一\"等时，必须转换为 YYYY-MM-DD。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "score",
+        "type": "int",
+        "required": true,
+        "example": 88,
+        "description": "睡眠评分（0-100），由 executor 查询并计算。"
+      },
+      {
+        "name": "totalSleepMinutes",
+        "type": "int",
+        "required": true,
+        "example": 375,
+        "description": "总睡眠时长（分钟），由 executor 查询并填充。"
+      },
+      {
+        "name": "deepSleepMinutes",
+        "type": "int",
+        "required": true,
+        "example": 248,
+        "description": "深睡时长（分钟），由 executor 查询并填充。"
+      },
+      {
+        "name": "tags",
+        "type": "array",
+        "required": true,
+        "example": [
+          {"text": "深睡不足", "type": "warning"},
+          {"text": "入睡困难", "type": "warning"},
+          {"text": "呼吸良好", "type": "good"}
+        ],
+        "description": "状态标签数组 [{text,type}]，由 executor 根据 score 生成。type 可选值: 'warning' | 'good' | 'neutral'"
+      }
+    ]
+  },
+  {
+    "type": 2,
+    "enabled": true,
+    "name": "sleep_fatigue_comparison_card",
+    "url": "/widget/type-2",
+    "description": "展示用户某天的深睡时长与晨起疲劳度的对比分析，或血压相关指标的对比分析。支持两套颜色主题方案：sleep（睡眠主题）和 BP（血压主题）。",
+    "llm_extract_params": [
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期。用户说\"今天/昨天/前天/上周一\"等时，必须转换为 YYYY-MM-DD。"
+      },
+      {
+        "name": "theme",
+        "type": "string",
+        "required": false,
+        "default": "sleep",
+        "example": "sleep",
+        "description": "颜色主题方案。可选值: 'sleep' | 'BP'。'sleep' 主题用于睡眠相关对比（第1个柱子蓝色 #B8DBFF，第2个柱子红色 #FF9192）；'BP' 主题用于血压相关对比（第1个柱子橘色主题色，第2个柱子红色 #FF9192）。如果不提供，默认使用 'sleep' 主题。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "theme",
+        "type": "string",
+        "required": false,
+        "example": "sleep",
+        "description": "颜色主题方案。可选值: 'sleep' | 'BP'。'sleep' 主题用于睡眠相关对比（第1个柱子蓝色 #B8DBFF，第2个柱子红色 #FF9192）；'BP' 主题用于血压相关对比（第1个柱子橘色主题色 VITAL_COLORS.bp，第2个柱子红色 #FF9192）。如果不提供，默认使用 'sleep' 主题。"
+      },
+      {
+        "name": "left",
+        "type": "object",
+        "required": true,
+        "description": "左侧数据（深睡时长或血压相关指标）",
+        "fields": [
+          {
+            "name": "title",
+            "type": "string",
+            "required": true,
+            "example": "Deep sleep",
+            "description": "标题文字"
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "required": true,
+            "example": "45min",
+            "description": "数值显示，可为空字符串"
+          },
+          {
+            "name": "barPercent",
+            "type": "int",
+            "required": true,
+            "example": 45,
+            "description": "柱状图高度百分比 (0-100)"
+          },
+          {
+            "name": "standardPercent",
+            "type": "int",
+            "required": true,
+            "example": 40,
+            "description": "标准线位置百分比（从底部计算，0-100）"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "example": "low",
+            "description": "状态: 'low' | 'high' | 'normal'"
+          },
+          {
+            "name": "statusText",
+            "type": "string",
+            "required": true,
+            "example": "Low",
+            "description": "状态文字"
+          }
+        ]
+      },
+      {
+        "name": "right",
+        "type": "object",
+        "required": true,
+        "description": "右侧数据（晨起疲劳度或血压相关指标）",
+        "fields": [
+          {
+            "name": "title",
+            "type": "string",
+            "required": true,
+            "example": "Morning fatigue",
+            "description": "标题文字"
+          },
+          {
+            "name": "value",
+            "type": "string",
+            "required": true,
+            "example": "",
+            "description": "数值显示，可为空字符串"
+          },
+          {
+            "name": "barPercent",
+            "type": "int",
+            "required": true,
+            "example": 75,
+            "description": "柱状图高度百分比 (0-100)"
+          },
+          {
+            "name": "standardPercent",
+            "type": "int",
+            "required": true,
+            "example": 55,
+            "description": "标准线位置百分比（从底部计算，0-100）"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "example": "high",
+            "description": "状态: 'low' | 'high' | 'normal'"
+          },
+          {
+            "name": "statusText",
+            "type": "string",
+            "required": true,
+            "example": "Rise",
+            "description": "状态文字"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": 3,
+    "enabled": true,
+    "name": "nutrition_intake_card",
+    "url": "/widget/type-3",
+    "description": "展示用户某餐或某天的营养摄入情况，包括营养评分、总热量、警告标题、本餐摄入、每日总摄入和提示文字。",
+    "llm_extract_params": [
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期。用户说\"今天/昨天/前天/上周一\"等时，必须转换为 YYYY-MM-DD。"
+      },
+      {
+        "name": "mealType",
+        "type": "string",
+        "required": false,
+        "example": "lunch",
+        "description": "餐次类型。可选值: 'breakfast' | 'lunch' | 'dinner' | 'snack'。如果不提供，默认查询当天所有餐次。"
+      },
+      {
+        "name": "nutritionType",
+        "type": "string",
+        "required": false,
+        "example": "sodium",
+        "description": "营养类型。可选值: 'sodium' | 'calories' | 'protein' | 'fat' | 'carbohydrate' 等。如果不提供，由 executor 根据超标情况自动选择。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "nutritionScore",
+        "type": "int",
+        "required": true,
+        "example": 85,
+        "description": "营养评分（0-100），由 executor 查询并计算。"
+      },
+      {
+        "name": "totalCalories",
+        "type": "int",
+        "required": true,
+        "example": 880,
+        "description": "总热量（卡路里），由 executor 查询并填充。"
+      },
+      {
+        "name": "warningTitle",
+        "type": "string",
+        "required": true,
+        "example": "钠摄入严重超标",
+        "description": "警告标题，由 executor 根据超标情况生成。"
+      },
+      {
+        "name": "mealIntake",
+        "type": "object",
+        "required": true,
+        "description": "本餐摄入数据",
+        "fields": [
+          {
+            "name": "value",
+            "type": "float",
+            "required": true,
+            "example": 8.0,
+            "description": "本餐摄入值"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "mg",
+            "description": "单位，如 'mg'、'g'、'kcal'"
+          },
+          {
+            "name": "recommended",
+            "type": "float",
+            "required": true,
+            "example": 5.0,
+            "description": "推荐值"
+          },
+          {
+            "name": "exceedPercent",
+            "type": "float",
+            "required": true,
+            "example": 40.0,
+            "description": "超标百分比，负数表示未超标"
+          }
+        ]
+      },
+      {
+        "name": "dailyIntake",
+        "type": "object",
+        "required": true,
+        "description": "每日总摄入数据",
+        "fields": [
+          {
+            "name": "value",
+            "type": "float",
+            "required": true,
+            "example": 28.0,
+            "description": "每日总摄入值"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "mg",
+            "description": "单位，如 'mg'、'g'、'kcal'"
+          },
+          {
+            "name": "recommended",
+            "type": "float",
+            "required": true,
+            "example": 20.0,
+            "description": "推荐值"
+          },
+          {
+            "name": "exceedPercent",
+            "type": "float",
+            "required": true,
+            "example": 27.0,
+            "description": "超标百分比，负数表示未超标"
+          }
+        ]
+      },
+      {
+        "name": "tipText",
+        "type": "string",
+        "required": true,
+        "example": "您的钠摄入超出每日基准14%，且本餐摄入也超出基准。超标钠主要来源于宫保鸡丁和酱油。",
+        "description": "提示文字，由 executor 根据摄入情况生成具体建议。"
+      }
+    ]
+  },
+  {
+    "type": 4,
+    "enabled": true,
+    "name": "music_recommendation_card",
+    "url": "/widget/type-4",
+    "description": "根据用户当前情绪、睡眠状态或健康数据推荐适合的音乐列表。",
+    "llm_extract_params": [
+      {
+        "name": "emotion",
+        "type": "string",
+        "required": false,
+        "example": "relaxed",
+        "description": "用户当前情绪。可选值: 'relaxed' | 'stressed' | 'anxious' | 'tired' | 'energetic' 等。如果不提供，由 executor 根据用户数据自动判断。"
+      },
+      {
+        "name": "scenario",
+        "type": "string",
+        "required": false,
+        "example": "sleep",
+        "description": "使用场景。可选值: 'sleep' | 'work' | 'exercise' | 'meditation' | 'relaxation'。如果不提供，由 executor 根据时间或用户状态自动判断。"
+      },
+      {
+        "name": "count",
+        "type": "int",
+        "required": false,
+        "default": 3,
+        "example": 5,
+        "description": "推荐音乐数量，默认 3 首，最多 10 首。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "items",
+        "type": "array",
+        "required": true,
+        "description": "音乐推荐列表，必须是数组格式。数组中的每个元素按 order 字段排序显示。",
+        "item_fields": [
+          {
+            "name": "order",
+            "type": "int",
+            "required": true,
+            "example": 1,
+            "description": "卡片顺序（1=第一个，2=第二个...），用于控制卡片显示顺序，必须从1开始递增。"
+          },
+          {
+            "name": "songId",
+            "type": "string",
+            "required": false,
+            "example": "song_001",
+            "description": "歌曲唯一标识，用于 React key 和业务逻辑。"
+          },
+          {
+            "name": "imageUrl",
+            "type": "string",
+            "required": false,
+            "example": "https://example.com/image1.jpg",
+            "description": "封面图片 URL（与 imageBase64 二选一）"
+          },
+          {
+            "name": "imageBase64",
+            "type": "string",
+            "required": false,
+            "example": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+            "description": "Base64 编码的图片（与 imageUrl 二选一）"
+          },
+          {
+            "name": "title",
+            "type": "string",
+            "required": false,
+            "example": "轻音乐",
+            "description": "音乐类型标题，如 '轻音乐'、'禅音疗法'"
+          },
+          {
+            "name": "text",
+            "type": "string",
+            "required": false,
+            "example": "[轻音乐] (放松、舒缓、减压、治愈)",
+            "description": "描述文字（与 description 二选一）"
+          },
+          {
+            "name": "description",
+            "type": "string",
+            "required": false,
+            "example": "禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐",
+            "description": "描述文字（与 text 二选一）"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": 5,
+    "enabled": true,
+    "name": "vital_overview_card",
+    "url": "/widget/type-5",
+    "description": "展示用户当前的健康体征总览，包括心率、血压、血氧、POCT（即时检测）四项指标的数值和状态。",
+    "llm_extract_params": [
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期。用户说\"今天/昨天/前天/上周一\"等时，必须转换为 YYYY-MM-DD。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "heartRate",
+        "type": "object",
+        "required": true,
+        "description": "心率数据",
+        "fields": [
+          {
+            "name": "value",
+            "type": "int",
+            "required": true,
+            "example": 68,
+            "description": "心率值（bpm）"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "bpm",
+            "description": "单位"
+          },
+          {
+            "name": "statusText",
+            "type": "string",
+            "required": true,
+            "example": "steady rhythm",
+            "description": "状态描述文字"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "example": "normal",
+            "description": "状态: 'normal' | 'warning' | 'danger'"
+          },
+          {
+            "name": "highlighted",
+            "type": "boolean",
+            "required": false,
+            "example": false,
+            "description": "是否高亮显示边框"
+          }
+        ]
+      },
+      {
+        "name": "bloodPressure",
+        "type": "object",
+        "required": true,
+        "description": "血压数据",
+        "fields": [
+          {
+            "name": "systolic",
+            "type": "int",
+            "required": true,
+            "example": 115,
+            "description": "收缩压（mmHg）"
+          },
+          {
+            "name": "diastolic",
+            "type": "int",
+            "required": true,
+            "example": 75,
+            "description": "舒张压（mmHg）"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "mmHg",
+            "description": "单位"
+          },
+          {
+            "name": "statusText",
+            "type": "string",
+            "required": true,
+            "example": "Slightly high SBP",
+            "description": "状态描述文字"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "example": "warning",
+            "description": "状态: 'normal' | 'warning' | 'danger'"
+          },
+          {
+            "name": "highlighted",
+            "type": "boolean",
+            "required": false,
+            "example": true,
+            "description": "是否高亮显示边框"
+          }
+        ]
+      },
+      {
+        "name": "spo2",
+        "type": "object",
+        "required": true,
+        "description": "血氧数据",
+        "fields": [
+          {
+            "name": "value",
+            "type": "int",
+            "required": true,
+            "example": 98,
+            "description": "血氧值（%）"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "%",
+            "description": "单位"
+          },
+          {
+            "name": "statusText",
+            "type": "string",
+            "required": true,
+            "example": "Sufficient oxygen supply",
+            "description": "状态描述文字"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "example": "normal",
+            "description": "状态: 'normal' | 'warning' | 'danger'"
+          },
+          {
+            "name": "highlighted",
+            "type": "boolean",
+            "required": false,
+            "example": false,
+            "description": "是否高亮显示边框"
+          }
+        ]
+      },
+      {
+        "name": "poct",
+        "type": "object",
+        "required": true,
+        "description": "POCT（即时检测）数据",
+        "fields": [
+          {
+            "name": "value",
+            "type": "float",
+            "required": true,
+            "example": 5.1,
+            "description": "POCT值（mmol/L）"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "mmol/L",
+            "description": "单位"
+          },
+          {
+            "name": "statusText",
+            "type": "string",
+            "required": true,
+            "example": "Normal metabolism",
+            "description": "状态描述文字"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "required": true,
+            "example": "normal",
+            "description": "状态: 'normal' | 'warning' | 'danger'"
+          },
+          {
+            "name": "highlighted",
+            "type": "boolean",
+            "required": false,
+            "example": false,
+            "description": "是否高亮显示边框"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": 6,
+    "enabled": true,
+    "name": "sodium_bp_card",
+    "url": "/widget/type-6",
+    "description": "展示钠摄入与血压之间的关联分析，左侧显示钠摄入仪表盘，右侧显示对血压的影响警告。",
+    "llm_extract_params": [
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期。用户说\"今天/昨天/前天/上周一\"等时，必须转换为 YYYY-MM-DD。"
+      },
+      {
+        "name": "mealType",
+        "type": "string",
+        "required": false,
+        "example": "lunch",
+        "description": "餐次类型。可选值: 'breakfast' | 'lunch' | 'dinner' | 'snack'。如果不提供，默认查询当前餐次。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "intake",
+        "type": "object",
+        "required": true,
+        "description": "钠摄入数据",
+        "fields": [
+          {
+            "name": "value",
+            "type": "float",
+            "required": true,
+            "example": 8.0,
+            "description": "摄入值"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": true,
+            "example": "mg",
+            "description": "单位"
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "required": true,
+            "example": "Sodium intake per meal",
+            "description": "标签文字"
+          },
+          {
+            "name": "percent",
+            "type": "int",
+            "required": true,
+            "example": 60,
+            "description": "仪表盘百分比（0-100），用于确定指针位置"
+          },
+          {
+            "name": "level",
+            "type": "string",
+            "required": true,
+            "example": "danger",
+            "description": "等级: 'normal' | 'warning' | 'danger'"
+          }
+        ]
+      },
+      {
+        "name": "alert",
+        "type": "object",
+        "required": true,
+        "description": "血压影响警告数据",
+        "fields": [
+          {
+            "name": "text",
+            "type": "string",
+            "required": true,
+            "example": "BP sharp rise",
+            "description": "警告文字"
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "required": true,
+            "example": "Sodium intake per meal",
+            "description": "标签文字"
+          },
+          {
+            "name": "level",
+            "type": "string",
+            "required": true,
+            "example": "danger",
+            "description": "等级: 'normal' | 'warning' | 'danger'"
+          }
+        ]
+      }
+    ]
+  }
+]

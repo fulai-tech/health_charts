@@ -1,0 +1,146 @@
+{
+  "sleep_score_card": {
+    "score": 88,
+    "totalSleepMinutes": 375,
+    "deepSleepMinutes": 248,
+    "tags": [
+      {
+        "text": "深睡不足",
+        "type": "warning"
+      },
+      {
+        "text": "入睡困难",
+        "type": "warning"
+      },
+      {
+        "text": "呼吸良好",
+        "type": "good"
+      }
+    ]
+  },
+  "sleep_fatigue_comparison_card": {
+    "sleep": {
+      "theme": "sleep",
+      "left": {
+        "title": "Deep sleep",
+        "value": "45min",
+        "barPercent": 45,
+        "standardPercent": 40,
+        "status": "low",
+        "statusText": "Low"
+      },
+      "right": {
+        "title": "Morning fatigue",
+        "value": "",
+        "barPercent": 75,
+        "standardPercent": 55,
+        "status": "high",
+        "statusText": "Rise"
+      }
+    },
+    "BP": {
+      "theme": "BP",
+      "left": {
+        "title": "Systolic BP",
+        "value": "135mmHg",
+        "barPercent": 68,
+        "standardPercent": 60,
+        "status": "high",
+        "statusText": "High"
+      },
+      "right": {
+        "title": "Diastolic BP",
+        "value": "88mmHg",
+        "barPercent": 55,
+        "standardPercent": 50,
+        "status": "normal",
+        "statusText": "Normal"
+      }
+    }
+  },
+  "nutrition_intake_card": {
+    "nutritionScore": 85,
+    "totalCalories": 880,
+    "warningTitle": "钠摄入严重超标",
+    "mealIntake": {
+      "value": 8,
+      "unit": "mg",
+      "recommended": 5,
+      "exceedPercent": 40
+    },
+    "dailyIntake": {
+      "value": 28,
+      "unit": "mg",
+      "recommended": 20,
+      "exceedPercent": 27
+    },
+    "tipText": "您的钠摄入超出每日基准14%，且本餐摄入也超出基准。超标钠主要来源于宫保鸡丁和酱油。"
+  },
+  "music_recommendation_card": {
+    "items": [
+      {
+        "order": 1,
+        "songId": "song_001",
+        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
+        "title": "轻音乐",
+        "text": "[轻音乐] (放松、舒缓、减压、治愈)"
+      },
+      {
+        "order": 2,
+        "songId": "song_002",
+        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
+        "title": "禅音疗法",
+        "text": "禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐"
+      },
+      {
+        "order": 3,
+        "songId": "song_003",
+        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
+        "title": "自然白噪音",
+        "text": "自然白噪音 | 雨声、海浪、森林 - 专注工作背景音"
+      }
+    ]
+  },
+  "vital_overview_card": {
+    "heartRate": {
+      "value": 68,
+      "unit": "bpm",
+      "statusText": "steady rhythm",
+      "status": "normal"
+    },
+    "bloodPressure": {
+      "systolic": 115,
+      "diastolic": 75,
+      "unit": "mmHg",
+      "statusText": "Slightly high SBP",
+      "status": "warning",
+      "highlighted": true
+    },
+    "spo2": {
+      "value": 98,
+      "unit": "%",
+      "statusText": "Sufficient oxygen supply",
+      "status": "normal"
+    },
+    "poct": {
+      "value": 5.1,
+      "unit": "mmol/L",
+      "statusText": "Normal metabolism",
+      "status": "normal"
+    }
+  },
+  "sodium_bp_card": {
+    "intake": {
+      "value": 8,
+      "unit": "mg",
+      "label": "Sodium intake per meal",
+      "percent": 60,
+      "level": "danger"
+    },
+    "alert": {
+      "text": "BP sharp rise",
+      "label": "Sodium intake per meal",
+      "level": "danger"
+    }
+  }
+}

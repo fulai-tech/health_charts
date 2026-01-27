@@ -18,8 +18,13 @@ import { HRTrendWidgetPage } from '@/pages/widget/HRTrendWidgetPage'
 import { GlucosePage } from '@/pages/details/GlucosePage'
 import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
 
-// Music Widget Page
-import { MusicWidgetPage } from '@/pages/widget/MusicWidgetPage'
+// Dialog Widget Pages (moved to widget/dialog/)
+import { MusicWidgetPage } from '@/pages/widget/dialog/MusicWidgetPage'
+import { SleepScoreWidgetPage } from '@/pages/widget/dialog/SleepScoreWidgetPage'
+import { NutritionIntakeWidgetPage } from '@/pages/widget/dialog/NutritionIntakeWidgetPage'
+import { SleepFatigueComparisonWidgetPage } from '@/pages/widget/dialog/ComparisonWidgetPage'
+import { VitalOverviewWidgetPage } from '@/pages/widget/dialog/VitalOverviewWidgetPage'
+import { SodiumBPWidgetPage } from '@/pages/widget/dialog/SodiumBPWidgetPage'
 
 // Questionnaire Widget Page
 import { QuestionnaireWidgetPage } from '@/pages/widget/QuestionnaireWidgetPage'
@@ -140,8 +145,23 @@ function App() {
             {/* Glucose Widget */}
             <Route path="/widget/glucose/trend" element={<GlucoseTrendWidgetPage />} />
 
-            {/* Music Widget */}
-            <Route path="/widget/music" element={<MusicWidgetPage />} />
+            {/* Type 1 - Sleep Score Widget */}
+            <Route path="/widget/type-1" element={<SleepScoreWidgetPage />} />
+
+            {/* Type 2 - Sleep Fatigue Comparison Widget */}
+            <Route path="/widget/type-2" element={<SleepFatigueComparisonWidgetPage />} />
+
+            {/* Type 3 - Nutrition Intake Widget */}
+            <Route path="/widget/type-3" element={<NutritionIntakeWidgetPage />} />
+
+            {/* Type 4 - Music Widget */}
+            <Route path="/widget/type-4" element={<MusicWidgetPage />} />
+
+            {/* Type 5 - Vital Overview Widget */}
+            <Route path="/widget/type-5" element={<VitalOverviewWidgetPage />} />
+
+            {/* Type 6 - Sodium BP Widget */}
+            <Route path="/widget/type-6" element={<SodiumBPWidgetPage />} />
 
             {/* Questionnaire Widget */}
             <Route path="/widget/questionnaire" element={<QuestionnaireWidgetPage />} />
