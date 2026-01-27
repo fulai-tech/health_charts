@@ -24,6 +24,9 @@ import { MusicWidgetPage } from '@/pages/widget/MusicWidgetPage'
 // Questionnaire Widget Page
 import { QuestionnaireWidgetPage } from '@/pages/widget/QuestionnaireWidgetPage'
 
+// Weekly Health Score Widget Page
+import { WeeklyHealthScorePage } from '@/pages/widget/WeeklyHealthScorePage'
+
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
 
@@ -143,6 +146,9 @@ function App() {
             {/* Questionnaire Widget */}
             <Route path="/widget/questionnaire" element={<QuestionnaireWidgetPage />} />
 
+            {/* Weekly Health Score Widget */}
+            <Route path="/widget/weekly-health-score" element={<WeeklyHealthScorePage />} />
+            
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
