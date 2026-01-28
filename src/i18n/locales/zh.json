@@ -63,6 +63,7 @@
     "systolic": "收缩压",
     "diastolic": "舒张压",
     "sbp": "高压",
+    "sleepDuration": "睡眠时长",
     "dbp": "低压",
     "pulse": "脉搏",
     "spo2": "血氧",

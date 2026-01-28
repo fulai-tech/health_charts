@@ -63,6 +63,7 @@
     "systolic": "Systolic",
     "diastolic": "Diastolic",
     "sbp": "SBP",
+    "sleepDuration": "Sleep duration",
     "dbp": "DBP",
     "pulse": "Pulse",
     "spo2": "Blood Oxygen",

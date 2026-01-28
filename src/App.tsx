@@ -26,6 +26,12 @@ import { SleepFatigueComparisonWidgetPage } from '@/pages/widget/dialog/Comparis
 import { VitalOverviewWidgetPage } from '@/pages/widget/dialog/VitalOverviewWidgetPage'
 import { SodiumBPWidgetPage } from '@/pages/widget/dialog/SodiumBPWidgetPage'
 
+// Questionnaire Widget Page
+import { QuestionnaireWidgetPage } from '@/pages/widget/QuestionnaireWidgetPage'
+
+// Sleep BP Chart Widget Page
+import { SleepBPChartPage } from '@/pages/widget/SleepBPChartPage'
+
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
 
@@ -156,6 +162,12 @@ function App() {
 
             {/* Type 6 - Sodium BP Widget */}
             <Route path="/widget/type-6" element={<SodiumBPWidgetPage />} />
+
+            {/* Questionnaire Widget */}
+            <Route path="/widget/questionnaire" element={<QuestionnaireWidgetPage />} />
+
+            {/* Sleep BP Chart Widget */}
+            <Route path="/widget/sleep-bp-chart" element={<SleepBPChartPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
