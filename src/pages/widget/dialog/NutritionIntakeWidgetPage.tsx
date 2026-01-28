@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { WidgetLayout } from '@/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { AlertTriangle } from 'lucide-react'
+import { widgetBGColor } from '@/config/theme'
 
 // ============================================
 // 类型定义
@@ -262,7 +263,7 @@ export function NutritionIntakeWidgetPage() {
   }, [send, data])
 
   return (
-    <WidgetLayout className="bg-[#F5F5F5] p-0">
+    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md mx-auto p-4">
         {/* 营养摄入卡片 */}
         <div

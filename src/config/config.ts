@@ -8,7 +8,7 @@
  * Set to true to enable test features like manual login/logout
  * Set to false for production builds
  */
-export const IS_TEST_ENV = true
+export const IS_TEST_ENV = false
 
 /**
  * Token check interval in milliseconds (default: 1 minute)

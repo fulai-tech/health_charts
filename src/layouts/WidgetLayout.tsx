@@ -1,9 +1,11 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 interface WidgetLayoutProps {
   children: ReactNode
   className?: string
+  /** 可选：根节点样式，用于统一背景色等 */
+  style?: CSSProperties
 }
 
 /**
@@ -11,13 +13,14 @@ interface WidgetLayoutProps {
  * Used for routes like /widget/blood-pressure/trend
  * No padding, transparent background, centers content
  */
-export function WidgetLayout({ children, className }: WidgetLayoutProps) {
+export function WidgetLayout({ children, className, style }: WidgetLayoutProps) {
   return (
     <div
       className={cn(
         'min-h-screen bg-transparent flex items-center justify-center',
         className
       )}
+      style={style}
     >
       {children}
     </div>

@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import { WidgetLayout } from '@/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Music, Headphones, Sparkles } from 'lucide-react'
+import { widgetBGColor } from '@/config/theme'
 
 // ============================================
 // 业务层类型定义
@@ -314,15 +315,11 @@ export function MusicWidgetPage() {
   const defaultCards = useMemo(() => getOrderedCards(DEFAULT_DATA), [])
 
   return (
-    <WidgetLayout className="bg-gradient-to-br from-[#F8F6F5] via-[#F1EFEE] to-[#E8E4E1]">
+    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-full md:max-w-[720px] mx-auto p-4 sm:p-5 md:p-6">
         {/* 标题区域 */}
         <div className="flex items-center justify-between mb-5 md:mb-6">
           <div className="flex items-center gap-3">
-            {/* 装饰图标 */}
-            <div className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-pink-500 shadow-lg shadow-orange-200/50">
-              <Headphones className="w-5 h-5 md:w-6 md:h-6 text-white" />
-            </div>
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-tight">
                 Music Recommendations
@@ -343,7 +340,7 @@ export function MusicWidgetPage() {
 
         {/* 音乐卡片网格 - 两个并排，超过两个时横向滚动 */}
         {displayCards.length > 0 ? (
-          <div className="flex gap-2 md:gap-4 w-full overflow-x-auto py-2 px-1 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
+          <div className="flex gap-2 md:gap-4 w-full overflow-x-auto py-4 px-3 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
             {displayCards.map((card, index) => (
               <MusicCard
                 key={card.songId || card.order || index}

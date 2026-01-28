@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { WidgetLayout } from '@/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Moon } from 'lucide-react'
-import { VITAL_COLORS, UI_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 
 // ============================================
 // 类型定义
@@ -218,13 +218,8 @@ export function SleepScoreWidgetPage() {
   const deepDuration = formatDuration(data.deepSleepMinutes)
 
   return (
-    <WidgetLayout className="bg-[#F5F5F5] p-0">
+    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md mx-auto p-4">
-        {/* 标题 */}
-        <div className="mb-4">
-          <p className="text-base text-slate-800">This is your sleep report</p>
-        </div>
-
         {/* 睡眠评分卡片 */}
         <div
           className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90 shadow-sm"
@@ -265,7 +260,7 @@ export function SleepScoreWidgetPage() {
           </div>
 
           {/* 底部统计区域（白色背景） */}
-          <div className="relative flex justify-between items-end p-6 pt-4 bg-white rounded-b-3xl">
+          <div className="relative flex items-start justify-start gap-10 p-6 pt-4 bg-white rounded-b-3xl">
             <div className="absolute top-0 left-6 right-6 h-px bg-white/15" />
             <StatItem
               hours={totalDuration.hours}
@@ -273,12 +268,14 @@ export function SleepScoreWidgetPage() {
               label="Total sleep duration"
               align="left"
             />
-            <StatItem
-              hours={deepDuration.hours}
-              minutes={deepDuration.minutes}
-              label="Deep sleep duration"
-              align="right"
-            />
+            <div className="flex-1 ml-8">
+              <StatItem
+                hours={deepDuration.hours}
+                minutes={deepDuration.minutes}
+                label="Deep sleep duration"
+                align="left"
+              />
+            </div>
           </div>
         </div>
 

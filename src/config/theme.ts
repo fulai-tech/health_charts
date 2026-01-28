@@ -161,6 +161,13 @@ export const UI_COLORS = {
 } as const
 
 /**
+ * Widget 统一背景色
+ * 用于所有 widget 页面背景
+ * 设置为 transparent 以支持 Android WebView 透明穿透
+ */
+export const widgetBGColor = 'transparent' as const
+
+/**
  * 状态颜色配置
  * 各生命体征统计数据的正常/异常状态颜色
  */

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { WidgetLayout } from '@/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Heart, Droplets, Activity } from 'lucide-react'
-import { VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS, widgetBGColor } from '@/config/theme'
 
 // ============================================
 // 类型定义
@@ -440,7 +440,7 @@ export function VitalOverviewWidgetPage() {
   }, [send, data])
 
   return (
-    <WidgetLayout className="bg-[#F5F5F5] p-0">
+    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md mx-auto p-4">
         {/* 2x2 网格布局 */}
         <div className="grid grid-cols-2 gap-3">
