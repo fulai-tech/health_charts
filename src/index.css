@@ -308,3 +308,54 @@ body::-webkit-scrollbar {
   height: 0 !important;
   display: none !important;
 }
+
+/* 自定义样式类 */
+@layer components {
+
+  /* 自定义伪元素 */
+  .custom-before::before {
+    content: '';
+    position: absolute;
+    display: block;
+    border-left: 1rem solid transparent;
+    border-top: 2rem solid transparent;
+    border-right: 2rem solid #fff;
+    border-bottom: 2rem solid transparent;
+    top: 50%;
+    left: -2rem;
+    transform: translateY(-50%);
+  }
+
+  /* 自定义drop-shadow */
+  .custom-drop-shadow {
+    filter: drop-shadow(0 0 10px rgba(128, 128, 128, 0.3));
+  }
+
+  /* 自定义transition */
+  .transition-drop-shadow {
+    transition: filter 0.3s;
+  }
+
+  /* 自定义问题卡片内边距 */
+ 
+
+  /* 自定义圆角 */
+  .border-radius-25 {
+    border-radius: 1.5625rem;
+  }
+  /* 问卷选项卡片内边距 */
+  .option-card {
+    padding: 1.875rem; /* 上 右 下 左 */
+    border-radius: 3.75rem;
+  }
+
+  /* 选项内边距 */
+  .option-item-padding {
+    padding: 2.5rem 2.875rem;
+  }
+
+  /* 问卷按钮外边距 */
+  .question-btn-shadow {
+    box-shadow: 0px 8px 24px 0px rgba(0,0,0,0.06), 0px 2px 8px 0px rgba(0,0,0,0.04), inset 0px -1px 2px 1px rgba(0,0,0,0.05), inset 0px 1px 2px 1px #FFFFFF;
+  }
+}
