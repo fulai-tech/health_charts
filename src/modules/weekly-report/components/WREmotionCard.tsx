@@ -1,22 +1,12 @@
 /**
  * WREmotionCard - 周报情绪模块卡片
- * 显示情绪分数和情绪分布
+ * 显示情绪分数和情绪分布（复用 StackedBarChart）
  */
 
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts'
 import { UI_STYLES, UI_COLORS, EMOTION_COLORS } from '@/config/theme'
-import { useChartAnimation } from '@/hooks/useChartAnimation'
-import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { StackedBarChart, type BarLayer } from '@/components/charts/StackedBarChart'
 import type { EmotionAPI } from '../types'
 
 // 情绪颜色配置
@@ -76,8 +66,6 @@ const WREmotionCardInner = ({
   className = '',
 }: WREmotionCardProps) => {
   const { t } = useTranslation()
-  const animationProps = useChartAnimation()
-  const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
   if (!emotion.has_data) {
     return (
@@ -117,10 +105,16 @@ const WREmotionCardInner = ({
   const avgDist = emotion.avg_distribution
   const emotionColor = EMOTION_COLORS.primary
   const legends = [
-    { key: 'positive', label: t('weeklyReport.positive'), color: EMOTION_CHART_COLORS.positive },
-    { key: 'neutral', label: t('weeklyReport.neutral'), color: EMOTION_CHART_COLORS.neutral },
     { key: 'negative', label: t('weeklyReport.negative'), color: EMOTION_CHART_COLORS.negative },
+    { key: 'neutral', label: t('weeklyReport.neutral'), color: EMOTION_CHART_COLORS.neutral },
+    { key: 'positive', label: t('weeklyReport.positive'), color: EMOTION_CHART_COLORS.positive },
   ]
+
+  const layers: BarLayer[] = legends.map((l) => ({
+    dataKey: l.key,
+    color: l.color,
+    label: l.label,
+  }))
 
   return (
     <div
@@ -176,33 +170,20 @@ const WREmotionCardInner = ({
           </div>
         ))}
       </div>
-      <div ref={chartContainerRef} className="h-44 -mx-2 mb-4" data-swipe-ignore>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 100]}
-              tickFormatter={(v) => `${v}%`}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-            />
-            <Bar dataKey="negative" stackId="emotion" fill={EMOTION_CHART_COLORS.negative} barSize={12} {...animationProps} />
-            <Bar dataKey="neutral" stackId="emotion" fill={EMOTION_CHART_COLORS.neutral} barSize={12} {...animationProps} />
-            <Bar dataKey="positive" stackId="emotion" fill={EMOTION_CHART_COLORS.positive} barSize={12} radius={[3, 3, 0, 0]} {...animationProps} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      <StackedBarChart
+        data={chartData}
+        layers={layers}
+        xAxisKey="label"
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        yAxisDomain={[0, 100]}
+        yAxisFormatter={(v) => `${v}%`}
+        showLegend={false}
+        height={200}
+        barSize={12}
+        showRoundedTop
+        className="-mx-2 mb-4"
+        stackId="emotion"
+      />
 
       {/* Avg Mood Distribution 灰色盒子 */}
       <div

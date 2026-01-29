@@ -218,8 +218,8 @@ export function SleepScoreWidgetPage() {
   const deepDuration = formatDuration(data.deepSleepMinutes)
 
   return (
-    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md mx-auto p-4">
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+      <div className="w-full max-w-md p-4">
         {/* 睡眠评分卡片 */}
         <div
           className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90 shadow-sm"

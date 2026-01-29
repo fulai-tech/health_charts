@@ -1,34 +1,23 @@
 /**
  * WRNutritionCard - 周报营养模块卡片
- * 显示日均热量、餐食分布和每日热量柱状图
+ * 显示日均热量、餐食分布和每日热量柱状图（复用 StackedBarChart，与 SleepTrendyReportCard 一致）
  */
 
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Cell,
-  ReferenceLine,
-} from 'recharts'
 import { UI_STYLES, UI_COLORS } from '@/config/theme'
-import { useChartAnimation } from '@/hooks/useChartAnimation'
-import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { StackedBarChart, type BarLayer } from '@/components/charts/StackedBarChart'
 import type { NutritionAPI } from '../types'
-import { getNutritionStatusColor } from '../adapter'
 
-const NUTRITION_COLOR = '#10B981' // 营养卡片主题色（达标绿）
+// 营养卡片主题色（设计稿）
+const NUTRITION_BG = '#EFFBF0' // 浅绿背景
+const NUTRITION_TEXT = '#8DC77A' // 深绿文字/图标
 
-// 营养状态颜色
-const NUTRITION_STATUS_COLORS = {
-  on_target: '#10B981', // 绿色 - 达标
-  over: '#EF4444', // 红色 - 超标
-  under: '#F59E0B', // 橙色 - 不足
+// 柱状图三色：on_target 绿色、over 稍淡红、under 淡蓝
+const NUTRITION_STATUS_COLORS: Record<string, string> = {
+  on_target: '#8DC77A', // 绿色 - 达标
+  over: '#ff6262', // 稍淡的红色 - 超标
+  under: '#B8DBFF', // 淡蓝色 - 不足
 }
 
 interface WRNutritionCardProps {
@@ -45,10 +34,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3 min-w-[100px]">
       <p className="text-xs font-medium text-slate-600 mb-1">{label}</p>
       <p className="text-sm font-semibold text-slate-800">{data.calories} kcal</p>
-      <p
-        className="text-xs mt-1"
-        style={{ color: getNutritionStatusColor(data.status) }}
-      >
+      <p className="text-xs mt-1" style={{ color: NUTRITION_STATUS_COLORS[data.status] ?? '#64748b' }}>
         {data.statusLabel}
       </p>
     </div>
@@ -60,8 +46,6 @@ const WRNutritionCardInner = ({
   className = '',
 }: WRNutritionCardProps) => {
   const { t } = useTranslation()
-  const animationProps = useChartAnimation()
-  const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
   if (!nutrition.has_data) {
     return (
@@ -81,18 +65,29 @@ const WRNutritionCardInner = ({
     )
   }
 
-  // 转换图表数据
+  // 目标热量线（假设为3000 kcal）
+  const targetCalories = 3000
+
+  // 转换为堆叠柱状图数据（与 SleepTrendyReportCard 一致：按状态拆成三层）
   const chartData = nutrition.chart_data.map((item) => ({
     label: item.label,
     calories: item.calories,
     status: item.status,
     statusLabel: item.status_label,
+    on_target: item.status === 'on_target' ? item.calories : 0,
+    over: item.status === 'over' ? item.calories : 0,
+    under: item.status === 'under' ? item.calories : 0,
   }))
 
-  // 目标热量线（假设为3000 kcal）
-  const targetCalories = 3000
+  const maxCalories = Math.max(...chartData.map((d) => d.calories), targetCalories)
+  const yAxisMax = Math.ceil((maxCalories * 1.15) / 500) * 500
 
-  // 图例
+  const chartLayers: BarLayer[] = [
+    { dataKey: 'on_target', color: NUTRITION_STATUS_COLORS.on_target, label: t('weeklyReport.onTarget') },
+    { dataKey: 'over', color: NUTRITION_STATUS_COLORS.over, label: t('weeklyReport.over') },
+    { dataKey: 'under', color: NUTRITION_STATUS_COLORS.under, label: t('weeklyReport.under') },
+  ]
+
   const legends = [
     { status: 'on_target', label: t('weeklyReport.onTarget'), color: NUTRITION_STATUS_COLORS.on_target },
     { status: 'over', label: t('weeklyReport.over'), color: NUTRITION_STATUS_COLORS.over },
@@ -118,10 +113,11 @@ const WRNutritionCardInner = ({
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)' }}
+            style={{ backgroundColor: NUTRITION_BG }}
           >
-            <svg className="w-6 h-6" style={{ color: NUTRITION_COLOR }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            <svg className="w-6 h-6" style={{ color: NUTRITION_TEXT }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 2v20M8 12h8" />
+              <path d="M16 2v6c0 1.1.9 2 2 2h2v12h2V10h2c1.1 0 2-.9 2-2V2h-8z" />
             </svg>
           </div>
           <div>
@@ -132,8 +128,8 @@ const WRNutritionCardInner = ({
         <span
           className="text-xs font-medium px-3 py-1.5 rounded-full"
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.12)',
-            color: NUTRITION_COLOR,
+            backgroundColor: NUTRITION_BG,
+            color: NUTRITION_TEXT,
           }}
         >
           {t('weeklyReport.onTargetPercent', { percent: nutrition.compliance_rate })}
@@ -153,44 +149,24 @@ const WRNutritionCardInner = ({
           </div>
         ))}
       </div>
-      <div ref={chartContainerRef} className="h-44 -mx-2 mb-4" data-swipe-ignore>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 'auto']}
-              tickFormatter={(v) => `${v / 1000}k`}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-            />
-            <ReferenceLine
-              y={targetCalories}
-              stroke="#F59E0B"
-              strokeDasharray="4 4"
-              strokeWidth={1.5}
-            />
-            <Bar dataKey="calories" barSize={12} radius={[3, 3, 0, 0]} {...animationProps}>
-              {chartData.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={getNutritionStatusColor(entry.status)}
-                />
-              ))}
-            </Bar>
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      <StackedBarChart
+        data={chartData}
+        layers={chartLayers}
+        xAxisKey="label"
+        yAxisDomain={[0, yAxisMax]}
+        yAxisFormatter={(v) => `${v / 1000}k`}
+        legendShape="circle"
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        showLegend={false}
+        height={200}
+        barSize={12}
+        showRoundedTop
+        className="-mx-2 mb-4"
+        stackId="nutrition"
+        referenceLines={[
+          { y: targetCalories, stroke: '#F59E0B', strokeDasharray: '4 4' },
+        ]}
+      />
 
       {/* 餐食平均热量（灰色盒子） */}
       <div
@@ -199,11 +175,14 @@ const WRNutritionCardInner = ({
       >
         <div className="grid grid-cols-3 gap-3">
           {nutrition.meal_avg.map((meal) => (
-            <div key={meal.type} className="text-center p-2 rounded-xl bg-white/80">
-              <p className="text-xs text-slate-500 mb-1">
+            <div key={meal.type} className="text-left p-3 rounded-xl bg-white/80">
+              <p className="text-sm font-semibold text-slate-800 mb-1">
                 {meal.type === 'breakfast' ? t('weeklyReport.breakfast') : meal.type === 'lunch' ? t('weeklyReport.lunch') : t('weeklyReport.dinner')}
               </p>
-              <p className="text-sm font-semibold" style={{ color: NUTRITION_COLOR }}>{meal.avg_calories} kcal</p>
+              <p className="text-base font-semibold">
+                <span style={{ color: NUTRITION_TEXT }}>{meal.avg_calories}</span>
+                <span className="text-slate-600 ml-1">kcal</span>
+              </p>
             </div>
           ))}
         </div>
@@ -216,8 +195,8 @@ const WRNutritionCardInner = ({
           style={{ backgroundColor: UI_COLORS.background.gray }}
         >
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-            style={{ backgroundColor: NUTRITION_COLOR }}
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
+            style={{ backgroundColor: NUTRITION_BG, color: NUTRITION_TEXT }}
           >
             AI
           </div>

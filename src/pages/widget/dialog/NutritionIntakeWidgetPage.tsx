@@ -263,8 +263,8 @@ export function NutritionIntakeWidgetPage() {
   }, [send, data])
 
   return (
-    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md mx-auto p-4">
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+      <div className="w-full max-w-md p-4">
         {/* 营养摄入卡片 */}
         <div
           className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none shadow-sm transition-all duration-200 active:scale-[0.98] active:opacity-90"

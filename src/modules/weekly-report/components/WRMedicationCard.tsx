@@ -9,7 +9,9 @@ import { UI_STYLES, UI_COLORS } from '@/config/theme'
 import type { MedicationAPI } from '../types'
 import { getMedicationStatusColor } from '../adapter'
 
-const MED_COLOR = '#10B981' // 用药主题色（依从绿）
+// 用药卡片主题色（青绿色）
+const MED_BG = '#CCFBF1' // 浅青绿背景 teal-100
+const MED_COLOR = '#14B8A6' // 青绿色 teal-500
 
 interface WRMedicationCardProps {
   medication: MedicationAPI
@@ -65,7 +67,7 @@ const WRMedicationCardInner = ({
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)' }}
+            style={{ backgroundColor: MED_BG }}
           >
             <svg className="w-6 h-6" style={{ color: MED_COLOR }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
@@ -79,7 +81,7 @@ const WRMedicationCardInner = ({
         <span
           className="text-xs font-medium px-3 py-1.5 rounded-full"
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.12)',
+            backgroundColor: MED_BG,
             color: MED_COLOR,
           }}
         >
@@ -100,12 +102,26 @@ const WRMedicationCardInner = ({
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between mb-4">
-        {medication.chart_data.map((item) => (
-          <div key={item.date} className="flex flex-col items-center gap-2">
-            <span className="text-xs text-slate-500">{item.label}</span>
+      {/* 七日依从：标签行 + 圆圈行（虚线居中穿过）+ 数字行 */}
+      <div className="mb-4">
+        {/* 标签行 */}
+        <div className="flex items-center justify-between mb-2">
+          {medication.chart_data.map((item) => (
+            <span key={`label-${item.date}`} className="text-xs text-slate-500 w-8 text-center">
+              {item.label}
+            </span>
+          ))}
+        </div>
+        {/* 圆圈行：虚线在该行内垂直居中 */}
+        <div className="relative flex items-center justify-between h-8">
+          <div
+            className="absolute left-4 right-4 border-t border-dashed pointer-events-none border-slate-300 h-0"
+            style={{ top: 'calc(50% - 0.5px)', zIndex: 0 }}
+          />
+          {medication.chart_data.map((item) => (
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
+              key={item.date}
+              className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ring-2 ring-white relative z-10"
               style={{ backgroundColor: getMedicationStatusColor(item.status) }}
               title={item.status_label}
             >
@@ -125,11 +141,19 @@ const WRMedicationCardInner = ({
                 </svg>
               )}
             </div>
-            <span className="text-[10px] text-slate-400">
+          ))}
+        </div>
+        {/* 数字行 */}
+        <div className="flex items-center justify-between mt-2">
+          {medication.chart_data.map((item) => (
+            <span
+              key={`count-${item.date}`}
+              className="text-[10px] text-slate-400 w-8 text-center"
+            >
               {item.detail.taken}/{item.detail.total}
             </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* 用药 AI 洞察（内嵌在卡片底部） */}
@@ -139,8 +163,8 @@ const WRMedicationCardInner = ({
           style={{ backgroundColor: UI_COLORS.background.gray }}
         >
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-            style={{ backgroundColor: MED_COLOR }}
+            className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold"
+            style={{ backgroundColor: MED_BG, color: MED_COLOR }}
           >
             AI
           </div>

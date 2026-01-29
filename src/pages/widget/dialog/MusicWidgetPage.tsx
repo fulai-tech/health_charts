@@ -315,8 +315,8 @@ export function MusicWidgetPage() {
   const defaultCards = useMemo(() => getOrderedCards(DEFAULT_DATA), [])
 
   return (
-    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-full md:max-w-[720px] mx-auto p-4 sm:p-5 md:p-6">
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+      <div className="w-full max-w-full md:max-w-[720px] p-4 sm:p-5 md:p-6">
         {/* 标题区域 */}
         <div className="flex items-center justify-between mb-5 md:mb-6">
           <div className="flex items-center gap-3">

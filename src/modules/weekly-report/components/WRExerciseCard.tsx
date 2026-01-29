@@ -1,26 +1,19 @@
 /**
  * WRExerciseCard - 周报运动模块卡片
- * 显示运动完成率、主要运动类型和效率评估
+ * 显示运动完成率、主要运动类型和效率评估（柱状图复用 StackedBarChart，与 SleepTrendyReportCard 一致）
  */
 
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts'
 import { UI_STYLES, UI_COLORS } from '@/config/theme'
-import { useChartAnimation } from '@/hooks/useChartAnimation'
-import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { StackedBarChart, type BarLayer } from '@/components/charts/StackedBarChart'
 import type { ExerciseAPI } from '../types'
 
-// 运动主题色
-const EXERCISE_COLOR = '#22C55E' // 绿色
+// 运动主题色（设计稿：蓝色主题）
+const EXERCISE_BG = '#E3F1FF' // 徽章/图标圆/活动圆背景
+const EXERCISE_TEXT = '#8EC5FF' // 徽章文字
+const EXERCISE_ICON = '#4A90E2' // 图标等更深的蓝色
+const EXERCISE_CHART = '#B8DBFF' // 柱状图、AI 图标背景（较淡蓝）
 
 interface WRExerciseCardProps {
   exercise: ExerciseAPI
@@ -69,8 +62,10 @@ const WRExerciseCardInner = ({
   className = '',
 }: WRExerciseCardProps) => {
   const { t } = useTranslation()
-  const animationProps = useChartAnimation()
-  const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
+
+  const chartLayers: BarLayer[] = [
+    { dataKey: 'completion_rate', color: EXERCISE_CHART, label: t('weeklyReport.exerciseCompletion') },
+  ]
 
   if (!exercise.has_data) {
     return (
@@ -109,9 +104,9 @@ const WRExerciseCardInner = ({
         <div className="flex items-center gap-3">
           <div
             className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: `${EXERCISE_COLOR}20` }}
+            style={{ backgroundColor: EXERCISE_BG }}
           >
-            <svg className="w-6 h-6" style={{ color: EXERCISE_COLOR }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-6 h-6" style={{ color: EXERCISE_ICON }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
@@ -123,8 +118,8 @@ const WRExerciseCardInner = ({
         <span
           className="text-xs font-medium px-3 py-1.5 rounded-full"
           style={{
-            backgroundColor: `${EXERCISE_COLOR}20`,
-            color: EXERCISE_COLOR,
+            backgroundColor: EXERCISE_BG,
+            color: EXERCISE_TEXT,
           }}
         >
           {exercise.status.label}
@@ -140,10 +135,10 @@ const WRExerciseCardInner = ({
               <div
                 key={type.type}
                 className="flex items-center justify-center w-8 h-8 rounded-full"
-                style={{ backgroundColor: `${EXERCISE_COLOR}20` }}
+                style={{ backgroundColor: EXERCISE_BG }}
                 title={type.label}
               >
-                <span style={{ color: EXERCISE_COLOR }}>
+                <span style={{ color: EXERCISE_ICON }}>
                   <ExerciseIcon type={type.icon} />
                 </span>
               </div>
@@ -157,9 +152,11 @@ const WRExerciseCardInner = ({
               {exercise.efficiency.effect === 'bp_ideal' ? t('weeklyReport.bpIdeal') : exercise.efficiency.effect}
             </span>
             <span
-              className={`flex items-center text-xs ${
-                exercise.efficiency.change.direction === 'down' ? 'text-green-500' : 'text-red-500'
-              }`}
+              className="flex items-center text-xs"
+              style={{
+                color:
+                  exercise.efficiency.change.direction === 'down' ? EXERCISE_ICON : 'rgb(248, 113, 113)',
+              }}
             >
               {exercise.efficiency.change.direction === 'down' ? '↓' : '↑'}
               {exercise.efficiency.change.value}
@@ -168,38 +165,22 @@ const WRExerciseCardInner = ({
         </div>
       </div>
 
-      {/* 柱状图 */}
-      <div ref={chartContainerRef} className="h-36 -mx-2 mb-4" data-swipe-ignore>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={exercise.chart_data} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              domain={[0, 100]}
-              tickFormatter={(v) => `${v}%`}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-            />
-            <Bar
-              dataKey="completion_rate"
-              fill={EXERCISE_COLOR}
-              barSize={12}
-              radius={[3, 3, 0, 0]}
-              {...animationProps}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      {/* 柱状图（复用 StackedBarChart，与 SleepTrendyReportCard 一致） */}
+      <StackedBarChart
+        data={exercise.chart_data}
+        layers={chartLayers}
+        xAxisKey="label"
+        yAxisDomain={[0, 100]}
+        yAxisFormatter={(v) => `${v}%`}
+        legendShape="circle"
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        showLegend={false}
+        height={200}
+        barSize={12}
+        showRoundedTop
+        className="-mx-2 mb-4"
+        stackId="exercise"
+      />
 
       {/* 运动 AI 洞察（内嵌在卡片底部） */}
       {exercise.ai_insight && (
@@ -209,7 +190,7 @@ const WRExerciseCardInner = ({
         >
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-            style={{ backgroundColor: EXERCISE_COLOR }}
+            style={{ backgroundColor: EXERCISE_CHART }}
           >
             AI
           </div>

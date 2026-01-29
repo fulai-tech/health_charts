@@ -1,39 +1,20 @@
 /**
  * WRSleepCard - 周报睡眠模块卡片
- * 显示睡眠时长统计和睡眠结构堆叠柱状图
+ * 显示睡眠时长统计和睡眠结构堆叠柱状图（复用 StackedBarChart）
  */
 
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  ResponsiveContainer,
-  ComposedChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Rectangle,
-} from 'recharts'
 import { UI_STYLES, UI_COLORS, SLEEP_COLORS, VITAL_COLORS } from '@/config/theme'
-import { useChartAnimation } from '@/hooks/useChartAnimation'
-import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { StackedBarChart, type BarLayer } from '@/components/charts/StackedBarChart'
 import type { SleepAPI } from '../types'
+
 interface WRSleepCardProps {
   sleep: SleepAPI
   className?: string
 }
 
-/** 圆角顶部柱状图 */
-const RoundedTopBar = memo((props: any) => {
-  const { fill, x, y, width, height, dataKey } = props
-  const isTop = dataKey === 'awake'
-  const radius = isTop ? [3, 3, 0, 0] : [0, 0, 0, 0]
-  return <Rectangle {...props} radius={radius} />
-})
-RoundedTopBar.displayName = 'RoundedTopBar'
-
-/** 自定义Tooltip */
+/** 自定义 Tooltip */
 const CustomTooltip = ({ active, payload, label }: any) => {
   const { t } = useTranslation()
   if (!active || !payload?.length) return null
@@ -79,8 +60,6 @@ const WRSleepCardInner = ({
   className = '',
 }: WRSleepCardProps) => {
   const { t } = useTranslation()
-  const animationProps = useChartAnimation()
-  const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
 
   if (!sleep.has_data) {
     return (
@@ -123,13 +102,19 @@ const WRSleepCardInner = ({
     }
   })
 
-  // 图例配置
+  // 图例配置（与 StackedBarChart layers 顺序一致：自下而上 deep → light → rem → awake）
   const legends = [
     { key: 'deep', label: t('weeklyReport.sleepDeep'), color: SLEEP_COLORS.deep },
     { key: 'light', label: t('weeklyReport.sleepLight'), color: SLEEP_COLORS.light },
     { key: 'rem', label: t('weeklyReport.sleepRem'), color: SLEEP_COLORS.rem },
     { key: 'awake', label: t('weeklyReport.awake'), color: SLEEP_COLORS.awake },
   ]
+
+  const layers: BarLayer[] = legends.map((l) => ({
+    dataKey: l.key,
+    color: l.color,
+    label: l.label,
+  }))
 
   const sleepColor = VITAL_COLORS.sleep
 
@@ -188,41 +173,20 @@ const WRSleepCardInner = ({
         ))}
       </div>
 
-      {/* 堆叠柱状图 */}
-      <div ref={chartContainerRef} className="h-44 -mx-2 mb-4" data-swipe-ignore>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-            <XAxis
-              dataKey="label"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(v) => `${Math.floor(v / 60)}h`}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              wrapperStyle={{ outline: 'none', pointerEvents: 'none' }}
-            />
-            <Bar dataKey="deep" stackId="sleep" fill={SLEEP_COLORS.deep} barSize={12} {...animationProps} />
-            <Bar dataKey="light" stackId="sleep" fill={SLEEP_COLORS.light} barSize={12} {...animationProps} />
-            <Bar dataKey="rem" stackId="sleep" fill={SLEEP_COLORS.rem} barSize={12} {...animationProps} />
-            <Bar
-              dataKey="awake"
-              stackId="sleep"
-              fill={SLEEP_COLORS.awake}
-              barSize={12}
-              shape={<RoundedTopBar />}
-              {...animationProps}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+      {/* 堆叠柱状图（复用 StackedBarChart，仅点击弹出 tooltip） */}
+      <StackedBarChart
+        data={chartData}
+        layers={layers}
+        xAxisKey="label"
+        renderTooltip={(props) => <CustomTooltip {...props} />}
+        yAxisFormatter={(v) => `${Math.floor(Number(v) / 60)}h`}
+        showLegend={false}
+        height={250}
+        barSize={12}
+        showRoundedTop
+        className="-mx-2 mb-4"
+        stackId="sleep"
+      />
 
       {/* Avg Sleep Stages 横向进度条 + 图例（灰色背景盒子） */}
       <div

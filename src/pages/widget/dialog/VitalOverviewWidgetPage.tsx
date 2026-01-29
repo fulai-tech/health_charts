@@ -440,8 +440,8 @@ export function VitalOverviewWidgetPage() {
   }, [send, data])
 
   return (
-    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md mx-auto p-4">
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+      <div className="w-full max-w-md p-4">
         {/* 2x2 网格布局 */}
         <div className="grid grid-cols-2 gap-3">
           {/* 心率 */}

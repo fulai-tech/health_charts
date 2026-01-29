@@ -294,23 +294,15 @@ export function DateRangePicker({
   return (
     <div
       className={cn(
-        // Premium glassmorphic container with gradient border and hover effects
         'group relative inline-flex items-center gap-0.5 flex-shrink-0',
-        'bg-gradient-to-b from-white/90 to-white/70',
-        'backdrop-blur-xl backdrop-saturate-150',
-        'rounded-full p-1.5',
+        'bg-white rounded-full p-1.5',
         'shadow-[0_2px_16px_-4px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.02)]',
-        'border border-white/60',
+        'border border-slate-200',
         'transition-all duration-300 ease-out',
-        // Enhanced hover effects for entire component
-        'hover:bg-gradient-to-b hover:from-white hover:to-white/80',
-        // Deeper shadow when popover is open (selecting date)
         open && 'shadow-[0_12px_40px_-8px_rgba(0,0,0,0.25),0_0_0_1px_rgba(0,0,0,0.06)]',
         className
       )}
     >
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-500/[0.02] via-transparent to-purple-500/[0.02] pointer-events-none transition-opacity duration-300 group-hover:opacity-80" />
 
       {/* Previous Button */}
       <button
@@ -319,7 +311,7 @@ export function DateRangePicker({
           'relative z-10 flex items-center justify-center w-9 h-9 rounded-full',
           'transition-all duration-200 ease-out',
           'text-slate-500 hover:text-slate-700',
-          'hover:bg-white/80 hover:shadow-sm',
+          'hover:bg-slate-100 hover:shadow-sm',
           'active:scale-95 active:shadow-inner',
           'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
         )}
@@ -336,7 +328,7 @@ export function DateRangePicker({
               'relative z-10 flex items-center justify-center gap-2.5 px-4 py-2 mx-0.5 rounded-full',
               'w-[200px]', // Fixed width to prevent layout shift
               'transition-all duration-200 ease-out',
-              'hover:bg-white/95',
+              'hover:bg-slate-50',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
             )}
           >
@@ -362,13 +354,9 @@ export function DateRangePicker({
           <Popover.Content
             className={cn(
               'date-range-picker-popover',
-              'z-50 w-[340px]',
-              // Premium glassmorphic card
-              'bg-gradient-to-br from-white via-white to-slate-50/50',
-              'backdrop-blur-2xl backdrop-saturate-150',
-              'rounded-3xl p-5',
+              'z-50 w-[340px] bg-white rounded-3xl p-5',
               'shadow-[0_20px_60px_-12px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.03)]',
-              'border border-white/80'
+              'border border-slate-200'
             )}
             sideOffset={12}
             align="center"
@@ -377,8 +365,6 @@ export function DateRangePicker({
             onTouchMove={handleSwipeMove}
             onTouchEnd={handleSwipeEnd}
           >
-            {/* Decorative gradient background */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-blue-500/[0.03] via-transparent to-purple-500/[0.03] pointer-events-none" />
             
             {/* Calendar Header */}
             <div className="relative flex items-center justify-between mb-5">
@@ -515,7 +501,7 @@ export function DateRangePicker({
               ]
             : [
                 'text-slate-500 hover:text-slate-700',
-                'hover:bg-white/80 hover:shadow-sm',
+                'hover:bg-slate-100 hover:shadow-sm',
                 'active:scale-95 active:shadow-inner',
                 'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 focus-visible:ring-offset-1'
               ]

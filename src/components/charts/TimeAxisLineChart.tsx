@@ -19,6 +19,7 @@ import {
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
 import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { ChartClickTooltipOverlay } from './ChartClickTooltipOverlay'
 
 export interface TimeLineDataPoint {
     /** Time in format "HH:00" (e.g., "01:00", "14:00") */
@@ -103,7 +104,7 @@ const TimeAxisLineChartInner = ({
     }, [data, dataKey, yAxisDomain])
 
     return (
-        <div ref={chartContainerRef} className={`transform-gpu will-change-transform ${className}`} style={{ height }} data-swipe-ignore>
+        <div ref={chartContainerRef} className={`transform-gpu will-change-transform relative ${className}`} style={{ height }} data-swipe-ignore>
             <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                     data={data}
@@ -162,6 +163,7 @@ const TimeAxisLineChartInner = ({
                     />
                 </ComposedChart>
             </ResponsiveContainer>
+            <ChartClickTooltipOverlay containerRef={chartContainerRef} />
         </div>
     )
 }

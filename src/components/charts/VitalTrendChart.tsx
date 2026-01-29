@@ -17,7 +17,8 @@ import { useTranslation } from 'react-i18next'
 import { cn, getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
 import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
-import { useMemo, memo } from 'react'
+import { ChartClickTooltipOverlay } from './ChartClickTooltipOverlay'
+import { useMemo, memo, useEffect } from 'react'
 
 export type ChartType = 'line' | 'area' | 'range' | 'mixed'
 
@@ -307,11 +308,25 @@ export function VitalTrendChart({
     )
   }
 
+  // 点击图表外关闭 tooltip（与仅点击弹出配合）
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const wrapper = chartContainerRef.current?.querySelector('.recharts-wrapper')
+      if (wrapper && chartContainerRef.current && !chartContainerRef.current.contains(e.target as Node)) {
+        wrapper.dispatchEvent(new MouseEvent('mouseleave', { bubbles: false, view: window }))
+        wrapper.dispatchEvent(new MouseEvent('mouseout', { bubbles: true, relatedTarget: document.body, view: window }))
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
   return (
-    <div ref={chartContainerRef} className={cn('w-full transform-gpu will-change-transform', className)} style={{ height }} data-swipe-ignore>
+    <div ref={chartContainerRef} className={cn('w-full transform-gpu will-change-transform relative', className)} style={{ height }} data-swipe-ignore>
       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         {renderChart()}
       </ResponsiveContainer>
+      <ChartClickTooltipOverlay containerRef={chartContainerRef} />
     </div>
   )
 }

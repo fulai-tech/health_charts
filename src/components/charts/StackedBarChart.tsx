@@ -8,10 +8,12 @@ import {
     CartesianGrid,
     Tooltip,
     Rectangle,
+    ReferenceLine,
 } from 'recharts'
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
 import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { ChartClickTooltipOverlay } from './ChartClickTooltipOverlay'
 
 /**
  * Interface for a single bar layer in the stack
@@ -25,6 +27,13 @@ export interface BarLayer {
 /**
  * Props for StackedBarChart component
  */
+/** 可选参考线（如目标热量线） */
+export interface BarChartReferenceLine {
+    y: number
+    stroke?: string
+    strokeDasharray?: string
+}
+
 export interface StackedBarChartProps {
     data: Array<Record<string, any>> // Chart data
     layers: BarLayer[] // Stack configuration (from bottom to top)
@@ -39,6 +48,7 @@ export interface StackedBarChartProps {
     showRoundedTop?: boolean // Enable rounded top (default: true)
     stackId?: string // Stack identifier (default: 'stack')
     showLegend?: boolean // Show legend (default: true)
+    referenceLines?: BarChartReferenceLine[] // Optional reference lines (e.g. target calorie)
 }
 
 /**
@@ -94,12 +104,13 @@ const StackedBarChartInner = ({
     yAxisFormatter,
     legendShape = 'circle',
     barSize = 12,
-    height = 176, // h-44 equivalent
+    height = 200, // 图表区域高度（含点击遮罩）
     className = '',
     renderTooltip,
     showRoundedTop = true,
     stackId = 'stack',
     showLegend = true,
+    referenceLines,
 }: StackedBarChartProps) => {
     const animationProps = useChartAnimation()
     const chartContainerRef = useHideTooltipOnScroll<HTMLDivElement>()
@@ -124,8 +135,8 @@ const StackedBarChartInner = ({
                 </div>
             )}
 
-            {/* Chart */}
-            <div ref={chartContainerRef} style={{ height }} className="-mx-2" data-swipe-ignore>
+            {/* Chart：透明遮罩仅点击触发 tooltip */}
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2 relative" data-swipe-ignore>
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <ComposedChart
                         data={data}
@@ -153,6 +164,14 @@ const StackedBarChartInner = ({
                                 allowEscapeViewBox={{ x: false, y: false }}
                             />
                         )}
+                        {referenceLines?.map((ref, i) => (
+                            <ReferenceLine
+                                key={i}
+                                y={ref.y}
+                                stroke={ref.stroke ?? '#94a3b8'}
+                                strokeDasharray={ref.strokeDasharray}
+                            />
+                        ))}
                         {layers.map((layer) => (
                             <Bar
                                 key={layer.dataKey}
@@ -166,6 +185,7 @@ const StackedBarChartInner = ({
                         ))}
                     </ComposedChart>
                 </ResponsiveContainer>
+                <ChartClickTooltipOverlay containerRef={chartContainerRef} />
             </div>
         </div>
     )

@@ -220,8 +220,8 @@ export function SodiumBPWidgetPage() {
   }, [send, data.alert])
 
   return (
-    <WidgetLayout className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-lg mx-auto p-4">
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+      <div className="w-full max-w-lg p-4">
         {/* 对比卡片 */}
         <div className="relative flex items-stretch justify-center gap-3">
           {/* 左侧：环形进度条卡片 */}

@@ -13,6 +13,7 @@ import {
 import { getChartAnimationProps } from '@/lib/utils'
 import { useChartAnimation } from '@/hooks/useChartAnimation'
 import { useHideTooltipOnScroll } from '@/hooks/useHideTooltipOnScroll'
+import { ChartClickTooltipOverlay } from './ChartClickTooltipOverlay'
 
 /**
  * Legend indicator shape type
@@ -171,8 +172,8 @@ const TrendLineChartInner = ({
                 </div>
             )}
 
-            {/* Chart */}
-            <div ref={chartContainerRef} style={{ height }} className="-mx-2" data-swipe-ignore>
+            {/* Chart：透明遮罩拦截 hover/滑动，仅点击时派发 mousemove 触发 tooltip */}
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2 relative" data-swipe-ignore>
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <ComposedChart data={data} margin={chartMargin}>
                         {/* Gradient Definitions */}
@@ -258,6 +259,7 @@ const TrendLineChartInner = ({
                         ))}
                     </ComposedChart>
                 </ResponsiveContainer>
+                <ChartClickTooltipOverlay containerRef={chartContainerRef} />
             </div>
         </div>
     )

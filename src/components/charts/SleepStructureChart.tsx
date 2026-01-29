@@ -344,16 +344,27 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     return () => window.removeEventListener('scroll', handleScroll, true)
   }, [])
 
-  // 5. Interaction
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // 6. Click outside to close tooltip
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setTooltip(prev => ({ ...prev, visible: false }))
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  // 7. Interaction: 仅点击弹出 tooltip（不响应滑动/悬停）
+  const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current!.getBoundingClientRect()
-    const mouseX = e.clientX - rect.left
+    const clickX = e.clientX - rect.left
 
     const { width } = canvasSize
     const drawWidth = width - LAYOUT.paddingLeft - LAYOUT.paddingRight
     if (drawWidth <= 0 || !processedData.length) return
 
-    if (mouseX < LAYOUT.paddingLeft || mouseX > width - LAYOUT.paddingRight) {
+    if (clickX < LAYOUT.paddingLeft || clickX > width - LAYOUT.paddingRight) {
       setTooltip(prev => ({ ...prev, visible: false }))
       return
     }
@@ -361,10 +372,10 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     const minTime = processedData[0].startTime
     const totalTime = processedData[processedData.length - 1].endTime - minTime
 
-    const ratio = (mouseX - LAYOUT.paddingLeft) / drawWidth
-    const hoverTime = minTime + ratio * totalTime
+    const ratio = (clickX - LAYOUT.paddingLeft) / drawWidth
+    const clickTime = minTime + ratio * totalTime
 
-    const found = processedData.find(item => hoverTime >= item.startTime && hoverTime <= item.endTime)
+    const found = processedData.find(item => clickTime >= item.startTime && clickTime <= item.endTime)
 
     if (found) {
       setTooltip({
@@ -379,15 +390,12 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
     }
   }
 
-  const handleMouseLeave = () => setTooltip(prev => ({ ...prev, visible: false }))
-
   return (
     <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }} data-swipe-ignore>
       <canvas
         ref={canvasRef}
-        className="w-full h-full block"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        className="w-full h-full block cursor-pointer"
+        onClick={handleClick}
       />
 
       {typeof document !== 'undefined' && createPortal(
