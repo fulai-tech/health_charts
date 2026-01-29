@@ -1,5 +1,5 @@
-import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { HRTrendyReportCard, type HRDomainModel } from '@/features/heart-rate'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
+import { HRTrendyReportCard, type HRDomainModel } from '@/modules/features/heart-rate'
 import { parseUrlJsonData } from '@/lib/utils'
 
 /**

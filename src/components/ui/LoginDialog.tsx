@@ -1,7 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 import { API_CONFIG } from '@/config/api'
+
+/** Preset accounts for quick switch (username → password) */
+const PRESET_ACCOUNTS = [
+  { username: 'fulai001', password: '123456' },
+  { username: 'ceshi003', password: 'ceshi003' },
+] as const
+
+const DEFAULT_PRESET = PRESET_ACCOUNTS.find(
+  (a) => a.username === API_CONFIG.device.username
+) ?? PRESET_ACCOUNTS[0]
 
 interface LoginDialogProps {
   isOpen: boolean
@@ -13,7 +23,7 @@ interface LoginDialogProps {
 
 /**
  * LoginDialog - Modal dialog for user login
- * Shows default test credentials that can be modified
+ * Supports preset accounts dropdown for quick switch; credentials editable.
  */
 export function LoginDialog({
   isOpen,
@@ -23,8 +33,16 @@ export function LoginDialog({
   error = null,
 }: LoginDialogProps) {
   const { t } = useTranslation()
-  const [username, setUsername] = useState<string>(API_CONFIG.device.username)
-  const [password, setPassword] = useState<string>(API_CONFIG.device.password)
+  const [username, setUsername] = useState<string>(DEFAULT_PRESET.username)
+  const [password, setPassword] = useState<string>(DEFAULT_PRESET.password)
+  const [presetId, setPresetId] = useState<string>(DEFAULT_PRESET.username)
+
+  useEffect(() => {
+    if (!isOpen) return
+    setUsername(DEFAULT_PRESET.username)
+    setPassword(DEFAULT_PRESET.password)
+    setPresetId(DEFAULT_PRESET.username)
+  }, [isOpen])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,6 +53,26 @@ export function LoginDialog({
     if (e.target === e.currentTarget && !isLoading) {
       onClose()
     }
+  }
+
+  const handlePresetChange = (value: string) => {
+    setPresetId(value)
+    if (value === 'custom') return
+    const preset = PRESET_ACCOUNTS.find((a) => a.username === value)
+    if (preset) {
+      setUsername(preset.username)
+      setPassword(preset.password)
+    }
+  }
+
+  const handleUsernameChange = (value: string) => {
+    setUsername(value)
+    setPresetId('custom')
+  }
+
+  const handlePasswordChange = (value: string) => {
+    setPassword(value)
+    setPresetId('custom')
   }
 
   if (!isOpen) return null
@@ -71,6 +109,35 @@ export function LoginDialog({
             </div>
           )}
 
+          {/* Preset account dropdown */}
+          <div className="space-y-2">
+            <label
+              htmlFor="preset-account"
+              className="block text-sm font-medium text-slate-700"
+            >
+              {t('auth.presetAccount')}
+            </label>
+            <select
+              id="preset-account"
+              value={presetId}
+              onChange={(e) => handlePresetChange(e.target.value)}
+              disabled={isLoading}
+              className={cn(
+                'w-full px-3 py-2 text-sm border rounded-lg bg-white',
+                'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'disabled:bg-slate-50 disabled:text-slate-500',
+                'transition-colors'
+              )}
+            >
+              <option value="custom">{t('auth.customAccount')}</option>
+              {PRESET_ACCOUNTS.map((a) => (
+                <option key={a.username} value={a.username}>
+                  {a.username}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Username field */}
           <div className="space-y-2">
             <label
@@ -83,7 +150,7 @@ export function LoginDialog({
               id="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => handleUsernameChange(e.target.value)}
               disabled={isLoading}
               className={cn(
                 'w-full px-3 py-2 text-sm border rounded-lg',
@@ -108,7 +175,7 @@ export function LoginDialog({
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => handlePasswordChange(e.target.value)}
               disabled={isLoading}
               className={cn(
                 'w-full px-3 py-2 text-sm border rounded-lg',
@@ -121,17 +188,16 @@ export function LoginDialog({
             />
           </div>
 
-          {/* Test credentials hint */}
-          <div className="p-3 text-xs text-slate-500 bg-slate-50 rounded-lg">
-            <p className="font-medium text-slate-600 mb-1">
-              {t('auth.testCredentials')}
-            </p>
-            <p>
-              {t('auth.username')}: <code className="px-1 py-0.5 bg-slate-200 rounded">{API_CONFIG.device.username}</code>
-            </p>
-            <p>
-              {t('auth.password')}: <code className="px-1 py-0.5 bg-slate-200 rounded">{API_CONFIG.device.password}</code>
-            </p>
+          {/* Preset hint */}
+          <div className="p-3 text-xs text-slate-500 bg-slate-50 rounded-lg space-y-1">
+            <p className="font-medium text-slate-600">{t('auth.testCredentials')}</p>
+            {PRESET_ACCOUNTS.map((a) => (
+              <p key={a.username}>
+                <code className="px-1 py-0.5 bg-slate-200 rounded">{a.username}</code>
+                {' / '}
+                <code className="px-1 py-0.5 bg-slate-200 rounded">{a.password}</code>
+              </p>
+            ))}
           </div>
         </form>
 

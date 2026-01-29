@@ -13,7 +13,7 @@ import {
     SleepDistributionCard,
     SleepQualityIndicators,
     toggleDemoMode,
-} from '@/daily/sleep'
+} from '@/modules/daily/sleep'
 import { VITAL_COLORS, UI_STYLES } from '@/config/theme'
 import { useSleepDailyData } from '@/hooks/useDailyData'
 

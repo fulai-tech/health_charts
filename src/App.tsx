@@ -43,6 +43,9 @@ import EmotionDailyPage from '@/pages/daily/EmotionDailyPage'
 import SleepDailyPage from '@/pages/daily/SleepDailyPage'
 import HealthyDailyPage from '@/pages/daily/HealthyDailyPage'
 
+// Weekly Report Page
+import { WeeklyReportPage } from '@/pages/weekly/WeeklyReportPage'
+
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
@@ -122,6 +125,12 @@ function App() {
             <Route path="/daily/emotion" element={<EmotionDailyPage />} />
             <Route path="/daily/sleep" element={<SleepDailyPage />} />
             <Route path="/daily/healthy" element={<HealthyDailyPage />} />
+
+            {/* ============================================ */}
+            {/* Weekly Report Page */}
+            {/* ============================================ */}
+
+            <Route path="/weekly/report" element={<WeeklyReportPage />} />
 
             {/* ============================================ */}
             {/* Widget Routes (for iframe embedding) */}

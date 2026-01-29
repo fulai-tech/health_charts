@@ -4,6 +4,20 @@
  */
 
 /**
+ * Widget 统一背景色
+ * 用于所有 widget 页面背景
+ * 设置为 transparent 以支持 Android WebView 透明穿透
+ */
+export const widgetBGColor = 'transparent' as const
+
+/**
+ * 周报页面整页渐变背景（同一块背景，从上到下）
+ * 顶部 #FFE8C7，向下渐变到底部色
+ */
+export const weeklyReportGradientTop = '#FFE8C7'
+export const weeklyReportBGColor = '#F1F0EE'
+
+/**
  * 生命体征主题色
  * 用于各生命体征模块的主色调
  */
@@ -160,12 +174,6 @@ export const UI_COLORS = {
   },
 } as const
 
-/**
- * Widget 统一背景色
- * 用于所有 widget 页面背景
- * 设置为 transparent 以支持 Android WebView 透明穿透
- */
-export const widgetBGColor = 'transparent' as const
 
 /**
  * 状态颜色配置

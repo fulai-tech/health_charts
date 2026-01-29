@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { WidgetLayout } from '@/layouts/WidgetLayout'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Moon } from 'lucide-react'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'

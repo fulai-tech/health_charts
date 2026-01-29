@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
-import { WidgetLayout } from '@/layouts/WidgetLayout'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Heart, Droplets, Activity } from 'lucide-react'
-import { VITAL_COLORS, widgetBGColor } from '@/config/theme'
+import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 
 // ============================================
 // 类型定义
@@ -353,7 +353,7 @@ function VitalCard({
   return (
     <div
       className="bg-white rounded-2xl p-4 cursor-pointer select-none transition-all duration-200 border-2 overflow-hidden"
-      style={{ borderColor: isActive ? themeColor : 'transparent' }}
+      style={{ borderColor: isActive ? themeColor : UI_COLORS.card.border }}
       onClick={onClick}
     >
       {/* 标题行 */}

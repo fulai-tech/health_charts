@@ -17,8 +17,8 @@ import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/common/DateRangePicker'
 import { useUrlConfig } from '@/hooks/useUrlParams'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
-import { useHealthyData } from '@/features/healthy/api'
-import type { TimePeriod, ViewType } from '@/features/healthy/types'
+import { useHealthyData } from '@/modules/features/healthy/api'
+import type { TimePeriod, ViewType } from '@/modules/features/healthy/types'
 import { UI_STYLES } from '@/config/theme'
 
 // Import all healthy components
@@ -32,7 +32,7 @@ import {
   HealthEmotionCard,
   HealthNutritionCard,
   DemoModeToggle,
-} from '@/features/healthy'
+} from '@/modules/features/healthy'
 
 /**
  * Format Date to YYYY-MM-DD string

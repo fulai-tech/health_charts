@@ -1,5 +1,5 @@
-import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { BPTrendyReportCard, type BPDomainModel } from '@/features/blood-pressure'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
+import { BPTrendyReportCard, type BPDomainModel } from '@/modules/features/blood-pressure'
 import { parseUrlJsonData } from '@/lib/utils'
 
 /**

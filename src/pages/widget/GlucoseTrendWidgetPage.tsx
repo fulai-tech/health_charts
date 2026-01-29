@@ -1,5 +1,5 @@
-import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { GlucoseTrendyReportCard, type GlucoseDomainModel } from '@/features/glucose'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
+import { GlucoseTrendyReportCard, type GlucoseDomainModel } from '@/modules/features/glucose'
 import { parseUrlJsonData } from '@/lib/utils'
 
 /**

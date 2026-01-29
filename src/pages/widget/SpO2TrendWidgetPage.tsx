@@ -1,5 +1,5 @@
-import { WidgetLayout } from '@/layouts/WidgetLayout'
-import { SpO2TrendyReportCard, type SpO2DomainModel } from '@/features/spo2'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
+import { SpO2TrendyReportCard, type SpO2DomainModel } from '@/modules/features/spo2'
 import { parseUrlJsonData } from '@/lib/utils'
 
 /**

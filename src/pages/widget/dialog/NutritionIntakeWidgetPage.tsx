@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { WidgetLayout } from '@/layouts/WidgetLayout'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { AlertTriangle } from 'lucide-react'
 import { widgetBGColor } from '@/config/theme'

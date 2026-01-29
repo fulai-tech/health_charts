@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { WidgetLayout } from '@/layouts/WidgetLayout'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
 import { VITAL_COLORS, widgetBGColor } from '@/config/theme'

@@ -9,18 +9,18 @@ import { API_CONFIG } from '@/config/api'
 import type {
     HealthyDailyApiResponse,
     HealthyDailyData,
-} from '@/daily/healthy/types'
+} from '@/modules/daily/healthy/types'
 import type {
     EmotionDailyApiResponse,
     EmotionDailyData,
-} from '@/daily/emotion/types'
+} from '@/modules/daily/emotion/types'
 import type {
     SleepDailyApiResponse,
     SleepDailyData,
-} from '@/daily/sleep/types'
-import { adaptHealthyDailyData } from '@/daily/healthy/adapter'
-import { adaptEmotionDailyData } from '@/daily/emotion/adapter'
-import { adaptSleepDailyData } from '@/daily/sleep/adapter'
+} from '@/modules/daily/sleep/types'
+import { adaptHealthyDailyData } from '@/modules/daily/healthy/adapter'
+import { adaptEmotionDailyData } from '@/modules/daily/emotion/adapter'
+import { adaptSleepDailyData } from '@/modules/daily/sleep/adapter'
 
 /** Daily dimension types */
 export type DailyDimensionType = 'fitness' | 'emotion' | 'sleep'

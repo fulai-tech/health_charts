@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { AuthButton } from '@/components/ui/AuthButton'
 import { useTokenValidation } from '@/hooks/useTokenValidation'
@@ -37,6 +37,12 @@ export function HomePage() {
         { path: '/daily/healthy', label: t('nav.healthyDailyReport'), icon: LayoutDashboard, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha },
         { path: '/daily/emotion', label: t('nav.emotionDailyReport'), icon: Smile, color: EMOTION_COLORS.primary, alphaColor: EMOTION_COLORS.alpha },
         { path: '/daily/sleep', label: t('nav.sleepDailyReport'), icon: Moon, color: VITAL_COLORS.sleep, alphaColor: VITAL_COLORS_ALPHA.sleep },
+      ],
+    },
+    {
+      category: '周报',
+      items: [
+        { path: '/weekly/report', label: '我的周报', icon: Calendar, color: '#F97316', alphaColor: 'rgba(249, 115, 22, 0.125)' },
       ],
     },
     {

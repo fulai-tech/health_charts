@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
-import { WidgetLayout } from '@/layouts/WidgetLayout'
+import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Music, Headphones, Sparkles } from 'lucide-react'
 import { widgetBGColor } from '@/config/theme'
@@ -169,7 +169,7 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
   return (
     <div
       className="group relative overflow-hidden bg-white/60 backdrop-blur-sm flex-shrink-0 w-[calc(50%-0.5rem)] min-w-[calc(50%-0.5rem)] md:w-[calc(50%-1rem)] md:min-w-[calc(50%-1rem)] snap-start cursor-pointer rounded-2xl md:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-1"
-      style={{ aspectRatio: '3/4' }}
+      style={{ aspectRatio: '4/5' }}
       onClick={onCardClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}

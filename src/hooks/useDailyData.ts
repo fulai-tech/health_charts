@@ -11,15 +11,15 @@ import {
     fetchEmotionDaily,
     fetchSleepDaily,
 } from '@/services/api/dailyService'
-import type { HealthyDailyData } from '@/daily/healthy/types'
-import type { EmotionDailyData } from '@/daily/emotion/types'
-import type { SleepDailyData } from '@/daily/sleep/types'
-import { generateHealthyDemoData } from '@/daily/healthy/adapter'
-import { generateEmotionDemoData } from '@/daily/emotion/adapter'
-import { generateSleepDemoData } from '@/daily/sleep/adapter'
-import { isDemoModeEnabled as isHealthyDemoEnabled } from '@/daily/healthy/demoMode'
-import { isDemoModeEnabled as isEmotionDemoEnabled } from '@/daily/emotion/demoMode'
-import { isDemoModeEnabled as isSleepDemoEnabled } from '@/daily/sleep/demoMode'
+import type { HealthyDailyData } from '@/modules/daily/healthy/types'
+import type { EmotionDailyData } from '@/modules/daily/emotion/types'
+import type { SleepDailyData } from '@/modules/daily/sleep/types'
+import { generateHealthyDemoData } from '@/modules/daily/healthy/adapter'
+import { generateEmotionDemoData } from '@/modules/daily/emotion/adapter'
+import { generateSleepDemoData } from '@/modules/daily/sleep/adapter'
+import { isDemoModeEnabled as isHealthyDemoEnabled } from '@/modules/daily/healthy/demoMode'
+import { isDemoModeEnabled as isEmotionDemoEnabled } from '@/modules/daily/emotion/demoMode'
+import { isDemoModeEnabled as isSleepDemoEnabled } from '@/modules/daily/sleep/demoMode'
 
 /**
  * Query keys for daily data

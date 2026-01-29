@@ -12,7 +12,7 @@ import {
     EmotionProportionChart,
     EmotionDistributionCard,
     toggleDemoMode,
-} from '@/daily/emotion'
+} from '@/modules/daily/emotion'
 import { EMOTION_COLORS, UI_STYLES } from '@/config/theme'
 import { useEmotionDailyData } from '@/hooks/useDailyData'
 

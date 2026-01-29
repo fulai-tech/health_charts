@@ -14,7 +14,7 @@ import {
     BloodGlucoseIndicatorCard,
     BloodOxygenIndicatorCard,
     toggleDemoMode,
-} from '@/daily/healthy'
+} from '@/modules/daily/healthy'
 import { HEALTH_COLORS, UI_STYLES } from '@/config/theme'
 import { useHealthyDailyData } from '@/hooks/useDailyData'
 

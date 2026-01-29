@@ -23,6 +23,9 @@ export const API_CONFIG = {
     dimensionDetail: '/current-status/dimension-detail',
   },
 
+  /** Weekly report endpoint */
+  weeklyReport: '/trend-review/weekly-report',
+
   /** Device credentials (for demo/testing) */
   device: {
     username: 'ceshi003',
