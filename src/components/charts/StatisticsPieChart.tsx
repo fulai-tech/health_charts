@@ -96,7 +96,7 @@ const StatisticsPieChartInner = ({
   }
 
   return (
-    <div className={`relative transform-gpu will-change-transform ${widthClass} ${heightClass} ${className}`} data-swipe-ignore>
+    <div className={`relative transform-gpu will-change-transform ${widthClass} ${heightClass} ${className}`}>
       <ResponsiveContainer width="100%" height="100%">
         <PieChart margin={{ top: 0, right: 0, bottom: 0, left: 0 }}>
           <Pie

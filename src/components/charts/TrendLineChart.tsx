@@ -173,7 +173,7 @@ const TrendLineChartInner = ({
             )}
 
             {/* Chart：透明遮罩拦截 hover/滑动，仅点击时派发 mousemove 触发 tooltip */}
-            <div ref={chartContainerRef} style={{ height }} className="-mx-2 relative" data-swipe-ignore>
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2 relative">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <ComposedChart data={data} margin={chartMargin}>
                         {/* Gradient Definitions */}

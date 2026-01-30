@@ -203,7 +203,7 @@ export function SuperPanel() {
                             'absolute bottom-16 right-0 w-72',
                             'bg-white rounded-2xl shadow-2xl border border-slate-200',
                             'transform transition-all duration-200 origin-bottom-right',
-                            'animate-in fade-in slide-in-from-bottom-4'
+                            'animate-fade-in'
                         )}
                     >
                         {/* Header */}

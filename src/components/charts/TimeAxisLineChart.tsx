@@ -104,7 +104,7 @@ const TimeAxisLineChartInner = ({
     }, [data, dataKey, yAxisDomain])
 
     return (
-        <div ref={chartContainerRef} className={`transform-gpu will-change-transform relative ${className}`} style={{ height }} data-swipe-ignore>
+        <div ref={chartContainerRef} className={`transform-gpu will-change-transform relative ${className}`} style={{ height }}>
             <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
                     data={data}

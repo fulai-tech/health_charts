@@ -2,20 +2,6 @@
 
 基于 React + Vite + TypeScript 的高性能健康数据可视化组件库。
 专为移动端 WebView 嵌入设计，支持组件级独立渲染。
-![#w40%#c#s](./images/1.png)
-
-
-```mermaid
-flowchart TB
-Start --> Stop
-```
-
-2323232
-
-| 232 |   |   |
-| --- | --- | --- |
-| 22332 | 232323 | 23232aaa |
-
 
 ## 🏗 技术栈
 | 分类 | 技术 | 版本 |
@@ -52,14 +38,10 @@ yarn b
 
 ```
 
-你好你好。好的，测试一下。不错。
-
 ## 🧩 架构说明
 
-本项目采用 **Widget-First** 架构，支持两种渲染模式：
-$$
-x^2 - 5x + 6 = 0
-$$
+本项目采用 **Widget-First** 架构，支持两种渲染模式。
+
 ### 路由策略
 
 | 路由模式 | 示例路径 | 布局组件 | 用途 |
@@ -67,6 +49,7 @@ $$
 | 完整页面 | `/details/blood-pressure` | `MainLayout` | 独立访问，包含完整导航 |
 | Widget 模式 | `/widget/blood-pressure/trend` | `WidgetLayout` | 原生 App iframe 嵌入，透明背景 |
 | 日报页面 | `/daily/emotion` | 自定义 | 日报详情展示 |
+| 周报页面 | `/weekly/report` | 自定义 | 周度健康报告 |
 
 ### URL 参数支持
 
@@ -78,12 +61,12 @@ $$
 ```
 src/
 ├── App.tsx                 # 应用入口，路由配置
-├── main.tsx               # React 挂载点
-├── index.css              # 全局样式（Tailwind）
+├── main.tsx                # React 挂载点
+├── index.css               # 全局样式（Tailwind）
 │
-├── pages/                 # 页面组件（路由级别）
-│   ├── HomePage.tsx       # 首页/导航页
-│   ├── details/           # 详情页面 (/details/:type)
+├── pages/                  # 页面组件（路由级别）
+│   ├── HomePage.tsx        # 首页/导航页
+│   ├── details/            # 详情页面 (/details/:type)
 │   │   ├── BloodPressurePage.tsx   # 血压详情
 │   │   ├── SpO2Page.tsx            # 血氧详情
 │   │   ├── HeartRatePage.tsx       # 心率详情
@@ -92,39 +75,57 @@ src/
 │   │   ├── EmotionPage.tsx         # 情绪详情
 │   │   ├── NutritionPage.tsx       # 营养详情
 │   │   └── HealthyPage.tsx         # 综合健康
-│   ├── widget/            # Widget 页面 (/widget/:type/:component)
+│   ├── widget/             # Widget 页面 (/widget/:type/:component)
 │   │   ├── BPTrendWidgetPage.tsx
 │   │   ├── SpO2TrendWidgetPage.tsx
 │   │   ├── HRTrendWidgetPage.tsx
-│   │   └── GlucoseTrendWidgetPage.tsx
-│   └── daily/             # 日报页面 (/daily/:type)
-│       ├── EmotionDailyPage.tsx
-│       ├── SleepDailyPage.tsx
-│       └── HealthyDailyPage.tsx
+│   │   ├── GlucoseTrendWidgetPage.tsx
+│   │   └── dialog/         # 对话/弹窗类 Widget
+│   │       ├── SleepScoreWidgetPage.tsx      # type-1 睡眠评分
+│   │       ├── ComparisonWidgetPage.tsx      # type-2 睡眠疲劳对比
+│   │       ├── NutritionIntakeWidgetPage.tsx # type-3 营养摄入
+│   │       ├── MusicWidgetPage.tsx           # type-4 音乐
+│   │       ├── VitalOverviewWidgetPage.tsx   # type-5 生命体征概览
+│   │       └── SodiumBPWidgetPage.tsx        # type-6 钠与血压
+│   ├── daily/              # 日报页面 (/daily/:type)
+│   │   ├── EmotionDailyPage.tsx
+│   │   ├── SleepDailyPage.tsx
+│   │   └── HealthyDailyPage.tsx
+│   └── weekly/             # 周报页面 (/weekly/report)
+│       └── WeeklyReportPage.tsx    # 周度健康报告
 │
-├── features/              # 业务功能模块（按领域划分）
-│   ├── blood-pressure/    # 血压模块
-│   │   ├── api.ts         # API 请求（TanStack Query hooks）
-│   │   ├── adapter.ts     # 数据适配器（后端→前端转换）
-│   │   ├── types.ts       # TypeScript 类型定义
-│   │   ├── index.ts       # 模块导出
-│   │   └── components/    # 功能组件
-│   │       ├── BPStatisticsCard.tsx    # 统计卡片
-│   │       ├── BPTrendyReportCard.tsx  # 趋势报告
-│   │       ├── BPWeeklyOverviewCard.tsx # 周概览
-│   │       ├── BPCompareCard.tsx       # 对比卡片
-│   │       ├── BPSummaryCard.tsx       # 摘要卡片
-│   │       └── BPTrendWidget.tsx       # Widget 组件
-│   ├── spo2/              # 血氧模块
-│   ├── heart-rate/        # 心率模块
-│   ├── glucose/           # 血糖模块
-│   ├── sleep/             # 睡眠模块
-│   ├── emotion/           # 情绪模块
-│   ├── nutrition/         # 营养模块
-│   └── healthy/           # 综合健康模块
+├── modules/                # 业务功能模块（按领域/场景划分）
+│   ├── features/           # 详情页功能模块
+│   │   ├── blood-pressure/ # 血压
+│   │   ├── spo2/           # 血氧
+│   │   ├── heart-rate/     # 心率
+│   │   ├── glucose/        # 血糖
+│   │   ├── sleep/          # 睡眠
+│   │   ├── emotion/        # 情绪
+│   │   ├── nutrition/      # 营养
+│   │   └── healthy/        # 综合健康
+│   ├── daily/              # 日报模块
+│   │   ├── emotion/        # 情绪日报
+│   │   ├── sleep/          # 睡眠日报
+│   │   └── healthy/        # 健康日报
+│   └── weekly-report/      # 周报模块
+│       ├── api.ts          # 周报 API（TanStack Query）
+│       ├── adapter.ts      # 数据适配器
+│       ├── types.ts
+│       └── components/     # 周报卡片组件
+│           ├── WROverallScoreCard.tsx      # 综合评分
+│           ├── WRVitalSignsTrendCard.tsx   # 生命体征趋势
+│           ├── WRAIInsightCard.tsx         # AI 洞察
+│           ├── WRSleepCard.tsx             # 睡眠
+│           ├── WREmotionCard.tsx            # 情绪
+│           ├── WRMedicationCard.tsx        # 用药
+│           ├── WRNutritionCard.tsx         # 营养
+│           ├── WRExerciseCard.tsx          # 运动
+│           ├── WRCorrelationCard.tsx        # 相关性
+│           └── WRSuggestionCard.tsx        # 建议
 │
-├── components/            # 通用组件
-│   ├── charts/            # 纯图表组件（无业务逻辑）
+├── components/             # 通用组件
+│   ├── charts/             # 纯图表组件（无业务逻辑）
 │   │   ├── VitalTrendChart.tsx       # 生命体征趋势图
 │   │   ├── TrendLineChart.tsx        # 折线趋势图
 │   │   ├── TimeAxisLineChart.tsx     # 时间轴折线图
@@ -132,8 +133,11 @@ src/
 │   │   ├── StackedBarChart.tsx       # 堆叠柱状图
 │   │   ├── StatisticsPieChart.tsx    # 统计饼图
 │   │   ├── SleepStructureChart.tsx   # 睡眠结构图
+│   │   ├── MiniGaugeChart.tsx        # 迷你仪表盘
+│   │   ├── ChartClickTooltipOverlay.tsx  # 图表点击提示层
 │   │   └── LazyChart.tsx             # 懒加载图表包装
-│   ├── common/            # 通用业务组件
+│   ├── common/             # 通用业务组件
+│   │   ├── SuperPanel.tsx            # 测试环境浮动控制面板
 │   │   ├── DistributionCard.tsx      # 分布卡片
 │   │   ├── TargetBarChartCard.tsx    # 目标柱状图卡片
 │   │   ├── DataAnalysisCard.tsx      # 数据分析卡片
@@ -145,53 +149,59 @@ src/
 │   │   ├── EmptyState.tsx            # 空状态组件
 │   │   ├── EmotionFaceIcon.tsx       # 情绪表情图标
 │   │   └── SuggestionsList.tsx       # 建议列表
-│   └── ui/                # 基础 UI 组件
-│       ├── card.tsx                  # 卡片组件
-│       ├── DisclaimerBox.tsx         # 免责声明
-│       └── swipeable-carousel.tsx    # 滑动轮播
+│   ├── layouts/            # 布局组件
+│   │   ├── MainLayout.tsx  # 主布局（含导航）
+│   │   └── WidgetLayout.tsx # Widget 布局（透明背景）
+│   └── ui/                 # 基础 UI 组件
+│       ├── card.tsx
+│       ├── DisclaimerBox.tsx
+│       ├── swipeable-carousel.tsx
+│       ├── AuthButton.tsx
+│       └── LoginDialog.tsx
 │
-├── layouts/               # 布局组件
-│   ├── MainLayout.tsx     # 主布局（含导航）
-│   └── WidgetLayout.tsx   # Widget 布局（透明背景）
+├── services/               # 服务层
+│   ├── api/                # API 相关
+│   │   ├── client.ts
+│   │   ├── trendService.ts
+│   │   ├── dailyService.ts
+│   │   ├── types.ts
+│   │   └── index.ts
+│   └── auth/               # 认证相关
+│       ├── authService.ts
+│       ├── types.ts
+│       └── index.ts
 │
-├── services/              # 服务层
-│   ├── api/               # API 相关
-│   │   ├── client.ts      # Axios 实例配置
-│   │   ├── trendService.ts # 趋势数据服务
-│   │   ├── dailyService.ts # 日报数据服务
-│   │   ├── types.ts       # API 类型定义
-│   │   └── index.ts       # 导出
-│   └── auth/              # 认证相关
-│       ├── authService.ts # 认证服务
-│       ├── types.ts       # 认证类型
-│       └── index.ts       # 导出
-│
-├── hooks/                 # 自定义 Hooks
+├── hooks/                  # 自定义 Hooks
 │   ├── useUrlParams.ts         # URL 参数解析
 │   ├── useWeekNavigation.ts    # 周导航逻辑
 │   ├── useSwipeNavigation.ts   # 滑动导航
 │   ├── useDailyData.ts         # 日数据获取
 │   ├── useChartAnimation.ts    # 图表动画
 │   ├── useInViewport.ts        # 视口检测
-│   └── useHideTooltipOnScroll.ts # 滚动隐藏提示
+│   ├── useHideTooltipOnScroll.ts # 滚动隐藏提示
+│   ├── useNativeBridge.ts      # 原生桥接
+│   ├── useTheme.ts             # 主题
+│   └── useTokenValidation.ts   # Token 校验
 │
-├── config/                # 配置文件
-│   ├── theme.ts           # 主题配置（颜色常量）
-│   ├── chartConfig.ts     # 图表配置
-│   └── api.ts             # API 配置
+├── config/                 # 配置文件
+│   ├── theme.ts            # 主题配置（颜色常量）
+│   ├── chartConfig.ts      # 图表配置
+│   ├── api.ts              # API 配置
+│   ├── config.ts           # 通用配置
+│   └── globalDemoMode.ts   # 全局演示模式
 │
-├── lib/                   # 工具函数
-│   ├── utils.ts           # 通用工具（cn 函数等）
-│   ├── dateUtils.ts       # 日期处理工具
-│   └── usePrefetchData.ts # 预加载数据
+├── lib/                    # 工具函数
+│   ├── utils.ts
+│   ├── dateUtils.ts
+│   └── usePrefetchData.ts
 │
-├── i18n/                  # 国际化
-│   ├── index.ts           # i18next 配置
-│   └── locales/           # 语言文件
-│       ├── zh.json        # 中文
-│       └── en.json        # 英文
+├── i18n/                   # 国际化
+│   ├── index.ts
+│   └── locales/
+│       ├── zh.json
+│       └── en.json
 │
-└── assets/                # 静态资源
+└── assets/                 # 静态资源
 ```
 
 ## 🎨 设计规范
@@ -217,6 +227,7 @@ src/
 | sleep | Sleep |
 | emotion | Emotion |
 | nutrition | Nutrition |
+| weekly-report | WR |
 
 ### 颜色配置
 
@@ -290,12 +301,12 @@ return adaptBPData(response.data) // 转换为前端模型
 
 ### 新增功能模块
 
-1. 在 `src/features/` 下创建模块目录
+1. 在 `src/modules/` 下创建模块目录（如 `features/xxx`、`daily/xxx` 或独立模块如 `weekly-report`）
 2. 创建 `types.ts` 定义 TypeScript 接口
 3. 创建 `adapter.ts` 实现数据转换
 4. 创建 `api.ts` 封装 TanStack Query hooks
-5. 在 `components/` 下创建功能组件
-6. 在 `src/pages/` 下创建页面组件
+5. 在模块内 `components/` 下创建功能组件
+6. 在 `src/pages/` 下创建对应页面（如 `details/`、`daily/`、`weekly/`、`widget/`）
 7. 在 `App.tsx` 中添加路由
 
 ### 代码规范

@@ -136,7 +136,7 @@ const StackedBarChartInner = ({
             )}
 
             {/* Chart：透明遮罩仅点击触发 tooltip */}
-            <div ref={chartContainerRef} style={{ height }} className="-mx-2 relative" data-swipe-ignore>
+            <div ref={chartContainerRef} style={{ height }} className="-mx-2 relative">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                     <ComposedChart
                         data={data}

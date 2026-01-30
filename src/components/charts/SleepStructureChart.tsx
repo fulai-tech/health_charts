@@ -391,7 +391,7 @@ export const SleepStructureChart: React.FC<SleepStructureChartProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }} data-swipe-ignore>
+    <div ref={containerRef} className={`relative w-full transform-gpu will-change-transform ${className}`} style={{ height: `${height}px` }}>
       <canvas
         ref={canvasRef}
         className="w-full h-full block cursor-pointer"
