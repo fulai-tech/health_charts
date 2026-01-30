@@ -1,16 +1,11 @@
-/**
- * WeeklyReportPage - 周报主页面
- * 展示用户的周度健康报告
- */
-
 import { memo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { UI_STYLES, weeklyReportBGColor, weeklyReportGradientTop } from '@/config/theme'
-import { useWeeklyReportData } from '@/modules/weekly-report'
+import { weeklyReportBGColor, weeklyReportGradientTop } from '@/config/theme'
+import { useWeeklyReportData, getDefaultWeeklyReportData } from '@/modules/weekly-report'
 import {
   WROverallScoreCard,
   WRVitalSignsTrendCard,
-  WRAIInsightCard,
   WRSleepCard,
   WREmotionCard,
   WRMedicationCard,
@@ -20,29 +15,45 @@ import {
   WRSuggestionCard,
 } from '@/modules/weekly-report/components'
 
-// 页面背景配置：顶部渐变区域（到第一个卡片底部），之后纯色背景
+// ================== 核心视觉与动画配置 ==================
+
+/** * 1. 动画持续时间 (Duration)
+ * 控制光流下的速度。数值越大，流动越慢。
+ * 建议范围: 1s (轻快) - 2.5s (优雅沉稳)
+ */
+const FLOW_DURATION = '1.5s'
+
+/** * 2. 动画速度曲线 (Timing Function)
+ * 控制光流动的“节奏感”或“加速度”。
+ * * 推荐选项:
+ * - 'cubic-bezier(0.25, 0.46, 0.45, 0.94)': [默认] 类似水流/光晕，中间快，收尾平滑缓慢
+ * - 'ease-out': 也就是一开始快，越往下越慢
+ * - 'linear': 绝对匀速（通常比较生硬，不推荐）
+ * - 'ease-in-out': 两头慢中间快
+ */
+const FLOW_TIMING_FUNCTION = 'ease-out'
+
+/** 页面基础背景色（灰色） */
+const BASE_GRAY = '#F3F1EF'
+
+// ======================================================
+
+// 定义动画关键帧：背景位置从底部(100%)移动到顶部(0%)
+const ANIMATION_STYLES = `
+  @keyframes lightPropagate {
+    0% {
+      background-position: 0% 100%;
+    }
+    100% {
+      background-position: 0% 0%;
+    }
+  }
+`
+
 const PAGE_THEME = {
-  // 顶部渐变：从 FFE8C7 渐变到 F3F1EF
-  topGradient: `linear-gradient(180deg, ${weeklyReportGradientTop} 0%, #F3F1EF 100%)`,
-  // 下方纯色背景
-  bottomBg: '#F3F1EF',
-  // 骨架屏/错误页使用的渐变（完整页面）
+  bottomBg: BASE_GRAY,
   fullPageGradient: `linear-gradient(180deg, ${weeklyReportGradientTop} 0%, ${weeklyReportBGColor} 100%)`,
 }
-
-/** 页面骨架屏 */
-const PageSkeleton = () => (
-  <div className="min-h-screen" style={{ background: PAGE_THEME.fullPageGradient }}>
-    <div className="max-w-xl mx-auto px-4 py-6 space-y-4">
-      {/* 头部骨架 */}
-      <div className="h-24 bg-slate-200 rounded-3xl animate-pulse" />
-      {/* 卡片骨架 */}
-      {[...Array(5)].map((_, i) => (
-        <div key={i} className="h-48 bg-slate-200 rounded-3xl animate-pulse" />
-      ))}
-    </div>
-  </div>
-)
 
 /** 错误状态 */
 const ErrorState = ({ message }: { message: string }) => {
@@ -82,23 +93,19 @@ const NoReportState = () => {
 
 const WeeklyReportPageInner = () => {
   const { t } = useTranslation()
-  const { data, isLoading, error } = useWeeklyReportData()
+  const [searchParams] = useSearchParams()
+  const reportId = searchParams.get('rid') ?? undefined
+  const { data, isLoading, error } = useWeeklyReportData(reportId)
 
-  // 加载状态
-  if (isLoading) {
-    return <PageSkeleton />
-  }
-
-  // 错误状态
   if (error) {
     return <ErrorState message={(error as Error).message || t('weeklyReport.requestFailed')} />
   }
 
-  // 无数据状态
-  if (!data || !data.report_exists) {
+  if (!isLoading && (!data || !data.report_exists)) {
     return <NoReportState />
   }
 
+  const displayData = data ?? getDefaultWeeklyReportData()
   const {
     week_range,
     overall,
@@ -110,14 +117,31 @@ const WeeklyReportPageInner = () => {
     exercise,
     correlation,
     improvement_suggestions,
-  } = data
+  } = displayData
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: PAGE_THEME.bottomBg }}>
-      {/* 顶部渐变区域：包含 header 和第一个卡片 */}
-      <div style={{ background: PAGE_THEME.topGradient, paddingBottom: '16px' }}>
-        {/* 页面头部：与下方卡片同 max-width 左对齐 */}
-        <header className="pt-12 pb-8">
+      {/* 注入 CSS 动画样式 */}
+      <style>{ANIMATION_STYLES}</style>
+
+      {/* 顶部渐变区域：光传播动效 */}
+      <div
+        className="relative"
+        style={{
+          // 背景构建：0-50%是最终色(橘->灰)，50-100%是初始色(纯灰)
+          backgroundImage: `linear-gradient(180deg, 
+            ${weeklyReportGradientTop} 0%, 
+            ${BASE_GRAY} 50%, 
+            ${BASE_GRAY} 100%
+          )`,
+          backgroundSize: '100% 200%', 
+          paddingBottom: '16px',
+          // === 这里使用了顶部的配置常量 ===
+          animation: `lightPropagate ${FLOW_DURATION} ${FLOW_TIMING_FUNCTION} forwards`,
+        }}
+      >
+        {/* 页面头部 */}
+        <header className="pt-12 pb-8 relative z-[1]">
           <div className="max-w-xl mx-auto px-4">
             <h1 className="text-3xl font-bold text-slate-900">
               {t('weeklyReport.pageTitle')}
@@ -128,36 +152,21 @@ const WeeklyReportPageInner = () => {
           </div>
         </header>
 
-        {/* 第一个卡片：总体评分 */}
-        <div className="max-w-xl mx-auto px-4 -mt-4">
+        {/* 第一个卡片 */}
+        <div className="max-w-xl mx-auto px-4 -mt-4 relative z-[1]">
           <WROverallScoreCard overall={overall} weekRange={week_range} />
         </div>
       </div>
 
-      {/* 主要内容区域：纯色背景 */}
+      {/* 主要内容区域 */}
       <main className="max-w-xl mx-auto px-4 pb-8 space-y-4">
-        {/* 生命体征趋势 */}
         <WRVitalSignsTrendCard vitalSigns={vital_signs} />
-
-        {/* 睡眠卡片（含睡眠 AI 洞察） */}
         <WRSleepCard sleep={sleep} />
-
-        {/* 情绪卡片（含情绪 AI 洞察） */}
         <WREmotionCard emotion={emotion} />
-
-        {/* 用药卡片（含用药 AI 洞察） */}
         <WRMedicationCard medication={medication} />
-
-        {/* 营养卡片（含营养 AI 洞察） */}
         <WRNutritionCard nutrition={nutrition} />
-
-        {/* 运动卡片（含运动 AI 洞察） */}
         <WRExerciseCard exercise={exercise} />
-
-        {/* 健康关联分析 */}
         <WRCorrelationCard correlations={correlation} />
-
-        {/* 改善建议 */}
         <WRSuggestionCard suggestions={improvement_suggestions} />
       </main>
     </div>

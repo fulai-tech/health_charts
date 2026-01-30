@@ -427,6 +427,7 @@
     "requestFailed": "Request failed, please try again later",
     "noReport": "No report yet",
     "noReportHint": "This week's health report is being generated. Please check back later.",
+    "noReportId": "Please provide rid in the URL (?rid=)",
     "weekSummary": "Week {{week}} summary",
     "overallScore": "Weekly Health Score",
     "points": "pts",

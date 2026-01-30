@@ -427,6 +427,7 @@
     "requestFailed": "请求失败，请稍后重试",
     "noReport": "暂无周报",
     "noReportHint": "本周的健康报告正在生成中，请稍后再来查看",
+    "noReportId": "请在 URL 中提供 rid 参数 (?rid=)",
     "weekSummary": "第 {{week}} 周",
     "overallScore": "周健康评分",
     "points": "分",

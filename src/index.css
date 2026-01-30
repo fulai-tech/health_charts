@@ -159,6 +159,17 @@ html {
   animation: shimmer 1.5s infinite;
 }
 
+/* 周报顶部渐变「从上到下流动」动效：遮罩从满高收缩到 0，露出渐变 */
+@keyframes gradient-flow-reveal {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0);
+  }
+}
+
+
 /* Chart tooltip styles */
 .recharts-tooltip-wrapper {
   outline: none;

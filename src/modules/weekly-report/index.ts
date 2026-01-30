@@ -11,3 +11,6 @@ export { useWeeklyReportData, weeklyReportQueryKeys, getWeeklyReport } from './a
 
 // Adapters
 export * from './adapter'
+
+// 缺省数据（首屏占位，无骨架屏）
+export { getDefaultWeeklyReportData } from './defaultData'
