@@ -98,3 +98,4 @@ fun onJsMessage(payload: String) {
 ## 4. 后续扩展
 
 新增事件时：**先在「0. 已登记事件」登记事件名**，再在「3. data 含义表」补充该事件的 data 含义。解析方式不变（始终先解析 `event`、`data`、`pageId`、`timestamp`，再按 event 使用 data）。
+
