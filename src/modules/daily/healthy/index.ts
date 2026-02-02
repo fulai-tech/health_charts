@@ -13,12 +13,8 @@ export {
     isDataEmpty,
 } from './adapter'
 
-// API
-export {
-    fetchHealthyDailyData,
-    isEmptyValue,
-    hasIndicatorData,
-} from './api'
+// API helpers (actual request via @/services/api/dailyService)
+export { isEmptyValue, hasIndicatorData } from './api'
 
 // Demo Mode
 export {

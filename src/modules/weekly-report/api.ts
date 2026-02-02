@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/services/api'
 import { API_CONFIG } from '@/config/api'
+import { normalizeWeeklyReportData } from './adapter'
 import type { WeeklyReportDataAPI, WeeklyReportResponseAPI } from './types'
 
 /**
@@ -26,7 +27,7 @@ export async function getWeeklyReport(reportId?: string | null): Promise<WeeklyR
     throw new Error(response.data.msg || 'Failed to fetch weekly report')
   }
 
-  return response.data.data
+  return normalizeWeeklyReportData(response.data.data)
 }
 
 /**

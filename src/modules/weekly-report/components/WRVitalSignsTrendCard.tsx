@@ -32,52 +32,52 @@ const WRVitalSignsTrendCardInner = ({
   className = '',
 }: WRVitalSignsTrendCardProps) => {
   const { t } = useTranslation()
+  // 数据已由 adapter.normalizeWeeklyReportData 保证结构完整，仅做缺省时占位
+  if (!vitalSigns) return null
+
+  const hr = vitalSigns.heart_rate
+  const bp = vitalSigns.blood_pressure
+  const spo2 = vitalSigns.blood_oxygen
+  const glu = vitalSigns.blood_glucose
 
   return (
     <div className={`grid grid-cols-2 gap-4 ${className}`}>
-      {/* 心率卡片 */}
       <VitalMiniCard
         title={t('weeklyReport.avgHR')}
-        value={vitalSigns.heart_rate.avg}
-        unit={vitalSigns.heart_rate.unit}
-        status={vitalSigns.heart_rate.status.label}
+        value={hr.avg}
+        unit={hr.unit}
+        status={hr.status.label}
         color={LINE_COLORS.heartRate}
-        trendData={vitalSigns.heart_rate.trend_chart.map(item => ({ value: item.value }))}
+        trendData={hr.trend_chart.map(item => ({ value: item.value }))}
       />
-
-      {/* 血压卡片 */}
       <VitalMiniCard
         title={t('weeklyReport.avgBP')}
-        value={`${vitalSigns.blood_pressure.systolic_avg}/${vitalSigns.blood_pressure.diastolic_avg}`}
-        unit={vitalSigns.blood_pressure.unit}
-        status={vitalSigns.blood_pressure.status.label}
+        value={`${bp.systolic_avg}/${bp.diastolic_avg}`}
+        unit={bp.unit}
+        status={bp.status.label}
         color={LINE_COLORS.systolic}
         secondaryColor={LINE_COLORS.diastolic}
-        trendData={vitalSigns.blood_pressure.trend_chart.map(item => ({
+        trendData={bp.trend_chart.map(item => ({
           systolic: item.value.systolic,
           diastolic: item.value.diastolic,
         }))}
         isBP
       />
-
-      {/* 血氧卡片 */}
       <VitalMiniCard
         title={t('weeklyReport.avgSpO2')}
-        value={vitalSigns.blood_oxygen.avg}
-        unit={vitalSigns.blood_oxygen.unit}
-        status={vitalSigns.blood_oxygen.status.label}
+        value={spo2.avg}
+        unit={spo2.unit}
+        status={spo2.status.label}
         color={LINE_COLORS.bloodOxygen}
-        trendData={vitalSigns.blood_oxygen.trend_chart.map(item => ({ value: item.value }))}
+        trendData={spo2.trend_chart.map(item => ({ value: item.value }))}
       />
-
-      {/* 血糖卡片 */}
       <VitalMiniCard
         title={t('weeklyReport.avgGlucose')}
-        value={vitalSigns.blood_glucose.avg}
-        unit={vitalSigns.blood_glucose.unit}
-        status={vitalSigns.blood_glucose.status.label}
+        value={glu.avg}
+        unit={glu.unit}
+        status={glu.status.label}
         color={LINE_COLORS.bloodGlucose}
-        trendData={vitalSigns.blood_glucose.trend_chart.map(item => ({ value: item.value }))}
+        trendData={glu.trend_chart.map(item => ({ value: item.value }))}
       />
     </div>
   )
@@ -129,9 +129,9 @@ const VitalMiniCard = memo(({
         <span className="text-sm text-slate-500 ml-1.5">{unit}</span>
       </div>
 
-      {/* 简化趋势图 */}
-      <div className="h-16 -mx-2 mb-3">
-        <ResponsiveContainer width="100%" height="100%">
+      {/* 简化趋势图：minHeight 避免切换用户时 ResponsiveContainer 计算出 width/height -1 */}
+      <div className="h-16 min-h-[4rem] -mx-2 mb-3">
+        <ResponsiveContainer width="100%" height="100%" minHeight={64}>
           <LineChart data={trendData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
             {isBP ? (
               <>

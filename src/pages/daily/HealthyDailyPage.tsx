@@ -3,7 +3,7 @@
  */
 
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router-dom'
+import { useQueryParams } from '@/hooks/useUrlParams'
 import { Activity } from 'lucide-react'
 import { DailyScoreCard } from '@/components/common/DailyScoreCard'
 import { AIInsightsCard } from '@/components/common/AIInsightsCard'
@@ -20,8 +20,8 @@ import { useHealthyDailyData } from '@/hooks/useDailyData'
 
 export default function HealthyDailyPage() {
     const { t } = useTranslation()
-    const [searchParams] = useSearchParams()
-    const dateParam = searchParams.get('date')
+    const params = useQueryParams()
+    const dateParam = params.date
     const { data, isLoading, isError, error, isDemoMode, invalidate } = useHealthyDailyData(dateParam || undefined)
 
     const handleToggleDemo = () => {

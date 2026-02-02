@@ -127,6 +127,32 @@ class AuthService {
   }
 
   /**
+   * Set access token from URL (?token=xxx).
+   * Treats as new login state; only updates when URL token differs from current.
+   * User identity: deviceId 'Android', username 'Android'.
+   */
+  setTokenFromUrl(token: string): void {
+    if (!token || token === this.getAccessToken()) {
+      return
+    }
+    const now = Date.now()
+    this.authData = {
+      user: {
+        id: 'android',
+        type: 'device',
+        deviceId: 'Android',
+        permissions: [],
+      },
+      accessToken: token,
+      refreshToken: token,
+      accessTokenExpiry: now + TOKEN_EXPIRY.accessToken,
+      refreshTokenExpiry: now + TOKEN_EXPIRY.refreshToken,
+      username: 'Android',
+    }
+    this.saveToStorage()
+  }
+
+  /**
    * Logout - clear all auth data
    */
   logout(): void {

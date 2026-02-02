@@ -1,9 +1,9 @@
 import { memo } from 'react'
-import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQueryParams } from '@/hooks/useUrlParams'
 import { weeklyReportBGColor, weeklyReportGradientTop } from '@/config/theme'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
-import { useWeeklyReportData, getDefaultWeeklyReportData } from '@/modules/weekly-report'
+import { useWeeklyReportData, getDefaultWeeklyReportData, normalizeWeeklyReportData } from '@/modules/weekly-report'
 import {
   WROverallScoreCard,
   WRVitalSignsTrendCard,
@@ -94,8 +94,8 @@ const NoReportState = () => {
 
 const WeeklyReportPageInner = () => {
   const { t } = useTranslation()
-  const [searchParams] = useSearchParams()
-  const reportId = searchParams.get('rid') ?? undefined
+  const params = useQueryParams()
+  const reportId = params.rid ?? undefined
   const { data, isLoading, error } = useWeeklyReportData(reportId)
   const { send } = useNativeBridge({
     pageId: 'weekly-report',
@@ -111,7 +111,7 @@ const WeeklyReportPageInner = () => {
     return <NoReportState />
   }
 
-  const displayData = data ?? getDefaultWeeklyReportData()
+  const displayData = normalizeWeeklyReportData(data ?? getDefaultWeeklyReportData())
   const {
     week_range,
     overall,

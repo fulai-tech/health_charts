@@ -1,12 +1,48 @@
 /**
  * Weekly Report Adapter
- * 数据适配层 - 将API数据转换为前端展示格式
+ * 数据适配层 - 将API数据转换为前端展示格式，并对 API 返回做空值保护
  */
 
 import type {
   WeeklyReportDataAPI,
   CombinedTrendDataPoint,
 } from './types'
+import { getDefaultWeeklyReportData } from './defaultData'
+
+/**
+ * 深合并：用 default 补全 raw 中的 null/undefined，保证返回结构完整
+ * 用于切换用户、接口缺字段时避免组件读到 null 报错
+ */
+function mergeWithDefaults<T>(defaultVal: T, raw: T | null | undefined): T {
+  if (raw === null || raw === undefined) return defaultVal
+  if (typeof defaultVal !== 'object' || defaultVal === null) {
+    return (raw as T) ?? defaultVal
+  }
+  if (Array.isArray(defaultVal)) {
+    return (Array.isArray(raw) ? raw : defaultVal) as T
+  }
+  const out = { ...defaultVal } as T
+  for (const key of Object.keys(defaultVal) as (keyof T)[]) {
+    const d = (defaultVal as Record<string, unknown>)[key as string]
+    const r = (raw as Record<string, unknown>)[key as string]
+    ;(out as Record<string, unknown>)[key as string] = mergeWithDefaults(
+      d as T[keyof T],
+      r as T[keyof T] | null | undefined
+    )
+  }
+  return out
+}
+
+/**
+ * 周报数据空值保护：用默认结构补全 API 返回中的 null/undefined
+ * 在 api 层或页面层调用，保证传给子组件的数据结构完整（如 status 必有 label）
+ */
+export function normalizeWeeklyReportData(
+  raw: Partial<WeeklyReportDataAPI> | null | undefined
+): WeeklyReportDataAPI {
+  const defaultData = getDefaultWeeklyReportData()
+  return mergeWithDefaults(defaultData, raw ?? {}) as WeeklyReportDataAPI
+}
 
 /**
  * 将生命体征趋势数据合并为组合图表数据

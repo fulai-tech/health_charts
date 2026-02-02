@@ -52,8 +52,17 @@ import { HomePage } from '@/pages/HomePage'
 // Super Panel (Test Environment Only)
 import { SuperPanel } from '@/components/common/SuperPanel'
 
+// Page init: token/lang from URL, runs once per URL change for all routes
+import { useInitPage } from '@/lib/initPage'
+
 // Initialize i18n
 import '@/i18n'
+
+/** Runs initPage (token + lang from URL) for every route; only re-runs when URL params change. */
+function InitPageRunner() {
+  useInitPage()
+  return null
+}
 
 // Create Query Client
 const queryClient = new QueryClient({
@@ -83,6 +92,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <HashRouter>
+        <InitPageRunner />
         {/* Super Panel - Floating control panel for test environment */}
         <SuperPanel />
         <Suspense fallback={<PageLoading />}>
