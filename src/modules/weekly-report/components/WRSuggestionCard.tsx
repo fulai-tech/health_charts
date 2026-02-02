@@ -11,11 +11,14 @@ import type { ImprovementSuggestionAPI } from '../types'
 interface WRSuggestionCardProps {
   suggestions: ImprovementSuggestionAPI[]
   className?: string
+  /** 点击「查看详情」时回调（用于原生桥接跳转对应界面） */
+  onViewDetails?: (suggestion: ImprovementSuggestionAPI, index: number) => void
 }
 
 const WRSuggestionCardInner = ({
   suggestions,
   className = '',
+  onViewDetails,
 }: WRSuggestionCardProps) => {
   const { t } = useTranslation()
   if (!suggestions || suggestions.length === 0) {
@@ -31,7 +34,7 @@ const WRSuggestionCardInner = ({
 
       {/* 建议列表：每项为独立白卡，按设计稿布局 */}
       <div className="space-y-4">
-        {suggestions.map((suggestion) => (
+        {suggestions.map((suggestion, index) => (
           <div
             key={suggestion.suggestion_id}
             className="bg-white"
@@ -73,6 +76,7 @@ const WRSuggestionCardInner = ({
               <button
                 type="button"
                 className="text-sm font-medium text-orange-600 hover:text-orange-700 focus:outline-none focus:underline"
+                onClick={() => onViewDetails?.(suggestion, index)}
               >
                 {t('weeklyReport.viewDetails')} &gt;
               </button>

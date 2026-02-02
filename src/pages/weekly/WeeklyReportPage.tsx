@@ -2,6 +2,7 @@ import { memo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { weeklyReportBGColor, weeklyReportGradientTop } from '@/config/theme'
+import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWeeklyReportData, getDefaultWeeklyReportData } from '@/modules/weekly-report'
 import {
   WROverallScoreCard,
@@ -96,6 +97,11 @@ const WeeklyReportPageInner = () => {
   const [searchParams] = useSearchParams()
   const reportId = searchParams.get('rid') ?? undefined
   const { data, isLoading, error } = useWeeklyReportData(reportId)
+  const { send } = useNativeBridge({
+    pageId: 'weekly-report',
+    pageName: 'WeeklyReport',
+    debug: import.meta.env.DEV,
+  })
 
   if (error) {
     return <ErrorState message={(error as Error).message || t('weeklyReport.requestFailed')} />
@@ -167,7 +173,12 @@ const WeeklyReportPageInner = () => {
         <WRNutritionCard nutrition={nutrition} />
         <WRExerciseCard exercise={exercise} />
         <WRCorrelationCard correlations={correlation} />
-        <WRSuggestionCard suggestions={improvement_suggestions} />
+        <WRSuggestionCard
+          suggestions={improvement_suggestions}
+          onViewDetails={(suggestion) => {
+            send('click-weekly-suggestion', { suggestionId: suggestion.suggestion_id })
+          }}
+        />
       </main>
     </div>
   )
