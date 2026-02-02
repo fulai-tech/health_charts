@@ -186,7 +186,7 @@ function AlertCard({ text, level }: AlertCardProps) {
  * - Android -> JS: NativeBridge.receiveData(jsonString)
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
-export function SodiumBPWidgetPage() {
+export function Type6_SodiumBPWidgetPage() {
   const [data, setData] = useState<SodiumBPData>(DEFAULT_DATA)
 
   // 初始化原生桥接

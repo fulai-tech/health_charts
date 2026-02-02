@@ -3,14 +3,6 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Heart, Droplets, Activity } from 'lucide-react'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
-import {
-  WeeklyHealthScoreWidget,
-  type WeeklyHealthScoreData,
-} from '@/pages/widget/dialog/WeeklyHealthScoreWidget'
-import {
-  SbpSleepTrendChartWidget,
-  type SbpSleepTrendChartData,
-} from '@/pages/widget/dialog/SbpSleepTrendChartWidget'
 
 // ============================================
 // 类型定义
@@ -138,35 +130,6 @@ const DEFAULT_DATA: VitalOverviewData = {
   },
 }
 
-const DEFAULT_WEEKLY_HEALTH_SCORE: WeeklyHealthScoreData = {
-  weeklyScore: 92,
-  maxScore: 100,
-  weekNumber: 42,
-  daysToTarget: 5,
-  pointsHigherThanLastWeek: 12,
-  metrics: [
-    { type: 'sleep', label: 'Sleep duration', value: 324, unit: 'min' },
-    { type: 'exercise', label: 'Exercise', value: 3, unit: 'times' },
-    { type: 'dietary', label: 'Dietary', value: 'Goal', unit: '' },
-  ],
-}
-
-const DEFAULT_SBP_SLEEP_TREND: SbpSleepTrendChartData = {
-  data: [
-    { day: 'Mon', sbp: 118, sleepDuration: 6.2 },
-    { day: 'Tue', sbp: 122, sleepDuration: 5.8 },
-    { day: 'Wed', sbp: 115, sleepDuration: 6.5 },
-    { day: 'Thu', sbp: 128, sleepDuration: 5.2 },
-    { day: 'Fri', sbp: 120, sleepDuration: 5.4 },
-    { day: 'Sat', sbp: 125, sleepDuration: 6.0 },
-    { day: 'Sun', sbp: 119, sleepDuration: 5.7 },
-  ],
-  sbpLabel: 'SBP',
-  sleepDurationLabel: 'Sleep duration',
-  sbpColor: 'rgb(249, 115, 22)',
-  sleepDurationColor: 'rgb(167, 139, 250)',
-}
-
 // ============================================
 // 工具函数
 // ============================================
@@ -275,69 +238,6 @@ function parseVitalOverviewData(raw: unknown): VitalOverviewData | null {
   }
   
   return data as VitalOverviewData
-}
-
-/**
- * 解析每周健康分数据（weekly_health_score_card）
- */
-function parseWeeklyHealthScoreData(raw: unknown): WeeklyHealthScoreData | null {
-  let data = raw
-  if (typeof raw === 'string') {
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      return null
-    }
-  }
-  const obj = data as Record<string, unknown>
-  const card = (obj.weekly_health_score_card ?? obj) as Record<string, unknown>
-  if (typeof card.weeklyScore !== 'number' || typeof card.weekNumber !== 'number' || !Array.isArray(card.metrics) || card.metrics.length < 3) {
-    return null
-  }
-  const m0 = card.metrics[0] as Record<string, unknown>
-  const m1 = card.metrics[1] as Record<string, unknown>
-  const m2 = card.metrics[2] as Record<string, unknown>
-  return {
-    weeklyScore: card.weeklyScore as number,
-    maxScore: (card.maxScore as number) ?? 100,
-    weekNumber: card.weekNumber as number,
-    daysToTarget: card.daysToTarget as number | undefined,
-    pointsHigherThanLastWeek: card.pointsHigherThanLastWeek as number | undefined,
-    metrics: [
-      { type: 'sleep', label: (m0.label as string) ?? 'Sleep duration', value: (m0.value as number) ?? 0, unit: (m0.unit as string) ?? 'min' },
-      { type: 'exercise', label: (m1.label as string) ?? 'Exercise', value: (m1.value as number) ?? 0, unit: (m1.unit as string) ?? 'times' },
-      { type: 'dietary', label: (m2.label as string) ?? 'Dietary', value: (m2.value as string | number) ?? 'Goal', unit: (m2.unit as string) ?? '' },
-    ],
-  }
-}
-
-/**
- * 解析 SBP / 睡眠趋势图数据（sbp_sleep_trend_chart_card）
- */
-function parseSbpSleepTrendData(raw: unknown): SbpSleepTrendChartData | null {
-  let data = raw
-  if (typeof raw === 'string') {
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      return null
-    }
-  }
-  const obj = data as Record<string, unknown>
-  const card = (obj.sbp_sleep_trend_chart_card ?? obj) as Record<string, unknown>
-  if (!Array.isArray(card.data) || card.data.length === 0) return null
-  const points = card.data.map((d: Record<string, unknown>) => ({
-    day: String(d.day ?? ''),
-    sbp: Number(d.sbp ?? 0),
-    sleepDuration: Number(d.sleepDuration ?? 0),
-  }))
-  return {
-    data: points,
-    sbpLabel: (card.sbpLabel as string) ?? 'SBP',
-    sleepDurationLabel: (card.sleepDurationLabel as string) ?? 'Sleep duration',
-    sbpColor: card.sbpColor as string | undefined,
-    sleepDurationColor: card.sleepDurationColor as string | undefined,
-  }
 }
 
 // ============================================
@@ -508,11 +408,9 @@ function VitalCard({
  * - Android -> JS: NativeBridge.receiveData(jsonString)
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
-export function VitalOverviewWidgetPage() {
+export function Type5_VitalOverviewWidgetPage() {
   const [data, setData] = useState<VitalOverviewData>(DEFAULT_DATA)
   const [activeCard, setActiveCard] = useState<string | null>(null)
-  const [weeklyHealthScore, setWeeklyHealthScore] = useState<WeeklyHealthScoreData | null>(DEFAULT_WEEKLY_HEALTH_SCORE)
-  const [sbpSleepTrend, setSbpSleepTrend] = useState<SbpSleepTrendChartData | null>(DEFAULT_SBP_SLEEP_TREND)
 
   // 初始化原生桥接
   const { onData, send, isReady } = useNativeBridge({
@@ -521,7 +419,7 @@ export function VitalOverviewWidgetPage() {
     debug: import.meta.env.DEV,
   })
 
-  // 注册数据接收回调（支持合并 payload：vital_overview_card / weekly_health_score_card / sbp_sleep_trend_chart_card）
+  // 注册数据接收回调（支持 vital_overview_card 或顶层体征字段）
   useEffect(() => {
     onData((rawData) => {
       console.log('[VitalOverviewWidget] 收到原生数据')
@@ -537,10 +435,6 @@ export function VitalOverviewWidgetPage() {
           if (v) setData(v)
         }
       }
-      const weekly = parseWeeklyHealthScoreData(rawData)
-      if (weekly) setWeeklyHealthScore(weekly)
-      const trend = parseSbpSleepTrendData(rawData)
-      if (trend) setSbpSleepTrend(trend)
     })
   }, [onData])
 
@@ -608,24 +502,6 @@ export function VitalOverviewWidgetPage() {
             onClick={() => handleCardClick('poct')}
           />
         </div>
-
-        {/* 每周健康分数概览 */}
-        {weeklyHealthScore && (
-          <div className="mt-4">
-            <WeeklyHealthScoreWidget
-              data={weeklyHealthScore}
-              summaryButtonLabel={`Week ${weeklyHealthScore.weekNumber} Summary`}
-              onSummaryClick={() => send('summaryClick', { pageId: PAGE_CONFIG.pageId, weekNumber: weeklyHealthScore.weekNumber })}
-            />
-          </div>
-        )}
-
-        {/* SBP & 睡眠时长趋势图 */}
-        {sbpSleepTrend && sbpSleepTrend.data.length > 0 && (
-          <div className="mt-4">
-            <SbpSleepTrendChartWidget data={sbpSleepTrend} height={224} showLegend showArea={false} />
-          </div>
-        )}
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (

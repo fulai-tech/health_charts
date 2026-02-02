@@ -72,9 +72,10 @@ send('cardClick', {
 
 ## 组件列表
 
-### 1. VitalOverviewWidgetPage（健康体征总览）
+### 1. Type5_VitalOverviewWidgetPage（健康体征总览）
 
-- **路由**: `/widget/vital-overview`
+- **文件**: `Type5_VitalOverviewWidgetPage.tsx`
+- **路由**: `/widget/type-5`
 - **pageId**: `'vital-overview'`
 - **type**: `5`
 - **数据格式**: `VitalOverviewData`
@@ -88,9 +89,10 @@ send('cardClick', {
   ```
 - **事件**: `cardClick` - 卡片点击时发送，包含 `cardType` 和 `data`
 
-### 2. SleepScoreWidgetPage（睡眠评分）
+### 2. Type1_SleepScoreWidgetPage（睡眠评分）
 
-- **路由**: `/widget/sleep-score`
+- **文件**: `Type1_SleepScoreWidgetPage.tsx`
+- **路由**: `/widget/type-1`
 - **pageId**: `'sleep-score'`
 - **type**: `1`
 - **数据格式**: `SleepScoreData`
@@ -104,9 +106,10 @@ send('cardClick', {
   ```
 - **事件**: `cardClick` - 卡片点击时发送
 
-### 3. NutritionIntakeWidgetPage（营养摄入）
+### 3. Type3_NutritionIntakeWidgetPage（营养摄入）
 
-- **路由**: `/widget/nutrition-intake`
+- **文件**: `Type3_NutritionIntakeWidgetPage.tsx`
+- **路由**: `/widget/type-3`
 - **pageId**: `'nutrition-intake'`
 - **type**: `3`
 - **数据格式**: `NutritionIntakeData`
@@ -122,9 +125,10 @@ send('cardClick', {
   ```
 - **事件**: `cardClick` - 卡片点击时发送
 
-### 4. SodiumBPWidgetPage（钠摄入与血压关联）
+### 4. Type6_SodiumBPWidgetPage（钠摄入与血压关联）
 
-- **路由**: `/widget/sodium-bp`
+- **文件**: `Type6_SodiumBPWidgetPage.tsx`
+- **路由**: `/widget/type-6`
 - **pageId**: `'sodium-bp'`
 - **type**: `6`
 - **数据格式**: `SodiumBPData`
@@ -138,9 +142,10 @@ send('cardClick', {
   - `cardClick` (cardType: 'intake') - 左侧摄入卡片点击
   - `cardClick` (cardType: 'alert') - 右侧警告卡片点击
 
-### 5. SleepFatigueComparisonWidgetPage（深睡疲劳对比）
+### 5. Type2_ComparisonWidgetPage（深睡疲劳对比）
 
-- **路由**: `/widget/sleep-fatigue-comparison`
+- **文件**: `Type2_ComparisonWidgetPage.tsx`
+- **路由**: `/widget/type-2`
 - **pageId**: `'sleep-fatigue-comparison'`
 - **type**: `2`
 - **数据格式**: `SleepFatigueComparisonData`
@@ -153,9 +158,10 @@ send('cardClick', {
   ```
 - **事件**: `cardClick` - 卡片点击时发送
 
-### 6. MusicWidgetPage（音乐推荐）
+### 6. Type4_MusicWidgetPage（音乐推荐）
 
-- **路由**: `/widget/music`
+- **文件**: `Type4_MusicWidgetPage.tsx`
+- **路由**: `/widget/type-4`
 - **pageId**: `'music'`
 - **type**: `4`
 - **数据格式**: `MusicNativeData`
@@ -302,5 +308,5 @@ window.android = {
 ## 参考
 
 - Hook 实现: `src/hooks/useNativeBridge.ts`
-- 组件示例: `src/pages/widget/dialog/VitalOverviewWidgetPage.tsx`
+- 组件示例: `src/pages/widget/dialog/Type5_VitalOverviewWidgetPage.tsx`（所有 Widget 页面命名规范: `TypeN_NameWidgetPage.tsx`）
 - 原生桥接规范: `report/ANDROID_NATIVE_BRIDGE_SPEC.md`

@@ -233,7 +233,7 @@ function IntakeProgress({ label, intake }: IntakeProgressProps) {
  * - Android -> JS: NativeBridge.receiveData(jsonString)
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
-export function NutritionIntakeWidgetPage() {
+export function Type3_NutritionIntakeWidgetPage() {
   const [data, setData] = useState<NutritionIntakeData>(DEFAULT_DATA)
 
   // 初始化原生桥接

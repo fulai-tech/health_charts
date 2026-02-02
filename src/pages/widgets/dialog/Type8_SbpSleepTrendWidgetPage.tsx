@@ -1,13 +1,28 @@
 /**
- * SBP & 睡眠时长趋势图 Widget 页面（独立路由 type-8）
- * 仅渲染 SbpSleepTrendChartWidget，数据通过 NativeBridge 接收。
+ * SBP & 睡眠时长趋势图 Widget 页面（type-8）
+ * 路由: /widget/type-8
+ * 复用 @/components/charts/TrendLineChart
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
-import { SbpSleepTrendChartWidget, type SbpSleepTrendChartData } from '@/pages/widget/dialog/SbpSleepTrendChartWidget'
-import { widgetBGColor } from '@/config/theme'
+import { TrendLineChart, type ChartLine } from '@/components/charts/TrendLineChart'
+import { BP_COLORS, VITAL_COLORS, widgetBGColor } from '@/config/theme'
+
+interface SbpSleepTrendDataPoint {
+  day: string
+  sbp: number
+  sleepDuration: number
+}
+
+interface SbpSleepTrendChartData {
+  data: SbpSleepTrendDataPoint[]
+  sbpLabel?: string
+  sleepDurationLabel?: string
+  sbpColor?: string
+  sleepDurationColor?: string
+}
 
 const PAGE_CONFIG = { pageId: 'sbp-sleep-trend', pageName: 'SBP与睡眠趋势图', type: 8 } as const
 
@@ -30,11 +45,7 @@ const DEFAULT_DATA: SbpSleepTrendChartData = {
 function parseSbpSleepTrendData(raw: unknown): SbpSleepTrendChartData | null {
   let data = raw
   if (typeof raw === 'string') {
-    try {
-      data = JSON.parse(raw)
-    } catch {
-      return null
-    }
+    try { data = JSON.parse(raw) } catch { return null }
   }
   const obj = data as Record<string, unknown>
   const card = (obj.sbp_sleep_trend_chart_card ?? obj) as Record<string, unknown>
@@ -53,7 +64,7 @@ function parseSbpSleepTrendData(raw: unknown): SbpSleepTrendChartData | null {
   }
 }
 
-export function SbpSleepTrendWidgetPage() {
+export function Type8_SbpSleepTrendWidgetPage() {
   const [data, setData] = useState<SbpSleepTrendChartData>(DEFAULT_DATA)
   const { onData, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
@@ -68,10 +79,39 @@ export function SbpSleepTrendWidgetPage() {
     })
   }, [onData])
 
+  const sbpColor = data.sbpColor ?? BP_COLORS.systolic
+  const sleepColor = data.sleepDurationColor ?? VITAL_COLORS.sleep
+  const sbpLabel = data.sbpLabel ?? 'SBP'
+  const sleepLabel = data.sleepDurationLabel ?? 'Sleep duration'
+
+  const lines: ChartLine[] = useMemo(
+    () => [
+      { dataKey: 'sbp', color: sbpColor, label: sbpLabel, showArea: false, legendShape: 'circle', strokeWidth: 2 },
+      { dataKey: 'sleepDuration', color: sleepColor, label: sleepLabel, showArea: false, legendShape: 'circle', strokeWidth: 2 },
+    ],
+    [sbpColor, sleepColor, sbpLabel, sleepLabel]
+  )
+
+  const chartData = useMemo(
+    () => data.data.map((d) => ({ day: d.day, sbp: d.sbp, sleepDuration: d.sleepDuration })),
+    [data.data]
+  )
+
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        <SbpSleepTrendChartWidget data={data} height={224} showLegend showArea={false} />
+        {chartData.length > 0 ? (
+          <div className="bg-white rounded-2xl p-4 shadow-sm">
+            <TrendLineChart
+              data={chartData}
+              lines={lines}
+              xAxisKey="day"
+              height={224}
+              showLegend={true}
+              chartMargin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+            />
+          </div>
+        ) : null}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">NativeBridge Ready: {isReady ? '✅' : '⏳'}</div>
         )}

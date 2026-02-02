@@ -4,29 +4,29 @@ import { lazy, Suspense } from 'react'
 
 // Blood Pressure Pages
 import { BloodPressurePage } from '@/pages/details/BloodPressurePage'
-import { BPTrendWidgetPage } from '@/pages/widget/BPTrendWidgetPage'
+import { BPTrendWidgetPage } from '@/pages/widgets/BPTrendWidgetPage'
 
 // SpO2 Pages
 import { SpO2Page } from '@/pages/details/SpO2Page'
-import { SpO2TrendWidgetPage } from '@/pages/widget/SpO2TrendWidgetPage'
+import { SpO2TrendWidgetPage } from '@/pages/widgets/SpO2TrendWidgetPage'
 
 // Heart Rate Pages
 import { HeartRatePage } from '@/pages/details/HeartRatePage'
-import { HRTrendWidgetPage } from '@/pages/widget/HRTrendWidgetPage'
+import { HRTrendWidgetPage } from '@/pages/widgets/HRTrendWidgetPage'
 
 // Glucose Pages
 import { GlucosePage } from '@/pages/details/GlucosePage'
-import { GlucoseTrendWidgetPage } from '@/pages/widget/GlucoseTrendWidgetPage'
+import { GlucoseTrendWidgetPage } from '@/pages/widgets/GlucoseTrendWidgetPage'
 
-// Dialog Widget Pages (moved to widget/dialog/)
-import { MusicWidgetPage } from '@/pages/widget/dialog/MusicWidgetPage'
-import { SleepScoreWidgetPage } from '@/pages/widget/dialog/SleepScoreWidgetPage'
-import { NutritionIntakeWidgetPage } from '@/pages/widget/dialog/NutritionIntakeWidgetPage'
-import { SleepFatigueComparisonWidgetPage } from '@/pages/widget/dialog/ComparisonWidgetPage'
-import { VitalOverviewWidgetPage } from '@/pages/widget/dialog/VitalOverviewWidgetPage'
-import { SodiumBPWidgetPage } from '@/pages/widget/dialog/SodiumBPWidgetPage'
-import { WeeklyHealthScoreWidgetPage } from '@/pages/widget/dialog/WeeklyHealthScoreWidgetPage'
-import { SbpSleepTrendWidgetPage } from '@/pages/widget/dialog/SbpSleepTrendWidgetPage'
+// Dialog Widget Pages (TypeN_NameWidgetPage.tsx)
+import { Type1_SleepScoreWidgetPage } from '@/pages/widgets/dialog/Type1_SleepScoreWidgetPage'
+import { Type2_ComparisonWidgetPage } from '@/pages/widgets/dialog/Type2_ComparisonWidgetPage'
+import { Type3_NutritionIntakeWidgetPage } from '@/pages/widgets/dialog/Type3_NutritionIntakeWidgetPage'
+import { Type4_MusicWidgetPage } from '@/pages/widgets/dialog/Type4_MusicWidgetPage'
+import { Type5_VitalOverviewWidgetPage } from '@/pages/widgets/dialog/Type5_VitalOverviewWidgetPage'
+import { Type6_SodiumBPWidgetPage } from '@/pages/widgets/dialog/Type6_SodiumBPWidgetPage'
+import { Type7_WeeklyHealthScoreWidgetPage } from '@/pages/widgets/dialog/Type7_WeeklyHealthScoreWidgetPage'
+import { Type8_SbpSleepTrendWidgetPage } from '@/pages/widgets/dialog/Type8_SbpSleepTrendWidgetPage'
 
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
@@ -161,28 +161,28 @@ function App() {
             <Route path="/widget/glucose/trend" element={<GlucoseTrendWidgetPage />} />
 
             {/* Type 1 - Sleep Score Widget */}
-            <Route path="/widget/type-1" element={<SleepScoreWidgetPage />} />
+            <Route path="/widget/type-1" element={<Type1_SleepScoreWidgetPage />} />
 
             {/* Type 2 - Sleep Fatigue Comparison Widget */}
-            <Route path="/widget/type-2" element={<SleepFatigueComparisonWidgetPage />} />
+            <Route path="/widget/type-2" element={<Type2_ComparisonWidgetPage />} />
 
             {/* Type 3 - Nutrition Intake Widget */}
-            <Route path="/widget/type-3" element={<NutritionIntakeWidgetPage />} />
+            <Route path="/widget/type-3" element={<Type3_NutritionIntakeWidgetPage />} />
 
             {/* Type 4 - Music Widget */}
-            <Route path="/widget/type-4" element={<MusicWidgetPage />} />
+            <Route path="/widget/type-4" element={<Type4_MusicWidgetPage />} />
 
             {/* Type 5 - Vital Overview Widget */}
-            <Route path="/widget/type-5" element={<VitalOverviewWidgetPage />} />
+            <Route path="/widget/type-5" element={<Type5_VitalOverviewWidgetPage />} />
 
             {/* Type 6 - Sodium BP Widget */}
-            <Route path="/widget/type-6" element={<SodiumBPWidgetPage />} />
+            <Route path="/widget/type-6" element={<Type6_SodiumBPWidgetPage />} />
 
             {/* Type 7 - Weekly Health Score Widget */}
-            <Route path="/widget/type-7" element={<WeeklyHealthScoreWidgetPage />} />
+            <Route path="/widget/type-7" element={<Type7_WeeklyHealthScoreWidgetPage />} />
 
             {/* Type 8 - SBP & Sleep Trend Chart Widget */}
-            <Route path="/widget/type-8" element={<SbpSleepTrendWidgetPage />} />
+            <Route path="/widget/type-8" element={<Type8_SbpSleepTrendWidgetPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

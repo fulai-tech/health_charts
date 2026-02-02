@@ -260,7 +260,7 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
  * - Android -> JS: webView.evaluateJavascript("NativeBridge.receiveData('...')", null)
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
-export function MusicWidgetPage() {
+export function Type4_MusicWidgetPage() {
   const [data, setData] = useState<MusicNativeData>(DEFAULT_DATA)
 
   // ============================================
