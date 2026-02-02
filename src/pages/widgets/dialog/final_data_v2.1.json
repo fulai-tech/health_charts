@@ -147,8 +147,9 @@
     "weeklyScore": 92,
     "maxScore": 100,
     "weekNumber": 42,
-    "daysToTarget": 5,
-    "pointsHigherThanLastWeek": 12,
+    "evaluationText": "表现极佳，保持这个节奏",
+    "daysToTargetText": "分数达标5天",
+    "pointsHigherThanLastWeekText": "较上周提升12分",
     "metrics": [
       {
         "type": "sleep",

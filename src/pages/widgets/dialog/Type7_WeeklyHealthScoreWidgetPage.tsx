@@ -26,8 +26,12 @@ interface WeeklyHealthScoreData {
   weeklyScore: number
   maxScore?: number
   weekNumber: number
-  daysToTarget?: number
-  pointsHigherThanLastWeek?: number
+  /** 一句评价语，由 Android 提供，如「表现极佳，保持这个节奏」 */
+  evaluationText?: string
+  /** 第一个标签完整文案，由 Android 提供，如「分数达标5天」 */
+  daysToTargetText?: string
+  /** 第二个标签完整文案，由 Android 提供，如「较上周提升12分」 */
+  pointsHigherThanLastWeekText?: string
   metrics: [WeeklyHealthScoreMetric, WeeklyHealthScoreMetric, WeeklyHealthScoreMetric]
 }
 
@@ -37,8 +41,9 @@ const DEFAULT_DATA: WeeklyHealthScoreData = {
   weeklyScore: 92,
   maxScore: 100,
   weekNumber: 42,
-  daysToTarget: 5,
-  pointsHigherThanLastWeek: 12,
+  evaluationText: '表现极佳，保持这个节奏',
+  daysToTargetText: '5 days to reach target',
+  pointsHigherThanLastWeekText: '12 points higher than last week',
   metrics: [
     { type: 'sleep', label: 'Sleep duration', value: 324, unit: 'min' },
     { type: 'exercise', label: 'Exercise', value: 3, unit: 'times' },
@@ -46,24 +51,33 @@ const DEFAULT_DATA: WeeklyHealthScoreData = {
   ],
 }
 
-function formatSleepDuration(totalMinutes: number): string {
-  const clamped = Math.max(0, Math.min(5999, Math.round(totalMinutes)))
-  const hours = Math.floor(clamped / 60)
-  const minutes = clamped % 60
-  if (hours === 0) return `${minutes} min`
-  if (minutes === 0) return `${hours} h`
-  return `${hours} h ${minutes} min`
-}
+type DisplaySegment = { text: string; isValue: boolean }
 
 function getMetricDisplay(
   type: 'sleep' | 'exercise' | 'dietary',
   value: number | string,
   unit?: string
-): { main: string; suffix: string } {
-  if (type === 'sleep' && typeof value === 'number') return { main: formatSleepDuration(value), suffix: '' }
-  if (type === 'exercise' && typeof value === 'number') return { main: String(value), suffix: unit ? ` ${unit}` : ' times' }
-  if (type === 'dietary') return { main: typeof value === 'string' ? value : 'Goal', suffix: '' }
-  return { main: String(value), suffix: unit ? ` ${unit}` : '' }
+): { main: string; suffix: string; segments?: DisplaySegment[] } {
+  if (type === 'sleep' && typeof value === 'number') {
+    const clamped = Math.max(0, Math.min(5999, Math.round(value)))
+    const hours = Math.floor(clamped / 60)
+    const minutes = clamped % 60
+    if (hours === 0) return { main: '', suffix: '', segments: [{ text: String(minutes), isValue: true }, { text: ' min', isValue: false }] }
+    if (minutes === 0) return { main: '', suffix: '', segments: [{ text: String(hours), isValue: true }, { text: ' h', isValue: false }] }
+    return {
+      main: '',
+      suffix: '',
+      segments: [
+        { text: String(hours), isValue: true },
+        { text: ' h ', isValue: false },
+        { text: String(minutes), isValue: true },
+        { text: ' min', isValue: false },
+      ],
+    }
+  }
+  if (type === 'exercise' && typeof value === 'number') return { main: String(value), suffix: unit ? ` ${unit}` : ' times', segments: undefined }
+  if (type === 'dietary') return { main: typeof value === 'string' ? value : 'Goal', suffix: '', segments: undefined }
+  return { main: String(value), suffix: unit ? ` ${unit}` : '', segments: undefined }
 }
 
 function getMetricStyle(type: 'sleep' | 'exercise' | 'dietary') {
@@ -90,8 +104,9 @@ function parseWeeklyHealthScoreData(raw: unknown): WeeklyHealthScoreData | null 
     weeklyScore: card.weeklyScore as number,
     maxScore: (card.maxScore as number) ?? 100,
     weekNumber: card.weekNumber as number,
-    daysToTarget: card.daysToTarget as number | undefined,
-    pointsHigherThanLastWeek: card.pointsHigherThanLastWeek as number | undefined,
+    evaluationText: (card.evaluationText ?? card.evaluation_text) as string | undefined,
+    daysToTargetText: (card.daysToTargetText ?? card.days_to_target_text) as string | undefined,
+    pointsHigherThanLastWeekText: (card.pointsHigherThanLastWeekText ?? card.points_higher_than_last_week_text) as string | undefined,
     metrics: [
       { type: 'sleep', label: (m0.label as string) ?? 'Sleep duration', value: (m0.value as number) ?? 0, unit: (m0.unit as string) ?? 'min' },
       { type: 'exercise', label: (m1.label as string) ?? 'Exercise', value: (m1.value as number) ?? 0, unit: (m1.unit as string) ?? 'times' },
@@ -105,26 +120,27 @@ function MetricCard({
   label,
   value,
   unit,
-  valueColor = HEALTH_COLORS.primary,
 }: {
   type: 'sleep' | 'exercise' | 'dietary'
   label: string
   value: number | string
   unit?: string
-  valueColor?: string
 }) {
   const style = getMetricStyle(type)
-  const { main, suffix } = getMetricDisplay(type, value, unit)
+  const { main, suffix, segments } = getMetricDisplay(type, value, unit)
   const Icon = type === 'sleep' ? Moon : type === 'exercise' ? Activity : Utensils
   return (
-    <div className="rounded-2xl p-4 flex flex-col" style={{ backgroundColor: style.bg }}>
+    <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center" style={{ backgroundColor: style.bg }}>
       <div className="flex justify-center mb-2">
         <Icon className="w-6 h-6" style={{ color: style.iconColor }} />
       </div>
-      <div className="text-sm font-medium text-slate-600 mb-1">{label}</div>
-      <div className="text-base font-semibold text-slate-800">
-        <span style={{ color: valueColor }}>{main}</span>
-        {suffix && <span className="text-slate-600">{suffix}</span>}
+      <div className="text-sm font-medium text-slate-600 mb-1 w-full text-center">{label}</div>
+      <div className="text-base font-semibold text-slate-800 w-full text-center">
+        {segments ? (
+          segments.map((seg, i) => <span key={i}>{seg.text}</span>)
+        ) : (
+          <>{main}{suffix}</>
+        )}
       </div>
     </div>
   )
@@ -165,19 +181,22 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
               Week {data.weekNumber} Summary
             </button>
           </div>
-          <div className="flex items-baseline gap-1 mb-3">
+          <div className="flex items-baseline gap-1 mb-2">
             <span className="text-4xl font-bold">{data.weeklyScore}</span>
             <span className="text-lg opacity-90">/ {maxScore}</span>
           </div>
+          {data.evaluationText != null && data.evaluationText !== '' && (
+            <div className="text-sm opacity-95 mb-3">{data.evaluationText}</div>
+          )}
           <div className="flex flex-wrap gap-2">
-            {data.daysToTarget != null && (
+            {data.daysToTargetText != null && data.daysToTargetText !== '' && (
               <span className="px-2.5 py-1 rounded-lg text-sm" style={{ backgroundColor: HEALTH_COLORS.weeklyScoreButtonBg }}>
-                {data.daysToTarget} days to reach target
+                {data.daysToTargetText}
               </span>
             )}
-            {data.pointsHigherThanLastWeek != null && (
+            {data.pointsHigherThanLastWeekText != null && data.pointsHigherThanLastWeekText !== '' && (
               <span className="px-2.5 py-1 rounded-lg text-sm" style={{ backgroundColor: HEALTH_COLORS.weeklyScoreButtonBg }}>
-                {data.pointsHigherThanLastWeek} points higher than last week
+                {data.pointsHigherThanLastWeekText}
               </span>
             )}
           </div>
