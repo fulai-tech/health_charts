@@ -77,8 +77,6 @@ yarn test:coverage  # 覆盖率报告
 yarn ci  # 运行 lint + typecheck + test
 ```
 
-```
-
 ## 🧩 架构说明
 
 本项目采用 **Widget-First** 架构，支持两种渲染模式。
