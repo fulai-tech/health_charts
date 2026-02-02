@@ -16,7 +16,7 @@
 
 **Badge 徽章**：
 ```markdown
-![Tests](https://github.com/YOUR_USERNAME/health_charts/workflows/Tests/badge.svg)
+![Tests](https://github.com/fulai-tech/health_charts/workflows/Tests/badge.svg)
 ```
 
 ---
@@ -32,7 +32,7 @@
 **Badge 徽章**：
 
 ```markdown
-![Build](https://github.com/YOUR_USERNAME/health_charts/workflows/Build/badge.svg)
+![Build](https://github.com/fulai-tech/health_charts/workflows/Build/badge.svg)
 ```
 
 ---
@@ -79,7 +79,7 @@ git push origin main
 ### 2. 查看工作流运行
 访问你的 GitHub 仓库：
 ```
-https://github.com/YOUR_USERNAME/health_charts/actions
+https://github.com/fulai-tech/health_charts/actions
 ```
 
 ### 3. 添加徽章到 README
@@ -88,9 +88,9 @@ https://github.com/YOUR_USERNAME/health_charts/actions
 ```markdown
 # Health Charts
 
-![Tests](https://github.com/YOUR_USERNAME/health_charts/workflows/Tests/badge.svg)
-![Build](https://github.com/YOUR_USERNAME/health_charts/workflows/Build/badge.svg)
-![Code Quality](https://github.com/YOUR_USERNAME/health_charts/workflows/Code%20Quality/badge.svg)
+![Tests](https://github.com/fulai-tech/health_charts/workflows/Tests/badge.svg)
+![Build](https://github.com/fulai-tech/health_charts/workflows/Build/badge.svg)
+![Code Quality](https://github.com/fulai-tech/health_charts/workflows/Code%20Quality/badge.svg)
 
 <!-- 其他内容... -->
 ```
@@ -130,7 +130,7 @@ yarn build          # 构建项目
 
 4. 添加 Codecov 徽章：
 ```markdown
-[![codecov](https://codecov.io/gh/YOUR_USERNAME/health_charts/branch/main/graph/badge.svg)](https://codecov.io/gh/YOUR_USERNAME/health_charts)
+[![codecov](https://codecov.io/gh/fulai-tech/health_charts/branch/main/graph/badge.svg)](https://codecov.io/gh/fulai-tech/health_charts)
 ```
 
 ---

@@ -1,8 +1,8 @@
 # Health Charts (Vital Signs Visualization)
 
-![Tests](https://github.com/YOUR_USERNAME/health_charts/workflows/Tests/badge.svg)
-![Build](https://github.com/YOUR_USERNAME/health_charts/workflows/Build/badge.svg)
-![Code Quality](https://github.com/YOUR_USERNAME/health_charts/workflows/Code%20Quality/badge.svg)
+![Tests](https://github.com/fulai-tech/health_charts/workflows/Tests/badge.svg)
+![Build](https://github.com/fulai-tech/health_charts/workflows/Build/badge.svg)
+![Code Quality](https://github.com/fulai-tech/health_charts/workflows/Code%20Quality/badge.svg)
 
 基于 React + Vite + TypeScript 的高性能健康数据可视化组件库。
 专为移动端 WebView 嵌入设计，支持组件级独立渲染。
