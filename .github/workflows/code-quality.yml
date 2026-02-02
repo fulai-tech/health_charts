@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0  # 获取完整历史用于更好的分析
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22.x'
           cache: 'yarn'
