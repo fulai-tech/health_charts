@@ -4,7 +4,7 @@
  * 测试目标：验证 MobX store 的状态转换和持久化逻辑
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { makeAutoObservable } from 'mobx'
 
 // Mock localStorage
