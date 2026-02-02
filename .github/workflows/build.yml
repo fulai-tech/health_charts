@@ -25,13 +25,6 @@ jobs:
       - name: Build project
         run: yarn build
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build
-          path: docs/
-          retention-days: 7
-
       - name: Check build size
         run: |
           echo "Build size:"
