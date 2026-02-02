@@ -8,7 +8,7 @@
 **触发条件**：推送到 main/master/develop 分支或创建 Pull Request
 
 **执行内容**：
-- ✅ 在 Node.js 18.x 和 20.x 上运行测试
+- ✅ 在 Node.js 20.19.0 和 22.x 上运行测试（兼容 Vite 7.2.5）
 - ✅ 运行 ESLint 检查
 - ✅ 运行 TypeScript 类型检查
 - ✅ 运行所有单元测试
@@ -168,12 +168,19 @@ yarn build          # 构建项目
 
 ## 📝 自定义配置
 
+### Node.js 版本要求
+⚠️ **重要**：本项目使用 Vite 7.2.5，要求 Node.js **≥20.19.0** 或 **≥22.12.0**
+
+当前工作流配置：
+- 测试矩阵：Node.js **20.19.0** 和 **22.x**
+- 构建/质检：Node.js **22.x**
+
 ### 修改 Node.js 版本
 编辑 `.github/workflows/test.yml`：
 ```yaml
 strategy:
   matrix:
-    node-version: [18.x, 20.x, 22.x]  # 添加更多版本
+    node-version: ['20.19.0', '22.x']  # 确保满足 Vite 要求
 ```
 
 ### 修改触发分支
