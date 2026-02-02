@@ -1,5 +1,9 @@
 # Health Charts (Vital Signs Visualization)
 
+![Tests](https://github.com/YOUR_USERNAME/health_charts/workflows/Tests/badge.svg)
+![Build](https://github.com/YOUR_USERNAME/health_charts/workflows/Build/badge.svg)
+![Code Quality](https://github.com/YOUR_USERNAME/health_charts/workflows/Code%20Quality/badge.svg)
+
 基于 React + Vite + TypeScript 的高性能健康数据可视化组件库。
 专为移动端 WebView 嵌入设计，支持组件级独立渲染。
 
@@ -35,6 +39,43 @@ yarn d
 yarn build
 或
 yarn b
+
+# 运行测试
+yarn test           # 监听模式
+yarn test:run       # 单次运行
+yarn test:ui        # UI 界面
+yarn test:coverage  # 覆盖率报告
+```
+
+## 🧪 测试
+
+本项目采用轻量级测试策略，专注于高价值的核心逻辑测试：
+
+**测试覆盖**：
+- ✅ 日期工具函数（11 个测试）- 防止时间范围计算错误
+- ✅ 数据适配层（13 个测试）- 防止 API 数据转换错误
+- ✅ 全局状态管理（11 个测试）- 验证认证/主题/语言状态
+- ✅ 工具函数（7 个测试）- 验证通用工具的正确性
+
+**测试框架**：Vitest + Testing Library + happy-dom
+
+详细测试指南：查看 [TEST_GUIDE.md](./TEST_GUIDE.md)
+
+## 🔄 CI/CD
+
+本项目配置了完整的 GitHub Actions 自动化工作流：
+
+- ✅ **自动测试** - 每次推送和 PR 自动运行测试
+- ✅ **自动构建** - 验证生产构建是否成功
+- ✅ **代码质量检查** - ESLint + TypeScript + 安全扫描
+- ✅ **依赖自动更新** - Dependabot 每周检查更新
+
+详细 CI/CD 配置：查看 [.github/CI_CD_GUIDE.md](.github/CI_CD_GUIDE.md)
+
+本地运行 CI 检查：
+```bash
+yarn ci  # 运行 lint + typecheck + test
+```
 
 ```
 
