@@ -1,8 +1,21 @@
 # Health Charts (Vital Signs Visualization)
 
+<!-- CI/CD Status -->
 ![Tests](https://github.com/fulai-tech/health_charts/workflows/Tests/badge.svg)
 ![Build](https://github.com/fulai-tech/health_charts/workflows/Build/badge.svg)
 ![Code Quality](https://github.com/fulai-tech/health_charts/workflows/Code%20Quality/badge.svg)
+
+<!-- Tech Stack -->
+![React](https://img.shields.io/badge/React-18.3-61dafb?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178c6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7.2-646cff?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind-4.x-06b6d4?logo=tailwindcss&logoColor=white)
+
+<!-- Tools & Libraries -->
+![TanStack Query](https://img.shields.io/badge/TanStack_Query-5.x-ff4154?logo=reactquery&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-3.6-8884d8)
+![Vitest](https://img.shields.io/badge/Vitest-4.0-6e9f18?logo=vitest&logoColor=white)
+![i18next](https://img.shields.io/badge/i18next-25.x-26a69a?logo=i18next&logoColor=white)
 
 基于 React + Vite + TypeScript 的高性能健康数据可视化组件库。
 专为移动端 WebView 嵌入设计，支持组件级独立渲染。
