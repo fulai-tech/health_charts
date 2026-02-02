@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Heart, Droplets, Activity } from 'lucide-react'
@@ -409,6 +410,7 @@ function VitalCard({
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function Type5_VitalOverviewWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<VitalOverviewData>(DEFAULT_DATA)
   const [activeCard, setActiveCard] = useState<string | null>(null)
 
@@ -452,7 +454,7 @@ export function Type5_VitalOverviewWidgetPage() {
           {/* 心率 */}
           <VitalCard
             type="heart-rate"
-            title="Heart rate"
+            title={t('widgets.type5.heartRate')}
             value={data.heartRate.value}
             unit={data.heartRate.unit}
             statusText={data.heartRate.statusText}
@@ -465,7 +467,7 @@ export function Type5_VitalOverviewWidgetPage() {
           {/* 血压 */}
           <VitalCard
             type="blood-pressure"
-            title="Blood pressure"
+            title={t('widgets.type5.bloodPressure')}
             value={data.bloodPressure.systolic}
             subValue={data.bloodPressure.diastolic}
             unit={data.bloodPressure.unit}
@@ -479,7 +481,7 @@ export function Type5_VitalOverviewWidgetPage() {
           {/* 血氧 */}
           <VitalCard
             type="spo2"
-            title="SpO2"
+            title={t('widgets.type5.spo2')}
             value={data.spo2.value}
             unit={data.spo2.unit}
             statusText={data.spo2.statusText}
@@ -492,7 +494,7 @@ export function Type5_VitalOverviewWidgetPage() {
           {/* POCT */}
           <VitalCard
             type="poct"
-            title="POCT"
+            title={t('widgets.type5.poct')}
             value={data.poct.value}
             unit={data.poct.unit}
             statusText={data.poct.statusText}
@@ -506,7 +508,7 @@ export function Type5_VitalOverviewWidgetPage() {
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">
-            NativeBridge Ready: {isReady ? '✅' : '⏳'}
+            {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
       </div>

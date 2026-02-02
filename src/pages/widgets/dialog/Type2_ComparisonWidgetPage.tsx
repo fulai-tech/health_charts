@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
@@ -123,9 +124,10 @@ interface CompareItemProps {
   data: CompareItemData
   theme: ThemeType
   position: 'left' | 'right'
+  standardLabel: string
 }
 
-function CompareItem({ data, theme, position }: CompareItemProps) {
+function CompareItem({ data, theme, position, standardLabel }: CompareItemProps) {
   const isLow = data.status === 'low'
   const isHigh = data.status === 'high'
   let barColorStyle: string
@@ -147,7 +149,7 @@ function CompareItem({ data, theme, position }: CompareItemProps) {
       <span className="text-sm font-medium text-slate-700 mb-3 text-center truncate max-w-full">{displayTitle}</span>
       <div className="w-full aspect-square bg-slate-50 rounded-xl relative flex items-end justify-center p-3 overflow-hidden">
         <div className="absolute left-2 right-2 h-px bg-slate-300" style={{ bottom: `${safeStandardPercent}%` }} />
-        <span className="absolute right-2 text-[10px] text-slate-400 -translate-y-1/2" style={{ bottom: `${safeStandardPercent}%` }}>Standard</span>
+        <span className="absolute right-2 text-[10px] text-slate-400 -translate-y-1/2" style={{ bottom: `${safeStandardPercent}%` }}>{standardLabel}</span>
         <div className="w-3/5 rounded-t-lg transition-all duration-500" style={{ height: `${safeBarPercent}%`, backgroundColor: barColorStyle }} />
       </div>
       <div className="flex items-center justify-center gap-1 mt-3 min-w-0 max-w-full">
@@ -164,6 +166,7 @@ function CompareItem({ data, theme, position }: CompareItemProps) {
  * 路由: /widget/type-2
  */
 export function Type2_ComparisonWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<SleepFatigueComparisonData>(DEFAULT_DATA)
   const { onData, send, isReady } = useNativeBridge({ pageId: PAGE_CONFIG.pageId, pageName: PAGE_CONFIG.pageName, debug: import.meta.env.DEV })
   useEffect(() => {
@@ -173,20 +176,21 @@ export function Type2_ComparisonWidgetPage() {
     })
   }, [onData])
   const handleCardClick = useCallback(() => send('cardClick', { pageId: PAGE_CONFIG.pageId, data }), [send, data])
+  const standardLabel = t('widgets.type2.standard')
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-lg p-4">
         <div className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none shadow-sm transition-all duration-200 active:scale-[0.98] active:opacity-90" onClick={handleCardClick}>
           <div className="relative flex items-center justify-center gap-4">
-            <CompareItem data={data.left} theme={data.theme || 'sleep'} position="left" />
+            <CompareItem data={data.left} theme={data.theme || 'sleep'} position="left" standardLabel={standardLabel} />
             <div className="flex items-center justify-center w-8 flex-shrink-0">
               <ChevronRight className="w-6 h-6 text-orange-500" />
             </div>
-            <CompareItem data={data.right} theme={data.theme || 'sleep'} position="right" />
+            <CompareItem data={data.right} theme={data.theme || 'sleep'} position="right" standardLabel={standardLabel} />
           </div>
         </div>
-        {import.meta.env.DEV && <div className="mt-4 text-xs text-gray-400 text-center">NativeBridge Ready: {isReady ? '✅' : '⏳'}</div>}
+        {import.meta.env.DEV && <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>}
       </div>
     </WidgetLayout>
   )

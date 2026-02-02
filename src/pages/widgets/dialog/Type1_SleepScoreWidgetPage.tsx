@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Moon } from 'lucide-react'
@@ -157,14 +158,14 @@ interface StatItemProps {
   align?: 'left' | 'right'
 }
 
-function StatItem({ hours, minutes, label, align = 'left' }: StatItemProps) {
+function StatItem({ hours, minutes, label, align = 'left', t }: StatItemProps & { t: (key: string) => string }) {
   return (
     <div className={`flex flex-col gap-1 ${align === 'right' ? 'items-end' : 'items-start'}`}>
       <div className="flex items-baseline gap-1">
         <span className="text-2xl font-semibold" style={{ color: VITAL_COLORS.bp }}>{hours}</span>
-        <span className="text-sm text-gray-700">hours</span>
+        <span className="text-sm text-gray-700">{t('widgets.type1.hours')}</span>
         <span className="text-2xl font-semibold ml-1" style={{ color: VITAL_COLORS.bp }}>{minutes}</span>
-        <span className="text-sm text-gray-700">minutes</span>
+        <span className="text-sm text-gray-700">{t('widgets.type1.minutes')}</span>
       </div>
       <span className="text-xs" style={{ color: UI_COLORS.text.secondary }}>{label}</span>
     </div>
@@ -185,6 +186,7 @@ function StatItem({ hours, minutes, label, align = 'left' }: StatItemProps) {
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function Type1_SleepScoreWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<SleepScoreData>(DEFAULT_DATA)
 
   // 初始化原生桥接
@@ -239,7 +241,7 @@ export function Type1_SleepScoreWidgetPage() {
                 {/* 标题行 */}
                 <div className="flex items-center gap-2 mb-1">
                   <Moon className="w-5 h-5 text-white/90 flex-shrink-0" />
-                  <span className="text-lg font-medium text-white/95">Sleep score</span>
+                  <span className="text-lg font-medium text-white/95">{t('widgets.type1.title')}</span>
                 </div>
                 {/* 分数 - 限制在 0-100 范围内 */}
                 <div className="flex items-baseline gap-1">
@@ -265,15 +267,17 @@ export function Type1_SleepScoreWidgetPage() {
             <StatItem
               hours={totalDuration.hours}
               minutes={totalDuration.minutes}
-              label="Total sleep duration"
+              label={t('widgets.type1.totalSleepDuration')}
               align="left"
+              t={t}
             />
             <div className="flex-1 ml-8">
               <StatItem
                 hours={deepDuration.hours}
                 minutes={deepDuration.minutes}
-                label="Deep sleep duration"
+                label={t('widgets.type1.deepSleepDuration')}
                 align="left"
+                t={t}
               />
             </div>
           </div>
@@ -282,7 +286,7 @@ export function Type1_SleepScoreWidgetPage() {
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">
-            NativeBridge Ready: {isReady ? '✅' : '⏳'}
+            {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
       </div>

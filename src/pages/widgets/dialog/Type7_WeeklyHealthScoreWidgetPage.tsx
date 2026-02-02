@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { BarChart3, Moon, Activity, Utensils } from 'lucide-react'
@@ -56,27 +57,32 @@ type DisplaySegment = { text: string; isValue: boolean }
 function getMetricDisplay(
   type: 'sleep' | 'exercise' | 'dietary',
   value: number | string,
-  unit?: string
+  unit?: string,
+  t?: (key: string) => string
 ): { main: string; suffix: string; segments?: DisplaySegment[] } {
+  const minLabel = t ? t('widgets.type7.min') : ' min'
+  const hLabel = t ? t('widgets.type7.h') : ' h'
+  const timesLabel = t ? ` ${t('widgets.type7.times')}` : ' times'
+  const goalLabel = t ? t('widgets.type7.goal') : 'Goal'
   if (type === 'sleep' && typeof value === 'number') {
     const clamped = Math.max(0, Math.min(5999, Math.round(value)))
     const hours = Math.floor(clamped / 60)
     const minutes = clamped % 60
-    if (hours === 0) return { main: '', suffix: '', segments: [{ text: String(minutes), isValue: true }, { text: ' min', isValue: false }] }
-    if (minutes === 0) return { main: '', suffix: '', segments: [{ text: String(hours), isValue: true }, { text: ' h', isValue: false }] }
+    if (hours === 0) return { main: '', suffix: '', segments: [{ text: String(minutes), isValue: true }, { text: ` ${minLabel}`, isValue: false }] }
+    if (minutes === 0) return { main: '', suffix: '', segments: [{ text: String(hours), isValue: true }, { text: ` ${hLabel}`, isValue: false }] }
     return {
       main: '',
       suffix: '',
       segments: [
         { text: String(hours), isValue: true },
-        { text: ' h ', isValue: false },
+        { text: ` ${hLabel} `, isValue: false },
         { text: String(minutes), isValue: true },
-        { text: ' min', isValue: false },
+        { text: ` ${minLabel}`, isValue: false },
       ],
     }
   }
-  if (type === 'exercise' && typeof value === 'number') return { main: String(value), suffix: unit ? ` ${unit}` : ' times', segments: undefined }
-  if (type === 'dietary') return { main: typeof value === 'string' ? value : 'Goal', suffix: '', segments: undefined }
+  if (type === 'exercise' && typeof value === 'number') return { main: String(value), suffix: unit ? ` ${unit}` : timesLabel, segments: undefined }
+  if (type === 'dietary') return { main: typeof value === 'string' ? value : goalLabel, suffix: '', segments: undefined }
   return { main: String(value), suffix: unit ? ` ${unit}` : '', segments: undefined }
 }
 
@@ -120,14 +126,16 @@ function MetricCard({
   label,
   value,
   unit,
+  t,
 }: {
   type: 'sleep' | 'exercise' | 'dietary'
   label: string
   value: number | string
   unit?: string
+  t?: (key: string) => string
 }) {
   const style = getMetricStyle(type)
-  const { main, suffix, segments } = getMetricDisplay(type, value, unit)
+  const { main, suffix, segments } = getMetricDisplay(type, value, unit, t)
   const Icon = type === 'sleep' ? Moon : type === 'exercise' ? Activity : Utensils
   return (
     <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center" style={{ backgroundColor: style.bg }}>
@@ -147,6 +155,7 @@ function MetricCard({
 }
 
 export function Type7_WeeklyHealthScoreWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<WeeklyHealthScoreData>(DEFAULT_DATA)
   const { onData, send, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
@@ -170,7 +179,7 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
-              <span className="text-sm font-medium">Weekly health score</span>
+              <span className="text-sm font-medium">{t('widgets.type7.weeklyHealthScore')}</span>
             </div>
             <button
               type="button"
@@ -178,7 +187,7 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
               style={{ backgroundColor: HEALTH_COLORS.weeklyScoreButtonBg, color: HEALTH_COLORS.weeklyScoreButtonText }}
               onClick={() => send('summaryClick', { pageId: PAGE_CONFIG.pageId, weekNumber: data.weekNumber })}
             >
-              Week {data.weekNumber} Summary
+              {t('widgets.type7.weekSummary', { week: data.weekNumber })}
             </button>
           </div>
           <div className="flex items-baseline gap-1 mb-2">
@@ -203,11 +212,11 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
         </div>
         <div className="grid grid-cols-3 gap-3">
           {data.metrics.map((m) => (
-            <MetricCard key={m.type} type={m.type} label={m.label} value={m.value} unit={m.unit} />
+            <MetricCard key={m.type} type={m.type} label={m.label} value={m.value} unit={m.unit} t={t} />
           ))}
         </div>
         {import.meta.env.DEV && (
-          <div className="mt-4 text-xs text-gray-400 text-center">NativeBridge Ready: {isReady ? '✅' : '⏳'}</div>
+          <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>
         )}
       </div>
     </WidgetLayout>

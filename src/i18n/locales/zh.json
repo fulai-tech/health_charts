@@ -19,7 +19,16 @@
     "detailPages": "详情页面",
     "widgetPages": "Widget 组件页 (用于 iframe 嵌入)",
     "dailyReportPages": "日报页面",
-    "urlParameters": "URL 参数"
+    "urlParameters": "URL 参数",
+    "weeklyReportCategory": "周报",
+    "widgetType1": "睡眠评分",
+    "widgetType2": "柱状图对比",
+    "widgetType3": "营养摄入",
+    "widgetType4": "音乐推荐",
+    "widgetType5": "健康体征总览",
+    "widgetType6": "钠摄入血压关联",
+    "widgetType7": "每周健康分数",
+    "widgetType8": "SBP与睡眠趋势图"
   },
   "common": {
     "loading": "加载中...",
@@ -505,5 +514,55 @@
     "influencingFactors": "影响因素",
     "healthOutcome": "健康结果",
     "noData": "暂无数据"
+  },
+  "widgets": {
+    "nativeBridgeReady": "NativeBridge Ready",
+    "type1": {
+      "title": "睡眠评分",
+      "hours": "小时",
+      "minutes": "分钟",
+      "totalSleepDuration": "总睡眠时长",
+      "deepSleepDuration": "深睡时长"
+    },
+    "type2": {
+      "standard": "标准线"
+    },
+    "type3": {
+      "nutritionalScore": "营养评分",
+      "totalCalories": "总热量",
+      "thisMealIntake": "本餐摄入",
+      "totalDailyIntake": "每日总摄入",
+      "recommended": "推荐值",
+      "recommendedValue": "推荐: {{value}} {{unit}}",
+      "exceedPercent": "超标 {{percent}}%"
+    },
+    "type4": {
+      "title": "音乐推荐",
+      "subtitle": "为你精选的放松音乐",
+      "viewAll": "查看更多",
+      "recommendListen": "推荐收听",
+      "noMusic": "暂无音乐推荐"
+    },
+    "type5": {
+      "heartRate": "心率",
+      "bloodPressure": "血压",
+      "spo2": "血氧",
+      "poct": "POCT"
+    },
+    "type7": {
+      "weeklyHealthScore": "每周健康分数",
+      "weekSummary": "第 {{week}} 周 摘要",
+      "sleepDuration": "睡眠时长",
+      "exercise": "运动",
+      "dietary": "饮食",
+      "min": "分钟",
+      "h": "小时",
+      "times": "次",
+      "goal": "达标"
+    },
+    "type8": {
+      "sbp": "收缩压",
+      "sleepDuration": "睡眠时长"
+    }
   }
 }

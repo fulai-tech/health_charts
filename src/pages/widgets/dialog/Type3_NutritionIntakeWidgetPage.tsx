@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { AlertTriangle } from 'lucide-react'
@@ -170,9 +171,11 @@ function parseNutritionData(raw: unknown): NutritionIntakeData | null {
 interface IntakeProgressProps {
   label: string
   intake: IntakeData
+  recommendedLabel: string
+  exceedLabel: string
 }
 
-function IntakeProgress({ label, intake }: IntakeProgressProps) {
+function IntakeProgress({ label, intake, recommendedLabel, exceedLabel }: IntakeProgressProps) {
   const progress = calcProgress(intake.value, intake.recommended)
   const isExceeded = intake.exceedPercent > 0
   
@@ -208,11 +211,11 @@ function IntakeProgress({ label, intake }: IntakeProgressProps) {
       {/* 说明行 */}
       <div className="flex justify-between items-center mt-1.5">
         <span className="text-xs text-slate-400 truncate mr-2">
-          Recommended: {displayRecommended} {intake.unit}
+          {recommendedLabel}
         </span>
         {isExceeded && (
           <span className="text-xs font-medium text-orange-500 flex-shrink-0">
-            Exceed {displayExceedPercent}%
+            {exceedLabel}
           </span>
         )}
       </div>
@@ -234,6 +237,7 @@ function IntakeProgress({ label, intake }: IntakeProgressProps) {
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function Type3_NutritionIntakeWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<NutritionIntakeData>(DEFAULT_DATA)
 
   // 初始化原生桥接
@@ -277,13 +281,13 @@ export function Type3_NutritionIntakeWidgetPage() {
               <span className="text-2xl sm:text-3xl font-semibold text-emerald-500">
                 {clampValue(Math.round(data.nutritionScore), 0, 100)}
               </span>
-              <span className="text-sm text-slate-500">nutritional score</span>
+              <span className="text-sm text-slate-500">{t('widgets.type3.nutritionalScore')}</span>
             </div>
             <div className="flex items-baseline gap-2 min-w-0">
               <span className="text-2xl sm:text-3xl font-semibold text-slate-800">
                 {formatLargeNumber(data.totalCalories)}
               </span>
-              <span className="text-sm text-slate-500">total calories</span>
+              <span className="text-sm text-slate-500">{t('widgets.type3.totalCalories')}</span>
             </div>
           </div>
 
@@ -298,10 +302,20 @@ export function Type3_NutritionIntakeWidgetPage() {
             </div>
 
             {/* 本餐摄入 */}
-            <IntakeProgress label="This meal intake" intake={data.mealIntake} />
+            <IntakeProgress
+              label={t('widgets.type3.thisMealIntake')}
+              intake={data.mealIntake}
+              recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.mealIntake.recommended), unit: data.mealIntake.unit })}
+              exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.mealIntake.exceedPercent), 0, 999) })}
+            />
 
             {/* 每日总摄入 */}
-            <IntakeProgress label="Total daily intake" intake={data.dailyIntake} />
+            <IntakeProgress
+              label={t('widgets.type3.totalDailyIntake')}
+              intake={data.dailyIntake}
+              recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.dailyIntake.recommended), unit: data.dailyIntake.unit })}
+              exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.dailyIntake.exceedPercent), 0, 999) })}
+            />
           </div>
 
           {/* 提示卡片 - 限制文本长度 */}
@@ -315,7 +329,7 @@ export function Type3_NutritionIntakeWidgetPage() {
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">
-            NativeBridge Ready: {isReady ? '✅' : '⏳'}
+            {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
       </div>

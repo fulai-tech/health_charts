@@ -19,7 +19,16 @@
     "detailPages": "Details Pages",
     "widgetPages": "Widget Pages (for iframe embedding)",
     "dailyReportPages": "Daily Report Pages",
-    "urlParameters": "URL Parameters"
+    "urlParameters": "URL Parameters",
+    "weeklyReportCategory": "Weekly Report",
+    "widgetType1": "Sleep Score",
+    "widgetType2": "Bar Chart Comparison",
+    "widgetType3": "Nutrition Intake",
+    "widgetType4": "Music Recommendation",
+    "widgetType5": "Health Vitals Overview",
+    "widgetType6": "Sodium & BP Correlation",
+    "widgetType7": "Weekly Health Score",
+    "widgetType8": "SBP & Sleep Trend"
   },
   "common": {
     "loading": "Loading...",
@@ -505,5 +514,55 @@
     "influencingFactors": "Influencing factors",
     "healthOutcome": "Health outcome",
     "noData": "No data"
+  },
+  "widgets": {
+    "nativeBridgeReady": "NativeBridge Ready",
+    "type1": {
+      "title": "Sleep score",
+      "hours": "hours",
+      "minutes": "minutes",
+      "totalSleepDuration": "Total sleep duration",
+      "deepSleepDuration": "Deep sleep duration"
+    },
+    "type2": {
+      "standard": "Standard"
+    },
+    "type3": {
+      "nutritionalScore": "Nutritional score",
+      "totalCalories": "Total calories",
+      "thisMealIntake": "This meal intake",
+      "totalDailyIntake": "Total daily intake",
+      "recommended": "Recommended",
+      "recommendedValue": "Recommended: {{value}} {{unit}}",
+      "exceedPercent": "Exceed {{percent}}%"
+    },
+    "type4": {
+      "title": "Music Recommendations",
+      "subtitle": "Curated relaxing music for you",
+      "viewAll": "View more",
+      "recommendListen": "Recommend listen",
+      "noMusic": "No music recommendations"
+    },
+    "type5": {
+      "heartRate": "Heart rate",
+      "bloodPressure": "Blood pressure",
+      "spo2": "SpO2",
+      "poct": "POCT"
+    },
+    "type7": {
+      "weeklyHealthScore": "Weekly health score",
+      "weekSummary": "Week {{week}} Summary",
+      "sleepDuration": "Sleep duration",
+      "exercise": "Exercise",
+      "dietary": "Dietary",
+      "min": "min",
+      "h": "h",
+      "times": "times",
+      "goal": "Goal"
+    },
+    "type8": {
+      "sbp": "SBP",
+      "sleepDuration": "Sleep duration"
+    }
   }
 }

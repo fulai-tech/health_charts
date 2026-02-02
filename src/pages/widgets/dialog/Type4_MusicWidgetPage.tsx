@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { Music, Headphones, Sparkles } from 'lucide-react'
@@ -154,9 +155,10 @@ interface MusicCardProps {
   index: number
   defaultItem: MusicCardItem
   onCardClick: () => void
+  recommendListenLabel: string
 }
 
-function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
+function MusicCard({ item, index, defaultItem, onCardClick, recommendListenLabel }: MusicCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   
@@ -221,7 +223,7 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
             isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
           }`}>
             <Headphones className="w-4 h-4 text-orange-400" />
-            <span className="text-xs text-orange-300 font-medium">推荐收听</span>
+            <span className="text-xs text-orange-300 font-medium">{recommendListenLabel}</span>
             <Sparkles className="w-3 h-3 text-yellow-400 animate-pulse" />
           </div>
           
@@ -261,6 +263,7 @@ function MusicCard({ item, index, defaultItem, onCardClick }: MusicCardProps) {
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function Type4_MusicWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<MusicNativeData>(DEFAULT_DATA)
 
   // ============================================
@@ -322,9 +325,9 @@ export function Type4_MusicWidgetPage() {
           <div className="flex items-center gap-3">
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-tight">
-                Music Recommendations
+                {t('widgets.type4.title')}
               </h2>
-              <p className="text-xs md:text-sm text-gray-500 mt-0.5">为你精选的放松音乐</p>
+              <p className="text-xs md:text-sm text-gray-500 mt-0.5">{t('widgets.type4.subtitle')}</p>
             </div>
           </div>
           
@@ -333,7 +336,7 @@ export function Type4_MusicWidgetPage() {
             className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 text-sm font-medium text-gray-600 hover:bg-white hover:border-orange-300 hover:text-orange-600 transition-all duration-300 shadow-sm hover:shadow-md"
             onClick={() => send('viewAll', { pageId: PAGE_CONFIG.pageId })}
           >
-            <span>查看更多</span>
+            <span>{t('widgets.type4.viewAll')}</span>
             <Sparkles className="w-4 h-4" />
           </button>
         </div>
@@ -348,19 +351,20 @@ export function Type4_MusicWidgetPage() {
                 index={index}
                 defaultItem={defaultCards[index] || defaultCards[0]}
                 onCardClick={() => handleCardClick(card)}
+                recommendListenLabel={t('widgets.type4.recommendListen')}
               />
             ))}
           </div>
         ) : (
           <div className="flex items-center justify-center py-8 text-gray-400 text-sm">
-            暂无音乐推荐
+            {t('widgets.type4.noMusic')}
           </div>
         )}
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">
-            NativeBridge Ready: {isReady ? '✅' : '⏳'}
+            {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
       </div>

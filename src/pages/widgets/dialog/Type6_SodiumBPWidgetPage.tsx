@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { ChevronRight } from 'lucide-react'
@@ -187,6 +188,7 @@ function AlertCard({ text, level }: AlertCardProps) {
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
 export function Type6_SodiumBPWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<SodiumBPData>(DEFAULT_DATA)
 
   // 初始化原生桥接
@@ -289,7 +291,7 @@ export function Type6_SodiumBPWidgetPage() {
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">
-            NativeBridge Ready: {isReady ? '✅' : '⏳'}
+            {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
       </div>

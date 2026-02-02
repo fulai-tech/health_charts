@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { TrendLineChart, type ChartLine } from '@/components/charts/TrendLineChart'
@@ -65,6 +66,7 @@ function parseSbpSleepTrendData(raw: unknown): SbpSleepTrendChartData | null {
 }
 
 export function Type8_SbpSleepTrendWidgetPage() {
+  const { t } = useTranslation()
   const [data, setData] = useState<SbpSleepTrendChartData>(DEFAULT_DATA)
   const { onData, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
@@ -81,8 +83,8 @@ export function Type8_SbpSleepTrendWidgetPage() {
 
   const sbpColor = data.sbpColor ?? BP_COLORS.systolic
   const sleepColor = data.sleepDurationColor ?? VITAL_COLORS.sleep
-  const sbpLabel = data.sbpLabel ?? 'SBP'
-  const sleepLabel = data.sleepDurationLabel ?? 'Sleep duration'
+  const sbpLabel = data.sbpLabel ?? t('widgets.type8.sbp')
+  const sleepLabel = data.sleepDurationLabel ?? t('widgets.type8.sleepDuration')
 
   const lines: ChartLine[] = useMemo(
     () => [
@@ -113,7 +115,7 @@ export function Type8_SbpSleepTrendWidgetPage() {
           </div>
         ) : null}
         {import.meta.env.DEV && (
-          <div className="mt-4 text-xs text-gray-400 text-center">NativeBridge Ready: {isReady ? '✅' : '⏳'}</div>
+          <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>
         )}
       </div>
     </WidgetLayout>
