@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 
 /**
  * Disclaimer Box Component
@@ -9,7 +9,7 @@ import { useUrlConfig } from '@/hooks/useUrlParams'
  */
 export function DisclaimerBox() {
     const { t } = useTranslation()
-    const { theme } = useUrlConfig()
+    const theme = useUrlThemeConfig()
 
     return (
         <div

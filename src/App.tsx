@@ -25,6 +25,8 @@ import { NutritionIntakeWidgetPage } from '@/pages/widget/dialog/NutritionIntake
 import { SleepFatigueComparisonWidgetPage } from '@/pages/widget/dialog/ComparisonWidgetPage'
 import { VitalOverviewWidgetPage } from '@/pages/widget/dialog/VitalOverviewWidgetPage'
 import { SodiumBPWidgetPage } from '@/pages/widget/dialog/SodiumBPWidgetPage'
+import { WeeklyHealthScoreWidgetPage } from '@/pages/widget/dialog/WeeklyHealthScoreWidgetPage'
+import { SbpSleepTrendWidgetPage } from '@/pages/widget/dialog/SbpSleepTrendWidgetPage'
 
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
@@ -175,6 +177,12 @@ function App() {
 
             {/* Type 6 - Sodium BP Widget */}
             <Route path="/widget/type-6" element={<SodiumBPWidgetPage />} />
+
+            {/* Type 7 - Weekly Health Score Widget */}
+            <Route path="/widget/type-7" element={<WeeklyHealthScoreWidgetPage />} />
+
+            {/* Type 8 - SBP & Sleep Trend Chart Widget */}
+            <Route path="/widget/type-8" element={<SbpSleepTrendWidgetPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

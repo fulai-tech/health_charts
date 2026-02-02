@@ -6,7 +6,7 @@ import { BPStatisticsCard } from '@/modules/features/blood-pressure/components/B
 import { BPCompareCard } from '@/modules/features/blood-pressure/components/BPCompareCard'
 import { BPWeeklyOverviewCard } from '@/modules/features/blood-pressure/components/BPWeeklyOverviewCard'
 import { useBPTrendData, usePrefetchBPData } from '@/modules/features/blood-pressure/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -21,7 +21,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function BloodPressurePage() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchBPData()
 
   // Week navigation (unified hook)

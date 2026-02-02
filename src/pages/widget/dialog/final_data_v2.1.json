@@ -142,5 +142,47 @@
       "label": "Sodium intake per meal",
       "level": "danger"
     }
+  },
+  "weekly_health_score_card": {
+    "weeklyScore": 92,
+    "maxScore": 100,
+    "weekNumber": 42,
+    "daysToTarget": 5,
+    "pointsHigherThanLastWeek": 12,
+    "metrics": [
+      {
+        "type": "sleep",
+        "label": "Sleep duration",
+        "value": 324,
+        "unit": "min"
+      },
+      {
+        "type": "exercise",
+        "label": "Exercise",
+        "value": 3,
+        "unit": "times"
+      },
+      {
+        "type": "dietary",
+        "label": "Dietary",
+        "value": "Goal",
+        "unit": ""
+      }
+    ]
+  },
+  "sbp_sleep_trend_chart_card": {
+    "data": [
+      { "day": "Mon", "sbp": 118, "sleepDuration": 6.2 },
+      { "day": "Tue", "sbp": 122, "sleepDuration": 5.8 },
+      { "day": "Wed", "sbp": 115, "sleepDuration": 6.5 },
+      { "day": "Thu", "sbp": 128, "sleepDuration": 5.2 },
+      { "day": "Fri", "sbp": 120, "sleepDuration": 5.4 },
+      { "day": "Sat", "sbp": 125, "sleepDuration": 6.0 },
+      { "day": "Sun", "sbp": 119, "sleepDuration": 5.7 }
+    ],
+    "sbpLabel": "SBP",
+    "sleepDurationLabel": "Sleep duration",
+    "sbpColor": "rgb(249, 115, 22)",
+    "sleepDurationColor": "rgb(167, 139, 250)"
   }
 }

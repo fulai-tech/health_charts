@@ -707,5 +707,181 @@
         ]
       }
     ]
+  },
+  {
+    "type": 7,
+    "enabled": true,
+    "name": "weekly_health_score_card",
+    "url": "/widget/type-7",
+    "description": "展示用户每周健康分数概览，包括分数区、距离目标天数、较上周提升分数，以及睡眠时长、运动次数、饮食目标三张指标卡。",
+    "llm_extract_params": [
+      {
+        "name": "weekNumber",
+        "type": "int",
+        "required": false,
+        "example": 42,
+        "description": "周序号（如第42周）。不提供时由 executor 根据当前日期计算。"
+      },
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期，用于计算周序号与指标。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "weeklyScore",
+        "type": "int",
+        "required": true,
+        "example": 92,
+        "description": "每周健康分数（0-100）"
+      },
+      {
+        "name": "maxScore",
+        "type": "int",
+        "required": false,
+        "default": 100,
+        "example": 100,
+        "description": "满分，默认 100"
+      },
+      {
+        "name": "weekNumber",
+        "type": "int",
+        "required": true,
+        "example": 42,
+        "description": "周序号"
+      },
+      {
+        "name": "daysToTarget",
+        "type": "int",
+        "required": false,
+        "example": 5,
+        "description": "距离目标天数"
+      },
+      {
+        "name": "pointsHigherThanLastWeek",
+        "type": "int",
+        "required": false,
+        "example": 12,
+        "description": "比上周高出的分数"
+      },
+      {
+        "name": "metrics",
+        "type": "array",
+        "required": true,
+        "description": "三张指标卡，固定顺序：睡眠、运动、饮食",
+        "item_fields": [
+          {
+            "name": "type",
+            "type": "string",
+            "required": true,
+            "example": "sleep",
+            "description": "指标类型: 'sleep' | 'exercise' | 'dietary'"
+          },
+          {
+            "name": "label",
+            "type": "string",
+            "required": true,
+            "example": "Sleep duration",
+            "description": "显示标签"
+          },
+          {
+            "name": "value",
+            "type": "number | string",
+            "required": true,
+            "example": 324,
+            "description": "睡眠为分钟数；运动为次数；饮食为状态文案如 'Goal'"
+          },
+          {
+            "name": "unit",
+            "type": "string",
+            "required": false,
+            "example": "min",
+            "description": "单位，如 min、times"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "type": 8,
+    "enabled": true,
+    "name": "sbp_sleep_trend_chart_card",
+    "url": "/widget/type-8",
+    "description": "展示一周内收缩压(SBP)与睡眠时长(Sleep duration)的双折线趋势图，X 轴为 Mon-Sun，支持自定义线条颜色与图例文案。",
+    "llm_extract_params": [
+      {
+        "name": "date",
+        "type": "string",
+        "format": "YYYY-MM-DD",
+        "required": false,
+        "default": "today",
+        "example": "2026-01-19",
+        "description": "查询日期，用于确定周区间。"
+      }
+    ],
+    "card_fields": [
+      {
+        "name": "data",
+        "type": "array",
+        "required": true,
+        "description": "图表数据点，按 Mon-Sun 顺序",
+        "item_fields": [
+          {
+            "name": "day",
+            "type": "string",
+            "required": true,
+            "example": "Mon",
+            "description": "星期几: Mon, Tue, Wed, Thu, Fri, Sat, Sun"
+          },
+          {
+            "name": "sbp",
+            "type": "int",
+            "required": true,
+            "example": 118,
+            "description": "收缩压（mmHg）"
+          },
+          {
+            "name": "sleepDuration",
+            "type": "float",
+            "required": true,
+            "example": 6.2,
+            "description": "睡眠时长（小时，如 5.4 表示 5h24min）"
+          }
+        ]
+      },
+      {
+        "name": "sbpLabel",
+        "type": "string",
+        "required": false,
+        "example": "SBP",
+        "description": "SBP 图例文案"
+      },
+      {
+        "name": "sleepDurationLabel",
+        "type": "string",
+        "required": false,
+        "example": "Sleep duration",
+        "description": "Sleep duration 图例文案"
+      },
+      {
+        "name": "sbpColor",
+        "type": "string",
+        "required": false,
+        "example": "rgb(249, 115, 22)",
+        "description": "SBP 折线颜色"
+      },
+      {
+        "name": "sleepDurationColor",
+        "type": "string",
+        "required": false,
+        "example": "rgb(167, 139, 250)",
+        "description": "Sleep duration 折线颜色"
+      }
+    ]
   }
 ]

@@ -9,7 +9,7 @@ import { EmotionWeeklyOverviewCard } from '@/modules/features/emotion/components
 import { EmotionDiaryCard } from '@/modules/features/emotion/components/EmotionDiaryCard'
 import { EmotionDemoModeToggle } from '@/modules/features/emotion/components/EmotionDemoModeToggle'
 import { useEmotionTrendData, usePrefetchEmotionData } from '@/modules/features/emotion/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -20,7 +20,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function EmotionPage() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchEmotionData()
 
   // Week navigation (unified hook)

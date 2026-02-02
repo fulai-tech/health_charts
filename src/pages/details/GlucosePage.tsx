@@ -6,7 +6,7 @@ import { GlucoseStatisticsCard } from '@/modules/features/glucose/components/Glu
 import { GlucoseCompareCard } from '@/modules/features/glucose/components/GlucoseCompareCard'
 import { GlucoseWeeklyOverviewCard } from '@/modules/features/glucose/components/GlucoseWeeklyOverviewCard'
 import { useGlucoseTrendData, usePrefetchGlucoseData } from '@/modules/features/glucose/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -21,7 +21,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function GlucosePage() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchGlucoseData()
 
   // Week navigation (unified hook)

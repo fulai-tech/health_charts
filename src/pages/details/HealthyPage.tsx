@@ -15,7 +15,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/common/DateRangePicker'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
 import { useHealthyData } from '@/modules/features/healthy/api'
 import type { TimePeriod, ViewType } from '@/modules/features/healthy/types'
@@ -57,7 +57,7 @@ function formatDateForDisplay(date: Date): string {
 export function HealthyPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
 
   // Period state for comprehensive health card (UI toggle)
   const [period, setPeriod] = useState<TimePeriod>('weekly')

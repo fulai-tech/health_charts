@@ -6,7 +6,7 @@ import { SpO2StatisticsCard } from '@/modules/features/spo2/components/SpO2Stati
 import { SpO2DataAnalysisCard } from '@/modules/features/spo2/components/SpO2DataAnalysisCard'
 import { SpO2WeeklyOverviewCard } from '@/modules/features/spo2/components/SpO2WeeklyOverviewCard'
 import { useSpO2TrendData, usePrefetchSpO2Data } from '@/modules/features/spo2/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -21,7 +21,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function SpO2Page() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchSpO2Data()
 
   // Week navigation (unified hook)

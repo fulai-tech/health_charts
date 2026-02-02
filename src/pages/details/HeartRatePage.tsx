@@ -6,7 +6,7 @@ import { HRStatisticsCard } from '@/modules/features/heart-rate/components/HRSta
 import { HRDataAnalysisCard } from '@/modules/features/heart-rate/components/HRDataAnalysisCard'
 import { HRWeeklyOverviewCard } from '@/modules/features/heart-rate/components/HRWeeklyOverviewCard'
 import { useHRTrendData, usePrefetchHRData } from '@/modules/features/heart-rate/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -21,7 +21,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function HeartRatePage() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchHRData()
 
   // Week navigation (unified hook)

@@ -10,7 +10,7 @@ import { DietaryComponentsCard } from '@/modules/features/nutrition/components/D
 import { NutritionComparisonCard } from '@/modules/features/nutrition/components/NutritionComparisonCard'
 import { NutritionWeeklyOverviewCard } from '@/modules/features/nutrition/components/NutritionWeeklyOverviewCard'
 import { useNutritionData, usePrefetchNutritionData } from '@/modules/features/nutrition/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -25,7 +25,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function NutritionPage() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchNutritionData()
 
   // Week navigation (unified hook)

@@ -6,6 +6,7 @@ import type {
   StoredAuthData,
 } from './types'
 import { TOKEN_EXPIRY, AUTH_STORAGE_KEY } from './types'
+import { globalStore } from '@/stores'
 
 /**
  * Authentication Service
@@ -34,7 +35,7 @@ class AuthService {
   }
 
   /**
-   * Save auth data to localStorage
+   * Save auth data to localStorage and sync to global store
    */
   private saveToStorage(): void {
     try {
@@ -43,6 +44,7 @@ class AuthService {
       } else {
         localStorage.removeItem(AUTH_STORAGE_KEY)
       }
+      globalStore.syncAuthFromStorage()
     } catch (error) {
       console.error('Failed to save auth data to storage:', error)
     }
@@ -128,13 +130,19 @@ class AuthService {
 
   /**
    * Set access token from URL (?token=xxx).
-   * Treats as new login state; only updates when URL token differs from current.
+   * 始终覆盖：先清空旧登录状态，再设置新 token。
+   * URL 参数优先级最高，无论本地是否有旧 token 都会被覆盖。
    * User identity: deviceId 'Android', username 'Android'.
    */
   setTokenFromUrl(token: string): void {
-    if (!token || token === this.getAccessToken()) {
+    if (!token) {
       return
     }
+    
+    // 先清空旧的登录状态
+    this.logout()
+    console.log('🔄 [AuthService] Clearing old auth state for new URL token')
+    
     const now = Date.now()
     this.authData = {
       user: {
@@ -161,17 +169,35 @@ class AuthService {
   }
 
   /**
-   * Ensure authenticated - login if needed
+   * Ensure authenticated - use URL token if present, otherwise login if needed.
+   * 只要 URL 带有 ?token=xxx，必须按该 token 更新用户状态，绝不触发默认账户登录。
    */
   async ensureAuthenticated(): Promise<string> {
+    const urlToken = getTokenFromUrl()
+    if (urlToken) {
+      this.setTokenFromUrl(urlToken)
+      this.loadFromStorage()
+      const token = this.getAccessToken()
+      if (token) return token
+    }
+
+    this.loadFromStorage()
     if (this.isAuthenticated()) {
       return this.authData!.accessToken
     }
 
-    // Need to login
     await this.login()
     return this.authData!.accessToken
   }
+}
+
+/** 从当前 URL 解析 token 参数（仅读，不依赖 React），支持 HashRouter 的 hash 查询串 */
+export function getTokenFromUrl(): string | null {
+  if (typeof window === 'undefined') return null
+  const q = new URLSearchParams(window.location.search)
+  const hash = window.location.hash || ''
+  const fromHash = hash.includes('?') ? new URLSearchParams(hash.slice(hash.indexOf('?') + 1)) : null
+  return q.get('token') ?? fromHash?.get('token') ?? null
 }
 
 // Singleton instance

@@ -7,7 +7,7 @@ import { SleepDataAnalysisCard } from '@/modules/features/sleep/components/Sleep
 import { SleepCompareCard } from '@/modules/features/sleep/components/SleepCompareCard'
 import { SleepWeeklyOverviewCard } from '@/modules/features/sleep/components/SleepWeeklyOverviewCard'
 import { useSleepTrendData, usePrefetchSleepData } from '@/modules/features/sleep/api'
-import { useUrlConfig } from '@/hooks/useUrlParams'
+import { useUrlThemeConfig } from '@/hooks/useUrlTheme'
 import { useWeekNavigation } from '@/hooks/useWeekNavigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import { DisclaimerBox } from '@/components/ui/DisclaimerBox'
@@ -22,7 +22,7 @@ import { UI_STYLES } from '@/config/theme'
  */
 export function SleepPage() {
   const { t } = useTranslation()
-  const { theme } = useUrlConfig()
+  const theme = useUrlThemeConfig()
   const { prefetchPreviousWeeks } = usePrefetchSleepData()
 
   // Week navigation (unified hook)

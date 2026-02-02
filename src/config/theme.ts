@@ -278,6 +278,12 @@ export const HEALTH_COLORS = {
   primary: 'rgb(251, 146, 61)',
   /** 目标参考线颜色 - 橙色，用于图表中的目标参考线 */
   targetLine: 'rgb(251, 146, 61)',
+  /** 每周健康分卡片头部背景 - 橙色 */
+  weeklyScoreHeader: 'rgb(251, 146, 61)',
+  /** 每周健康分摘要按钮背景 - 浅橙色 */
+  weeklyScoreButtonBg: 'rgba(255, 255, 255, 0.35)',
+  /** 每周健康分摘要按钮文字 */
+  weeklyScoreButtonText: 'rgb(194, 95, 30)',
 } as const
 
 /**

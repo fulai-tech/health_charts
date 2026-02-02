@@ -11,13 +11,15 @@
  * Uses conditional compilation to exclude from production builds.
  */
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { Settings, Globe, User, Sun, Moon, Database, LogIn, LogOut, X } from 'lucide-react'
 import { IS_TEST_ENV } from '@/config/config'
 import { cn } from '@/lib/utils'
 import { authService } from '@/services/auth/authService'
 import { useTheme } from '@/hooks/useTheme'
+import { useAuthStore, useLanguageStore } from '@/stores'
 import { isGlobalDemoModeEnabled, setGlobalDemoMode } from '@/config/globalDemoMode'
 import { LoginDialog } from '@/components/ui/LoginDialog'
 
@@ -95,15 +97,15 @@ function ControlRow({ icon, label, children }: ControlRowProps) {
 }
 
 /**
- * Super Panel Component
+ * Super Panel Component（使用 MobX store 同步登录/主题/语言，observer 保证响应式）
  */
-export function SuperPanel() {
+function SuperPanelInner() {
     const { t, i18n } = useTranslation()
     const { theme, toggleTheme } = useTheme()
+    const { isAuthenticated, username: authUsername, logout } = useAuthStore()
+    const { language, setLanguage } = useLanguageStore()
     const [isOpen, setIsOpen] = useState(false)
     const [isDemoMode, setIsDemoMode] = useState(isGlobalDemoModeEnabled)
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
-    const [username, setUsername] = useState<string | null>(null)
     const [showLoginDialog, setShowLoginDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [loginError, setLoginError] = useState<string | null>(null)
@@ -114,23 +116,10 @@ export function SuperPanel() {
         return null
     }
 
-    // Check authentication status
-    const checkAuth = useCallback(() => {
-        const authenticated = authService.isAuthenticated()
-        setIsAuthenticated(authenticated)
-        if (authenticated) {
-            const authData = authService.getAuthData()
-            setUsername(authData?.username || authData?.user?.deviceId || null)
-        } else {
-            setUsername(null)
-        }
-    }, [])
-
-    // Initial auth check
+    // Sync demo mode state
     useEffect(() => {
-        checkAuth()
         setIsDemoMode(isGlobalDemoModeEnabled())
-    }, [checkAuth])
+    }, [])
 
     // Close panel when clicking outside
     useEffect(() => {
@@ -149,6 +138,7 @@ export function SuperPanel() {
     const handleLanguageToggle = () => {
         const newLang = i18n.language.startsWith('en') ? 'zh' : 'en'
         i18n.changeLanguage(newLang)
+        setLanguage(newLang as 'en' | 'zh')
     }
 
     // Handle theme toggle
@@ -170,7 +160,7 @@ export function SuperPanel() {
         setLoginError(null)
         try {
             await authService.login({ username, password })
-            checkAuth()
+            // authService 会更新 localStorage，globalStore 会自动同步
             setShowLoginDialog(false)
         } catch (error) {
             console.error('Login failed:', error)
@@ -182,8 +172,7 @@ export function SuperPanel() {
 
     // Handle logout
     const handleLogout = () => {
-        authService.logout()
-        checkAuth()
+        logout()
     }
 
     const isEnglish = i18n.language.startsWith('en')
@@ -248,7 +237,7 @@ export function SuperPanel() {
                                 {isAuthenticated ? (
                                     <div className="flex items-center gap-2">
                                         <span className="text-xs text-slate-500 max-w-[80px] truncate">
-                                            {username}
+                                            {authUsername}
                                         </span>
                                         <button
                                             onClick={handleLogout}
@@ -350,3 +339,5 @@ export function SuperPanel() {
         </>
     )
 }
+
+export const SuperPanel = observer(SuperPanelInner)

@@ -1,12 +1,16 @@
-import { useSearchParams } from 'react-router-dom'
-import { useEffect, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
-
 /**
  * 统一的 URL Query 参数 Hook
- * 返回当前 URL 上所有 query 参数的键值对（只取每个 key 的第一个值）
- * 页面/组件应优先使用此 hook 再按需取具体参数，避免各处重复 useSearchParams().get('xxx')
- *
+ * 
+ * 专注于 URL 参数解析，不处理状态应用逻辑
+ * 状态应用由 initPage 统一处理
+ */
+
+import { useSearchParams } from 'react-router-dom'
+import { useMemo } from 'react'
+
+/**
+ * 解析当前 URL 上所有 query 参数的键值对（只取每个 key 的第一个值）
+ * 
  * @example
  * const params = useQueryParams()
  * const rid = params.rid
@@ -25,88 +29,25 @@ export function useQueryParams(): Record<string, string> {
 }
 
 /**
- * Theme modes: light or dark
+ * 获取特定的 URL 参数值
  */
-export type ThemeMode = 'light' | 'dark'
-
-export interface ThemeConfig {
-  mode: ThemeMode
-  /** Page background color */
-  background: string
-  /** Card background color */
-  cardBackground: string
-  /** Primary text color */
-  textPrimary: string
-  /** Secondary text color */
-  textSecondary: string
-  /** Border color */
-  border: string
-}
-
-export const THEMES: Record<ThemeMode, ThemeConfig> = {
-  light: {
-    mode: 'light',
-    background: '#F1EFEE',
-    cardBackground: '#FFFFFF',
-    textPrimary: '#1E293B',
-    textSecondary: '#64748B',
-    border: '#E2E8F0',
-  },
-  dark: {
-    mode: 'dark',
-    background: '#0F172A',
-    cardBackground: '#1E293B',
-    textPrimary: '#F1F5F9',
-    textSecondary: '#94A3B8',
-    border: '#334155',
-  },
+export function useUrlParam(key: string): string | undefined {
+  const params = useQueryParams()
+  return params[key]
 }
 
 /**
- * Hook to get theme mode from URL params
- * Usage: /details/blood-pressure?theme=light or ?theme=dark
+ * 获取多个 URL 参数值
  */
-export function useThemeMode(): ThemeConfig {
+export function useUrlParams<T extends readonly string[]>(
+  keys: T
+): Record<T[number], string | undefined> {
   const params = useQueryParams()
-  const theme = (params.theme as ThemeMode | undefined) ?? null
-
   return useMemo(() => {
-    if (theme === 'dark') {
-      return THEMES.dark
-    }
-    return THEMES.light
-  }, [theme])
-}
-
-/**
- * Hook to handle language from URL params
- * Usage: /details/blood-pressure?lang=zh or ?lang=en
- * 实际“应用”由 initPage 统一做；这里仅返回当前语言供组件使用。
- */
-export function useUrlLanguage(): string {
-  const params = useQueryParams()
-  const { i18n } = useTranslation()
-  const lang = params.lang
-
-  useEffect(() => {
-    if (lang && (lang === 'en' || lang === 'zh')) {
-      i18n.changeLanguage(lang)
-    }
-  }, [lang, i18n])
-
-  return i18n.language
-}
-
-/**
- * Combined hook for theme and language
- * Usage: /details/blood-pressure?theme=dark&lang=zh
- */
-export function useUrlConfig() {
-  const themeConfig = useThemeMode()
-  const language = useUrlLanguage()
-
-  return {
-    theme: themeConfig,
-    language,
-  }
+    const result: Record<string, string | undefined> = {}
+    keys.forEach((key) => {
+      result[key] = params[key]
+    })
+    return result as Record<T[number], string | undefined>
+  }, [params, keys])
 }
