@@ -38,7 +38,7 @@
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.5",
+    "@babel/core": "^7.29.0",
     "@babel/plugin-transform-logical-assignment-operators": "^7.28.5",
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.27.1",
     "@babel/plugin-transform-optional-chaining": "^7.28.5",
