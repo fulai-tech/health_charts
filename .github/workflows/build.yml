@@ -1,8 +1,6 @@
 name: Build
 
 on:
-  push:
-    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
 
@@ -30,13 +28,13 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: dist/
+          name: build
+          path: docs/
           retention-days: 7
 
       - name: Check build size
         run: |
           echo "Build size:"
-          du -sh dist/
+          du -sh docs/
           echo "Detailed breakdown:"
-          du -h dist/* | sort -rh | head -20
+          du -h docs/* | sort -rh | head -20
