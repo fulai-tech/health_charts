@@ -1,8 +1,5 @@
 /**
- * Token Validation Hook
- * 
- * 使用 globalStore 监听认证状态，提供 token 校验和自动重新登录功能
- * 简化逻辑，避免与 globalStore 的状态管理冲突
+ * Token validation hook: listens to auth store, handles expiry and optional auto re-login.
  */
 
 import { useEffect, useCallback, useRef, useState } from 'react'
@@ -19,24 +16,31 @@ interface UseTokenValidationOptions {
   autoReLogin?: boolean
 }
 
+type ValidationPhase = 'idle' | 'refreshing' | 'expired_notified'
+
 interface TokenValidationState {
+  phase: ValidationPhase
   isRefreshing: boolean
   lastChecked: number | null
 }
 
-/**
- * Hook to periodically validate token and handle expiration
- * 基于 globalStore 的认证状态，提供自动重新登录能力
- */
-export function useTokenValidation(options: UseTokenValidationOptions = {}) {
-  const {
-    interval = TOKEN_CHECK_INTERVAL,
-    onTokenExpired,
-    autoReLogin = true,
-  } = options
+function normalizeOptions(
+  options: UseTokenValidationOptions | undefined
+): Required<Pick<UseTokenValidationOptions, 'interval' | 'autoReLogin'>> & Pick<UseTokenValidationOptions, 'onTokenExpired'> {
+  const opts = options ?? {}
+  const interval = typeof opts.interval === 'number' && opts.interval > 0
+    ? opts.interval
+    : TOKEN_CHECK_INTERVAL
+  const autoReLogin = opts.autoReLogin !== false
+  return { ...opts, interval, autoReLogin }
+}
 
-  const { isAuthenticated, accessToken } = useAuthStore()
+export function useTokenValidation(options: UseTokenValidationOptions = {}) {
+  const { interval, onTokenExpired, autoReLogin } = normalizeOptions(options)
+
+  const { isAuthenticated } = useAuthStore()
   const [state, setState] = useState<TokenValidationState>({
+    phase: 'idle',
     isRefreshing: false,
     lastChecked: null,
   })
@@ -44,71 +48,65 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
   const isRefreshingRef = useRef(false)
   const prevAuthenticatedRef = useRef(isAuthenticated)
 
-  // 检测登录状态变化
   useEffect(() => {
     const wasAuthenticated = prevAuthenticatedRef.current
     prevAuthenticatedRef.current = isAuthenticated
 
-    // 从已认证变为未认证 = token 过期
     if (wasAuthenticated && !isAuthenticated && !isRefreshingRef.current) {
       console.log('[TokenValidation] Token expired, authentication lost')
+      setState((prev) => (prev.phase === 'expired_notified' ? prev : { ...prev, phase: 'expired_notified' }))
       onTokenExpired?.()
     }
   }, [isAuthenticated, onTokenExpired])
 
   const attemptReLogin = useCallback(async () => {
-    if (!IS_TEST_ENV || isRefreshingRef.current || isAuthenticated) {
-      return
-    }
-
-    // URL 带有 token 时绝不触发默认账户 re-login，避免顶替 Android 登录状态
-    if (getTokenFromUrl()) {
-      return
-    }
+    if (!IS_TEST_ENV) return
+    if (isRefreshingRef.current) return
+    if (isAuthenticated) return
+    if (getTokenFromUrl()) return
 
     const authData = authService.getAuthData()
-    if (!authData || !authService.canRefresh()) {
+    if (!authData || !authService.canRefresh()) return
+
+    setState((prev) => {
+      if (prev.phase === 'refreshing') return prev
+      return { ...prev, phase: 'refreshing', isRefreshing: true }
+    })
+    isRefreshingRef.current = true
+
+    if (!autoReLogin) {
+      isRefreshingRef.current = false
+      setState((prev) => ({ ...prev, phase: 'idle', isRefreshing: false, lastChecked: Date.now() }))
       return
     }
 
-    if (autoReLogin) {
-      isRefreshingRef.current = true
-      setState((prev) => ({ ...prev, isRefreshing: true }))
-
-      try {
-        console.log('[TokenValidation] Attempting auto re-login...')
-        await authService.login()
-        console.log('[TokenValidation] Re-login successful')
-        setState({
-          isRefreshing: false,
-          lastChecked: Date.now(),
-        })
-      } catch (error) {
-        console.error('[TokenValidation] Re-login failed:', error)
-        authService.logout()
-        setState({
-          isRefreshing: false,
-          lastChecked: Date.now(),
-        })
-      } finally {
-        isRefreshingRef.current = false
-      }
+    try {
+      console.log('[TokenValidation] Attempting auto re-login...')
+      await authService.login()
+      console.log('[TokenValidation] Re-login successful')
+      setState({
+        phase: 'idle',
+        isRefreshing: false,
+        lastChecked: Date.now(),
+      })
+    } catch (error) {
+      console.error('[TokenValidation] Re-login failed:', error)
+      authService.logout()
+      setState({
+        phase: 'idle',
+        isRefreshing: false,
+        lastChecked: Date.now(),
+      })
+    } finally {
+      isRefreshingRef.current = false
     }
   }, [autoReLogin, isAuthenticated])
 
-  // 定期检查
   useEffect(() => {
-    if (!IS_TEST_ENV) {
-      return
-    }
-
+    if (!IS_TEST_ENV) return
     const checkInterval = setInterval(() => {
       setState((prev) => ({ ...prev, lastChecked: Date.now() }))
-      
-      // 如果当前未认证且有历史登录数据，尝试重新登录
-      if (!isAuthenticated) {
-        attemptReLogin()
-      }
+      if (!isAuthenticated) attemptReLogin()
     }, interval)
 
     return () => clearInterval(checkInterval)
