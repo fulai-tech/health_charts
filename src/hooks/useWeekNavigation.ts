@@ -7,6 +7,7 @@ import {
   getNextWeekRange,
   canNavigateToNextWeek
 } from '@/lib/dateUtils'
+import { assert, assertDateRange } from '@/hooks/core'
 
 /**
  * Date range with Date objects
@@ -120,12 +121,12 @@ export function useWeekNavigation(): UseWeekNavigationReturn {
     })
   }, [])
 
-  // Jump to a specific week
   const setWeek = useCallback((start: Date, end: Date) => {
-    // Normalize to midnight
+    assert(start instanceof Date && !Number.isNaN(start.getTime()), 'setWeek: start must be a valid Date')
+    assert(end instanceof Date && !Number.isNaN(end.getTime()), 'setWeek: end must be a valid Date')
     const normalizedStart = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0)
     const normalizedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate(), 0, 0, 0, 0)
-    
+    assertDateRange(normalizedStart, normalizedEnd, 'setWeek')
     setDateRange({
       start: normalizedStart,
       end: normalizedEnd,
