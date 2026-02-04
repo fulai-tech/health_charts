@@ -28,6 +28,7 @@ import { Type6_SodiumBPWidgetPage } from '@/pages/widgets/dialog/Type6_SodiumBPW
 import { Type7_WeeklyHealthScoreWidgetPage } from '@/pages/widgets/dialog/Type7_WeeklyHealthScoreWidgetPage'
 import { Type8_SbpSleepTrendWidgetPage } from '@/pages/widgets/dialog/Type8_SbpSleepTrendWidgetPage'
 import { Type9_ImprovementPlanWidgetPage } from '@/pages/widgets/dialog/Type9_ImprovementPlanWidgetPage'
+import { Type10_PPGSignalWidgetPage } from '@/pages/widgets/dialog/Type10_PPGSignalWidgetPage'
 
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
@@ -187,6 +188,9 @@ function App() {
 
             {/* Type 9 - Customized Improvement Plan Widget */}
             <Route path="/widget/type-9" element={<Type9_ImprovementPlanWidgetPage />} />
+
+            {/* Type 10 - PPG Signal Widget */}
+            <Route path="/widget/type-10" element={<Type10_PPGSignalWidgetPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -29,7 +29,8 @@
     "widgetType6": "钠摄入血压关联",
     "widgetType7": "每周健康分数",
     "widgetType8": "SBP与睡眠趋势图",
-    "widgetType9": "定制改善计划"
+    "widgetType9": "定制改善计划",
+    "widgetType10": "PPG 信号采集"
   },
   "common": {
     "loading": "加载中...",
@@ -571,6 +572,15 @@
       "added": "已添加",
       "selected": "已选择",
       "completeSelection": "完成选择"
+    },
+    "type10": {
+      "title": "PPG 信号",
+      "start": "开始",
+      "restart": "重新开始",
+      "idleHint": "点击开始按钮开始测量",
+      "statusIdle": "准备测量",
+      "statusMeasuring": "正在采集红外信号...",
+      "statusCompleted": "测量完成"
     }
   }
 }
