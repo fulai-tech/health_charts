@@ -23,7 +23,7 @@ import { widgetBGColor } from '@/config/theme'
 
 type MeasureStatus = 'idle' | 'measuring' | 'completed'
 
-interface PPGData {
+interface _PPGData {
   values: number[]
 }
 
@@ -269,7 +269,7 @@ function usePPGCanvas(
         }
 
         lastX = x
-        lastY = y
+        const _lastY = y
       }
 
       // 绘制描边
@@ -464,6 +464,16 @@ export function Type10_PPGSignalWidgetPage() {
   // 计算进度
   const progress = (ANIMATION_CONFIG.maxDuration - remainingTime) / ANIMATION_CONFIG.maxDuration
 
+  // 停止测量（需在 useEffect / handleStart 之前声明，避免 “accessed before declaration”）
+  const handleStop = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = 0
+    }
+    setStatus('completed')
+    console.log('[PPGSignalWidget] 测量结束')
+  }, [])
+
   // 注册数据接收回调
   useEffect(() => {
     onData((rawData) => {
@@ -484,7 +494,7 @@ export function Type10_PPGSignalWidgetPage() {
         }
       }
     })
-  }, [onData])
+  }, [onData, handleStop])
 
   // 开始测量
   const handleStart = useCallback(() => {
@@ -512,17 +522,7 @@ export function Type10_PPGSignalWidgetPage() {
     }, 1000)
 
     console.log('[PPGSignalWidget] 开始测量')
-  }, [status, send, resetCanvas])
-
-  // 停止测量
-  const handleStop = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = 0
-    }
-    setStatus('completed')
-    console.log('[PPGSignalWidget] 测量结束')
-  }, [])
+  }, [status, send, resetCanvas, handleStop])
 
   // 清理定时器
   useEffect(() => {

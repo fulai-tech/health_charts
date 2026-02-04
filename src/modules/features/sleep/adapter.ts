@@ -111,7 +111,12 @@ export function adaptSleepData(apiData: SleepDetailData): SleepDomainModel {
     }))
 
     // Map sleep routine
-    const routine = apiData?.sleep_routine || { has_data: false } as any
+    const routine = (apiData?.sleep_routine || { has_data: false }) as {
+        has_data?: boolean
+        avg_sleep_time?: { time_text?: string; change?: { value?: number; trend?: string; text?: string } }
+        avg_wake_time?: { time_text?: string; change?: { value?: number; trend?: string; text?: string } }
+        insight?: string | null
+    }
     const mappedRoutine = {
         hasData: routine.has_data || false,
         avgSleepTime: {

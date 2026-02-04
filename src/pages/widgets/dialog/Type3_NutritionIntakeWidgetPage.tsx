@@ -108,7 +108,7 @@ function calcProgress(value: number, recommended: number): number {
  * 格式化大数值显示
  * 避免过长数字溢出
  */
-function formatLargeNumber(value: number, maxDigits: number = 4): string {
+function formatLargeNumber(value: number, _maxDigits: number = 4): string {
   if (value < 0) return '0'
   if (value >= 10000) return '9999+'
   if (value >= 1000) return value.toFixed(0)
@@ -181,9 +181,9 @@ function IntakeProgress({ label, intake, recommendedLabel, exceedLabel }: Intake
   
   // 格式化数值，避免溢出
   const displayValue = formatLargeNumber(intake.value)
-  const displayRecommended = formatLargeNumber(intake.recommended)
+  const _displayRecommended = formatLargeNumber(intake.recommended)
   // 限制超标百分比显示范围
-  const displayExceedPercent = clampValue(Math.round(intake.exceedPercent), 0, 999)
+  const _displayExceedPercent = clampValue(Math.round(intake.exceedPercent), 0, 999)
   
   return (
     <div className="mb-4 last:mb-0">

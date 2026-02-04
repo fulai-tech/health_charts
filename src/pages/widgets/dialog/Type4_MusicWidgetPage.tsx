@@ -158,7 +158,7 @@ interface MusicCardProps {
   recommendListenLabel: string
 }
 
-function MusicCard({ item, index, defaultItem, onCardClick, recommendListenLabel }: MusicCardProps) {
+function MusicCard({ item, index: _index, defaultItem, onCardClick, recommendListenLabel }: MusicCardProps) {
   const [isHovered, setIsHovered] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
   

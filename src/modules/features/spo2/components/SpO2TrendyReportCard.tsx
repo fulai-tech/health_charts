@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { TrendingUp, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { VITAL_COLORS, CHART_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
+import { VITAL_COLORS, UI_STYLES, UI_COLORS } from '@/config/theme'
 import type { SpO2DomainModel } from '../types'
 import { memo, useMemo } from 'react'
 import { TrendLineChart } from '@/components/charts/TrendLineChart'
@@ -114,7 +114,7 @@ export function SpO2TrendyReportCard({ data, className, isLoading }: SpO2TrendyR
         </span>
       )
     }
-  }, [data, UI_COLORS.trend])
+  }, [data])
 
   return (
     <Card className={`${className} relative overflow-hidden`}>
