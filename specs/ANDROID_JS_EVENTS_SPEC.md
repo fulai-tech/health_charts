@@ -31,6 +31,8 @@
 | **`click-weekly-suggestion`** | **周报页「查看详情」点击** |
 | **`click-widget-plan-add`** | **改善计划 Widget「添加」按钮点击** |
 | **`click-widget-plan-select`** | **改善计划 Widget「已选择」按钮点击** |
+| **`click-widget-ppg-start`** | **PPG 信号 Widget「开始」按钮点击** |
+| **`page-widget-ppg-stop`** | **PPG 信号 Widget 测量结束信号（Android -> JS）** |
 
 ---
 
@@ -77,6 +79,8 @@
 | **`click-weekly-suggestion`** | **`{ suggestionId: string }`** — 建议唯一 ID，用于跳转/拉取详情 |
 | **`click-widget-plan-add`** | **`{ itemId: string, itemType: string, itemTitle: string }`** — 点击添加的改善计划项目信息 |
 | **`click-widget-plan-select`** | **无（data 可为空或不传）** — 仅点击「已选择」按钮，无需传递业务数据 |
+| **`click-widget-ppg-start`** | **`{ timestamp: number }`** — 点击开始测量按钮，timestamp 为点击时间戳 |
+| **`page-widget-ppg-stop`** | **无（data 可为空或不传）** — Android 发送的测量结束信号 |
 
 ---
 

@@ -29,7 +29,8 @@
     "widgetType6": "Sodium & BP Correlation",
     "widgetType7": "Weekly Health Score",
     "widgetType8": "SBP & Sleep Trend",
-    "widgetType9": "Improvement Plan"
+    "widgetType9": "Improvement Plan",
+    "widgetType10": "PPG Signal"
   },
   "common": {
     "loading": "Loading...",
@@ -571,6 +572,15 @@
       "added": "Added",
       "selected": "Selected",
       "completeSelection": "Complete selection"
+    },
+    "type10": {
+      "title": "PPG Signal",
+      "start": "Start",
+      "restart": "Restart",
+      "idleHint": "Click Start to begin measurement",
+      "statusIdle": "Ready to measure",
+      "statusMeasuring": "In acquiring infrared signals...",
+      "statusCompleted": "Measurement completed"
     }
   }
 }
