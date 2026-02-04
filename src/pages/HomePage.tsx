@@ -96,7 +96,7 @@ export function HomePage() {
             <div className="grid gap-3">
               {category.items.map((route) => {
                 const Icon = route.icon
-                const isExternal = (route as any).isExternal
+                const isExternal = !!(route as { path: string; isExternal?: boolean }).isExternal
                 const linkClassName = "flex items-center gap-4 p-4 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all group"
                 
                 if (isExternal) {

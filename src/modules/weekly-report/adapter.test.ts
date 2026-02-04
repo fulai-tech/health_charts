@@ -54,7 +54,7 @@ describe('weekly-report adapter - 数据归一化', () => {
     const dataWithNulls = {
       overall: {
         score: 80,
-        status: null as any, // 模拟 API 返回 null
+        status: null, // 模拟 API 返回 null
         evaluate: 'Test',
         peer_compare: 'Test',
         days_on_target: 5,
@@ -62,7 +62,7 @@ describe('weekly-report adapter - 数据归一化', () => {
       },
     }
     
-    const result = normalizeWeeklyReportData(dataWithNulls)
+    const result = normalizeWeeklyReportData(dataWithNulls as unknown as Partial<WeeklyReportDataAPI>)
     
     // status 应该被默认值填充
     expect(result.overall.status).toBeDefined()

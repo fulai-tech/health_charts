@@ -12,7 +12,7 @@ interface NutritionDataAnalysisCardProps {
 }
 
 export const NutritionDataAnalysisCard = ({ data, className, isLoading }: NutritionDataAnalysisCardProps) => {
-    const { t } = useTranslation()
+    const { t: _t } = useTranslation()
     const themeColor = VITAL_COLORS.nutrition || '#FB923D'
 
     return (

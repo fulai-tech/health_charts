@@ -28,9 +28,9 @@ export function SpO2DataAnalysisCard({ data, className, isLoading }: SpO2DataAna
 
   // Similar to HR, we need to ensure items are strings. 
   // Original SpO2DataAnalysisCard used item.content, so we map.
-  const formattedItems = (dataAnalysis.length > 0 ? dataAnalysis : defaultAnalysis).map((item: any) => {
-    return typeof item === 'string' ? item : item.content
-  })
+  const formattedItems = (dataAnalysis.length > 0 ? dataAnalysis : defaultAnalysis)
+    .map((item: string | { content?: string }) => (typeof item === 'string' ? item : item.content ?? ''))
+    .filter((s): s is string => s !== '')
 
   return (
     <DataAnalysisCard

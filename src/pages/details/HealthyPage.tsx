@@ -11,7 +11,7 @@
  * - ?theme=light or ?theme=dark (theme mode)
  */
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { DateRangePicker } from '@/components/common/DateRangePicker'
@@ -83,7 +83,7 @@ export function HealthyPage() {
   }, [dateRange.end])
 
   // Format dates for API
-  const apiDateRange = useMemo(() => ({
+  const _apiDateRange = useMemo(() => ({
     startDate: formatDateToAPI(dateRange.start),
     endDate: formatDateToAPI(dateRange.end),
   }), [dateRange])
@@ -126,7 +126,7 @@ export function HealthyPage() {
   }
 
   // Fetch healthy data using viewType
-  const { data, isLoading, isFetching, error } = useHealthyData(viewType)
+  const { data, isLoading, isFetching: _isFetching, error } = useHealthyData(viewType)
 
 
 

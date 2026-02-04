@@ -105,7 +105,7 @@ const SleepTrendyReportCardInner = ({ data, className, isLoading }: SleepTrendyR
             awake: point.awake,
             total: point.total,
         })) ?? placeholderChartData,
-        [data?.chartData, t]
+        [data, t, placeholderChartData]
     )
 
     const maxMinutes = useMemo(

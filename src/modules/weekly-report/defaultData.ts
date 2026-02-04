@@ -39,7 +39,7 @@ export function getDefaultWeeklyReportData(): WeeklyReportDataAPI {
     label,
     value: { systolic: 0, diastolic: 0 },
   })
-  const trendChart = EMPTY_TREND_LABELS.map((l, i) => trendChartItem(l))
+  const trendChart = EMPTY_TREND_LABELS.map((l, _i) => trendChartItem(l))
   const bpTrendChart = EMPTY_TREND_LABELS.map((l) => bpTrendItem(l))
 
   return {

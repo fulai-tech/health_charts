@@ -25,16 +25,24 @@ interface WRNutritionCardProps {
   className?: string
 }
 
+/** 营养 Tooltip 数据 */
+interface NutritionTooltipPayload {
+  calories?: number
+  status?: string
+  statusLabel?: string
+}
+
 /** 自定义Tooltip */
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ payload?: NutritionTooltipPayload }>; label?: string }) => {
   if (!active || !payload?.length) return null
 
   const data = payload[0]?.payload
+  if (!data || data.calories === undefined || data.status === undefined) return null
   return (
     <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3 min-w-[100px]">
       <p className="text-xs font-medium text-slate-600 mb-1">{label}</p>
       <p className="text-sm font-semibold text-slate-800">{data.calories} kcal</p>
-      <p className="text-xs mt-1" style={{ color: NUTRITION_STATUS_COLORS[data.status] ?? '#64748b' }}>
+      <p className="text-xs mt-1" style={{ color: NUTRITION_STATUS_COLORS[data.status ?? ''] ?? '#64748b' }}>
         {data.statusLabel}
       </p>
     </div>

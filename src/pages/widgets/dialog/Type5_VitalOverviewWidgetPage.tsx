@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
-import { Heart, Droplets, Activity } from 'lucide-react'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 
 // ============================================
@@ -17,7 +16,7 @@ type VitalStatus = 'normal' | 'warning' | 'danger'
 /**
  * 单个体征数据类型
  */
-interface VitalItemData {
+interface _VitalItemData {
   type: 'heart-rate' | 'blood-pressure' | 'spo2' | 'poct'
   value: string | number
   subValue?: string | number // 用于血压的舒张压
@@ -326,7 +325,7 @@ function VitalCard({
   unit,
   statusText,
   status,
-  highlighted,
+  highlighted: _highlighted,
   isActive,
   onClick,
 }: VitalCardProps) {

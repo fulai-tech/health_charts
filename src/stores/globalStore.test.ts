@@ -26,7 +26,7 @@ const localStorageMock = (() => {
 })()
 
 // 在浏览器环境中 globalThis 就是 window
-globalThis.localStorage = localStorageMock as any
+globalThis.localStorage = localStorageMock as Storage
 
 // 简化的 GlobalStore 用于测试（避免导入整个 store）
 class TestGlobalStore {

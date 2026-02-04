@@ -11,7 +11,7 @@ import {
   Line,
 } from 'recharts'
 import { UI_STYLES, VITAL_COLORS } from '@/config/theme'
-import type { VitalSignsAPI, TrendChartItemAPI, BPTrendChartItemAPI } from '../types'
+import type { VitalSignsAPI } from '../types'
 
 // 图表颜色配置
 const LINE_COLORS = {
@@ -48,7 +48,7 @@ const WRVitalSignsTrendCardInner = ({
         unit={hr.unit}
         status={hr.status.label}
         color={LINE_COLORS.heartRate}
-        trendData={hr.trend_chart.map(item => ({ value: item.value }))}
+        trendData={hr.trend_chart.map(item => ({ value: item.value ?? undefined }))}
       />
       <VitalMiniCard
         title={t('weeklyReport.avgBP')}
@@ -69,7 +69,7 @@ const WRVitalSignsTrendCardInner = ({
         unit={spo2.unit}
         status={spo2.status.label}
         color={LINE_COLORS.bloodOxygen}
-        trendData={spo2.trend_chart.map(item => ({ value: item.value }))}
+        trendData={spo2.trend_chart.map(item => ({ value: item.value ?? undefined }))}
       />
       <VitalMiniCard
         title={t('weeklyReport.avgGlucose')}
@@ -77,7 +77,7 @@ const WRVitalSignsTrendCardInner = ({
         unit={glu.unit}
         status={glu.status.label}
         color={LINE_COLORS.bloodGlucose}
-        trendData={glu.trend_chart.map(item => ({ value: item.value }))}
+        trendData={glu.trend_chart.map(item => ({ value: item.value ?? undefined }))}
       />
     </div>
   )
@@ -100,7 +100,7 @@ const VitalMiniCard = memo(({
   status: string
   color: string
   secondaryColor?: string
-  trendData: any[]
+  trendData: Array<{ value?: number; systolic?: number; diastolic?: number }>
   isBP?: boolean
 }) => {
   // 判断状态颜色（正常为绿色，异常为粉色）
