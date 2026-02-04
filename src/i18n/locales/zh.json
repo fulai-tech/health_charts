@@ -28,7 +28,8 @@
     "widgetType5": "健康体征总览",
     "widgetType6": "钠摄入血压关联",
     "widgetType7": "每周健康分数",
-    "widgetType8": "SBP与睡眠趋势图"
+    "widgetType8": "SBP与睡眠趋势图",
+    "widgetType9": "定制改善计划"
   },
   "common": {
     "loading": "加载中...",
@@ -563,6 +564,13 @@
     "type8": {
       "sbp": "收缩压",
       "sleepDuration": "睡眠时长"
+    },
+    "type9": {
+      "title": "定制改善计划",
+      "add": "添加",
+      "added": "已添加",
+      "selected": "已选择",
+      "completeSelection": "完成选择"
     }
   }
 }
