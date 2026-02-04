@@ -28,7 +28,8 @@
     "widgetType5": "Health Vitals Overview",
     "widgetType6": "Sodium & BP Correlation",
     "widgetType7": "Weekly Health Score",
-    "widgetType8": "SBP & Sleep Trend"
+    "widgetType8": "SBP & Sleep Trend",
+    "widgetType9": "Improvement Plan"
   },
   "common": {
     "loading": "Loading...",
@@ -563,6 +564,13 @@
     "type8": {
       "sbp": "SBP",
       "sleepDuration": "Sleep duration"
+    },
+    "type9": {
+      "title": "Customized improvement plan",
+      "add": "Add",
+      "added": "Added",
+      "selected": "Selected",
+      "completeSelection": "Complete selection"
     }
   }
 }

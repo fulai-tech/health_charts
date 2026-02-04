@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar, BarChart3, TrendingUp } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar, BarChart3, TrendingUp, Zap } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { AuthButton } from '@/components/ui/AuthButton'
 import { useTokenValidation } from '@/hooks/useTokenValidation'
@@ -60,6 +60,7 @@ export function HomePage() {
         { path: '/widget/type-6', label: t('home.widgetType6'), icon: FlaskConical, color: VITAL_COLORS.nutrition, alphaColor: VITAL_COLORS_ALPHA.nutrition, type: 6 },
         { path: '/widget/type-7', label: t('home.widgetType7'), icon: BarChart3, color: HEALTHY_COLORS.primary, alphaColor: HEALTHY_COLORS.alpha, type: 7 },
         { path: '/widget/type-8', label: t('home.widgetType8'), icon: TrendingUp, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp, type: 8 },
+        { path: '/widget/type-9', label: t('home.widgetType9'), icon: Zap, color: '#F97316', alphaColor: 'rgba(249, 115, 22, 0.125)', type: 9 },
       ],
     },
   ]

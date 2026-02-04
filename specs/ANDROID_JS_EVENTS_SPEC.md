@@ -1,9 +1,5 @@
 # H5 → Android 事件接口
 
-> 仅约定：如何接收、消息格式、事件名规范、各事件 data 含义。业务逻辑由 Android 自行处理。
-
----
-
 ## 0. 事件名规范与维护列表
 
 ### 命名规范
@@ -33,6 +29,8 @@
 | `data-{pagename}-request` | H5 请求数据 |
 | `click-{pagename}-card` | 卡片/条目点击 |
 | **`click-weekly-suggestion`** | **周报页「查看详情」点击** |
+| **`click-widget-plan-add`** | **改善计划 Widget「添加」按钮点击** |
+| **`click-widget-plan-select`** | **改善计划 Widget「已选择」按钮点击** |
 
 ---
 
@@ -64,21 +62,6 @@
 | `pageId` | string | 来源页面标识 |
 | `timestamp` | number | 毫秒时间戳 |
 
-**解析示例（Kotlin）：**
-
-```kotlin
-@JavascriptInterface
-fun onJsMessage(payload: String) {
-    val json = JSONObject(payload)
-    val event = json.getString("event")
-    val data = if (json.has("data") && !json.isNull("data")) json.getJSONObject("data") else null
-    val pageId = json.optString("pageId", "")
-    val timestamp = json.optLong("timestamp", 0L)
-    // 根据 event 分发，业务逻辑由 Android 自行实现
-}
-```
-
----
 
 ## 3. data 含义表
 
@@ -92,6 +75,8 @@ fun onJsMessage(payload: String) {
 | `data-{pagename}-request` | `{}` 或业务参数 |
 | `click-{pagename}-card` | 视页面而定，如 `{ cardType?, cardIndex?, card?, data? }` |
 | **`click-weekly-suggestion`** | **`{ suggestionId: string }`** — 建议唯一 ID，用于跳转/拉取详情 |
+| **`click-widget-plan-add`** | **`{ itemId: string, itemType: string, itemTitle: string }`** — 点击添加的改善计划项目信息 |
+| **`click-widget-plan-select`** | **无（data 可为空或不传）** — 仅点击「已选择」按钮，无需传递业务数据 |
 
 ---
 

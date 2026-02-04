@@ -27,6 +27,7 @@ import { Type5_VitalOverviewWidgetPage } from '@/pages/widgets/dialog/Type5_Vita
 import { Type6_SodiumBPWidgetPage } from '@/pages/widgets/dialog/Type6_SodiumBPWidgetPage'
 import { Type7_WeeklyHealthScoreWidgetPage } from '@/pages/widgets/dialog/Type7_WeeklyHealthScoreWidgetPage'
 import { Type8_SbpSleepTrendWidgetPage } from '@/pages/widgets/dialog/Type8_SbpSleepTrendWidgetPage'
+import { Type9_ImprovementPlanWidgetPage } from '@/pages/widgets/dialog/Type9_ImprovementPlanWidgetPage'
 
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
@@ -183,6 +184,9 @@ function App() {
 
             {/* Type 8 - SBP & Sleep Trend Chart Widget */}
             <Route path="/widget/type-8" element={<Type8_SbpSleepTrendWidgetPage />} />
+
+            {/* Type 9 - Customized Improvement Plan Widget */}
+            <Route path="/widget/type-9" element={<Type9_ImprovementPlanWidgetPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
