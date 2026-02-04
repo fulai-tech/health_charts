@@ -14,13 +14,23 @@ interface WRSleepCardProps {
   className?: string
 }
 
+/** 睡眠 Tooltip 数据 */
+interface SleepTooltipPayload {
+  total?: number | null
+  totalText?: string
+  deepText?: string
+  lightText?: string
+  remText?: string
+  awakeText?: string
+}
+
 /** 自定义 Tooltip */
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ payload?: SleepTooltipPayload }>; label?: string }) => {
   const { t } = useTranslation()
   if (!active || !payload?.length) return null
 
   const data = payload[0]?.payload
-  if (!data || data.total === null) {
+  if (!data || data.total === null || data.total === undefined) {
     return (
       <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3">
         <p className="text-xs text-slate-500">{label}</p>
@@ -30,16 +40,16 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   }
 
   const sleepLegends = [
-    { key: 'deep', label: t('weeklyReport.sleepDeep'), color: SLEEP_COLORS.deep },
-    { key: 'light', label: t('weeklyReport.sleepLight'), color: SLEEP_COLORS.light },
-    { key: 'rem', label: t('weeklyReport.sleepRem'), color: SLEEP_COLORS.rem },
-    { key: 'awake', label: t('weeklyReport.awake'), color: SLEEP_COLORS.awake },
+    { key: 'deep' as const, label: t('weeklyReport.sleepDeep'), color: SLEEP_COLORS.deep },
+    { key: 'light' as const, label: t('weeklyReport.sleepLight'), color: SLEEP_COLORS.light },
+    { key: 'rem' as const, label: t('weeklyReport.sleepRem'), color: SLEEP_COLORS.rem },
+    { key: 'awake' as const, label: t('weeklyReport.awake'), color: SLEEP_COLORS.awake },
   ]
 
   return (
     <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3 min-w-[120px]">
       <p className="text-xs font-medium text-slate-600 mb-2">{label}</p>
-      <p className="text-sm font-semibold text-slate-800 mb-2">{data.totalText}</p>
+      <p className="text-sm font-semibold text-slate-800 mb-2">{(data.totalText as string) ?? '-'}</p>
       <div className="space-y-1">
         {sleepLegends.map((item) => (
           <div key={item.key} className="flex items-center justify-between gap-3">
@@ -47,7 +57,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
               <span className="text-xs text-slate-600">{item.label}</span>
             </div>
-            <span className="text-xs text-slate-800">{data[`${item.key}Text`] || '-'}</span>
+            <span className="text-xs text-slate-800">{(data[`${item.key}Text` as keyof typeof data] as string) ?? '-'}</span>
           </div>
         ))}
       </div>

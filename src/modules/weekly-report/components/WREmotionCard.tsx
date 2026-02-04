@@ -21,13 +21,21 @@ interface WREmotionCardProps {
   className?: string
 }
 
+/** 情绪 Tooltip 数据 */
+interface EmotionTooltipPayload {
+  score?: number | null
+  positive?: number
+  neutral?: number
+  negative?: number
+}
+
 /** 自定义Tooltip */
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ payload?: EmotionTooltipPayload }>; label?: string }) => {
   const { t } = useTranslation()
   if (!active || !payload?.length) return null
 
   const data = payload[0]?.payload
-  if (!data || data.score === null) {
+  if (!data || data.score === null || data.score === undefined) {
     return (
       <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3">
         <p className="text-xs text-slate-500">{label}</p>
@@ -37,9 +45,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   }
 
   const emotionLegends = [
-    { key: 'positive', label: t('weeklyReport.positive'), color: EMOTION_CHART_COLORS.positive },
-    { key: 'neutral', label: t('weeklyReport.neutral'), color: EMOTION_CHART_COLORS.neutral },
-    { key: 'negative', label: t('weeklyReport.negative'), color: EMOTION_CHART_COLORS.negative },
+    { key: 'positive' as const, label: t('weeklyReport.positive'), color: EMOTION_CHART_COLORS.positive },
+    { key: 'neutral' as const, label: t('weeklyReport.neutral'), color: EMOTION_CHART_COLORS.neutral },
+    { key: 'negative' as const, label: t('weeklyReport.negative'), color: EMOTION_CHART_COLORS.negative },
   ]
 
   return (
@@ -53,7 +61,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
               <span className="text-xs text-slate-600">{item.label}</span>
             </div>
-            <span className="text-xs text-slate-800">{data[item.key] || 0}%</span>
+            <span className="text-xs text-slate-800">{(data[item.key as keyof typeof data] as number) ?? 0}%</span>
           </div>
         ))}
       </div>

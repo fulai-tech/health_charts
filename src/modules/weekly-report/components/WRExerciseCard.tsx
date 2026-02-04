@@ -20,12 +20,19 @@ interface WRExerciseCardProps {
   className?: string
 }
 
+/** 运动 Tooltip 数据 */
+interface ExerciseTooltipPayload {
+  completion_rate?: number
+  duration?: string
+}
+
 /** 自定义Tooltip */
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ payload?: ExerciseTooltipPayload }>; label?: string }) => {
   const { t } = useTranslation()
   if (!active || !payload?.length) return null
 
   const data = payload[0]?.payload
+  if (!data || data.completion_rate === undefined || data.duration === undefined) return null
   return (
     <div className="bg-white rounded-lg shadow-lg border border-slate-200 p-3 min-w-[100px]">
       <p className="text-xs font-medium text-slate-600 mb-1">{label}</p>
