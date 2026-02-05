@@ -122,6 +122,7 @@ function SuperPanelInner() {
     const [loginError, setLoginError] = useState<string | null>(null)
     const [logs, setLogs] = useState<LogEntry[]>([])
     const [showLogs, setShowLogs] = useState(false)
+    const [isSmallScreen, setIsSmallScreen] = useState(false)
     const panelRef = useRef<HTMLDivElement>(null)
     const logIdRef = useRef(0)
     // 增加一个 Ref 来充当"互斥锁"，防止处理日志时产生新日志造成的死循环
@@ -136,10 +137,23 @@ function SuperPanelInner() {
         info: typeof console.info
     } | null>(null)
 
-    // Don't render in production
-    if (!IS_TEST_ENV) {
-        return null
-    }
+    // 检测屏幕尺寸，自适应布局
+    useEffect(() => {
+        if (!IS_TEST_ENV) return // 生产环境跳过
+        
+        const checkScreenSize = () => {
+            // 当屏幕宽度小于 360px 或高度小于 500px 时，认为是小屏幕
+            const isSmall = window.innerWidth < 360 || window.innerHeight < 500
+            setIsSmallScreen(isSmall)
+        }
+
+        // 初始检测
+        checkScreenSize()
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', checkScreenSize)
+        return () => window.removeEventListener('resize', checkScreenSize)
+    }, [])
 
     // 重写console方法来捕获日志 - 优化版本
     useEffect(() => {
@@ -279,6 +293,11 @@ function SuperPanelInner() {
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [isOpen])
 
+    // Don't render in production - 必须在所有 hooks 之后检查
+    if (!IS_TEST_ENV) {
+        return null
+    }
+
     // Handle language toggle
     const handleLanguageToggle = () => {
         const newLang = i18n.language.startsWith('en') ? 'zh' : 'en'
@@ -368,13 +387,28 @@ function SuperPanelInner() {
             {/* Floating Button */}
             <div
                 ref={panelRef}
-                className="fixed bottom-6 right-6 z-[9999]"
+                className={cn(
+                    "fixed z-[9999]",
+                    // 小屏幕时调整位置，避免溢出
+                    isSmallScreen ? "bottom-3 right-3" : "bottom-6 right-6"
+                )}
             >
                 {/* Control Panel */}
                 {isOpen && (
                     <div
                         className={cn(
-                            'absolute bottom-16 right-0 w-72',
+                            'absolute right-0',
+                            // 小屏幕时调整弹出位置
+                            isSmallScreen ? 'bottom-14' : 'bottom-16',
+                            // 响应式宽度：小屏幕时使用可用宽度，否则固定宽度
+                            isSmallScreen 
+                                ? 'w-[calc(100vw-24px)] max-w-72' 
+                                : 'w-72',
+                            // 限制最大高度，防止溢出屏幕
+                            isSmallScreen
+                                ? 'max-h-[calc(100vh-70px)]'
+                                : 'max-h-[calc(100vh-100px)]',
+                            'overflow-hidden flex flex-col',
                             'bg-white rounded-2xl shadow-2xl border border-slate-200',
                             'transform transition-all duration-200 origin-bottom-right',
                             'animate-fade-in'
@@ -396,8 +430,8 @@ function SuperPanelInner() {
                             </button>
                         </div>
 
-                        {/* Controls */}
-                        <div className="px-4 py-2">
+                        {/* Controls - 可滚动区域 */}
+                        <div className="px-4 py-2 overflow-y-auto flex-1 min-h-0">
                             {/* Language */}
                             <ControlRow
                                 icon={<Globe className="w-4 h-4" />}
@@ -509,7 +543,7 @@ function SuperPanelInner() {
 
                         {/* Console Logs */}
                         {showLogs && (
-                            <div className="border-t border-slate-100">
+                            <div className="border-t border-slate-100 flex-shrink-0">
                                 <div className="px-4 py-2 bg-slate-50">
                                     <div className="flex items-center justify-between mb-2">
                                         <span className="text-xs font-medium text-slate-600">
@@ -520,7 +554,11 @@ function SuperPanelInner() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="max-h-48 overflow-y-auto bg-slate-900 text-green-400 font-mono text-[10px]">
+                                {/* 小屏幕时减小日志区高度 */}
+                                <div className={cn(
+                                    "overflow-y-auto bg-slate-900 text-green-400 font-mono text-[10px]",
+                                    isSmallScreen ? "max-h-32" : "max-h-48"
+                                )}>
                                     {logs.length === 0 ? (
                                         <div className="p-3 text-slate-500 text-center">
                                             {isEnglish ? 'No logs' : '暂无日志'}
@@ -576,21 +614,23 @@ function SuperPanelInner() {
                     </div>
                 )}
 
-                {/* Floating Button */}
+                {/* Floating Button - 小屏幕时缩小 */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
-                        'w-14 h-14 rounded-full shadow-lg',
+                        'rounded-full shadow-lg',
                         'flex items-center justify-center',
                         'transition-all duration-200 transform',
                         'hover:scale-110 active:scale-95',
+                        // 小屏幕时缩小按钮
+                        isSmallScreen ? 'w-11 h-11' : 'w-14 h-14',
                         isOpen
                             ? 'bg-orange-500 text-white rotate-90'
                             : 'bg-white text-orange-500 border border-slate-200'
                     )}
                     aria-label="Open Super Panel"
                 >
-                    <Settings className="w-6 h-6" />
+                    <Settings className={cn(isSmallScreen ? "w-5 h-5" : "w-6 h-6")} />
                 </button>
             </div>
 

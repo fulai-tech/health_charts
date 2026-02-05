@@ -16,7 +16,9 @@
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "ci": "yarn lint && yarn typecheck && yarn test:run"
+    "ci": "yarn lint && yarn typecheck && yarn test:run",
+    "merge": "node scripts/merge-to-main.mjs",
+    "merge:dev": "node scripts/merge-to-main.mjs dev"
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.15",
