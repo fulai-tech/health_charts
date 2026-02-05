@@ -578,6 +578,7 @@
       "start": "Start",
       "restart": "Restart",
       "idleHint": "Click Start to begin measurement",
+      "placeFinger": "Place your finger on the sensor to start measurement",
       "statusIdle": "Ready to measure",
       "statusMeasuring": "In acquiring infrared signals...",
       "statusCompleted": "Measurement completed"

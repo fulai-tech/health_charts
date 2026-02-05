@@ -53,14 +53,17 @@ import { WeeklyReportPage } from '@/pages/weekly/WeeklyReportPage'
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
-// Super Panel (Test Environment Only)
-import { SuperPanel } from '@/components/common/SuperPanel'
+// Conditional imports for test environment
+import { IS_TEST_ENV } from '@/config/config'
 
 // Page init: token/lang from URL, runs once per URL change for all routes
 import { useInitPage } from '@/lib/initPage'
 
 // Initialize i18n
 import '@/i18n'
+
+// Lazy load SuperPanel only in test environment
+const SuperPanel = IS_TEST_ENV ? lazy(() => import('@/components/common/SuperPanel').then(module => ({ default: module.SuperPanel }))) : null
 
 /** Runs initPage (token + lang from URL) for every route; only re-runs when URL params change. */
 function InitPageRunner() {
@@ -98,7 +101,11 @@ function App() {
       <HashRouter>
         <InitPageRunner />
         {/* Super Panel - Floating control panel for test environment */}
-        <SuperPanel />
+        {IS_TEST_ENV && SuperPanel && (
+          <Suspense fallback={null}>
+            <SuperPanel />
+          </Suspense>
+        )}
         <Suspense fallback={<PageLoading />}>
           <Routes>
             {/* Home Page - Route Navigation */}
