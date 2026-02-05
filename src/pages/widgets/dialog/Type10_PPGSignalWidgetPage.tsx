@@ -123,6 +123,7 @@ function generateSimulatedPPGData(): number[] {
 
 interface UsePPGCanvasOptions {
   isRunning: boolean
+  isPaused: boolean // 是否暂停动画（completed 状态）
   ppgData: number[]
 }
 
@@ -170,7 +171,7 @@ function usePPGCanvas(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   options: UsePPGCanvasOptions
 ) {
-  const { isRunning, ppgData } = options
+  const { isRunning, isPaused, ppgData } = options
   const animationRef = useRef<number>(0)
   const gridOffsetRef = useRef(0)
   const dataIndexRef = useRef(0)
@@ -327,8 +328,10 @@ function usePPGCanvas(
       ctx.fillStyle = '#F8FAFC' // slate-50
       ctx.fillRect(0, 0, width, height)
 
-      // 绘制网格
-      gridOffsetRef.current += ANIMATION_CONFIG.gridSpeed * (elapsed / frameInterval)
+      // 绘制网格（暂停时停止滚动）
+      if (!isPaused) {
+        gridOffsetRef.current += ANIMATION_CONFIG.gridSpeed * (elapsed / frameInterval)
+      }
       drawGrid(gridOffsetRef.current)
 
       const ringBuffer = displayDataRef.current
@@ -363,7 +366,7 @@ function usePPGCanvas(
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [canvasRef, isRunning, ppgData])
+  }, [canvasRef, isRunning, isPaused, ppgData])
 
   // 重置显示数据
   const reset = useCallback(() => {
@@ -460,6 +463,7 @@ export function Type10_PPGSignalWidgetPage() {
   // Canvas 绑定
   const { reset: resetCanvas } = usePPGCanvas(canvasRef, {
     isRunning: status === 'measuring',
+    isPaused: status === 'completed', // 完成测量后暂停网格滚动
     ppgData,
   })
 
@@ -578,8 +582,8 @@ export function Type10_PPGSignalWidgetPage() {
               </button>
             )}
 
-            {/* 测量完成后的重新开始按钮 */}
-            {status === 'completed' && (
+            {/* 测量完成后的重新开始按钮（仅测试环境显示） */}
+            {status === 'completed' && IS_TEST_ENV && (
               <button
                 onClick={handleRestart}
                 className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-full transition-colors"
@@ -618,12 +622,13 @@ export function Type10_PPGSignalWidgetPage() {
               <div className="w-10" /> // 占位
             )}
 
-            {/* 状态文字 */}
-            <p className="text-sm text-slate-500">
-              {status === 'idle' && t('widgets.type10.statusIdle')}
-              {status === 'measuring' && t('widgets.type10.statusMeasuring')}
-              {status === 'completed' && t('widgets.type10.statusCompleted')}
-            </p>
+            {/* 状态文字（完成测量后不显示） */}
+            {status !== 'completed' && (
+              <p className="text-sm text-slate-500">
+                {status === 'idle' && t('widgets.type10.statusIdle')}
+                {status === 'measuring' && t('widgets.type10.statusMeasuring')}
+              </p>
+            )}
           </div>
         </div>
 
