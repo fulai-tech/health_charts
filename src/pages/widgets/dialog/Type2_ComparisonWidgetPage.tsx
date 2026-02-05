@@ -181,8 +181,8 @@ export function Type2_ComparisonWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-lg p-4">
-        <div className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none shadow-sm transition-all duration-200 active:scale-[0.98] active:opacity-90" onClick={handleCardClick}>
-          <div className="relative flex items-center justify-center gap-4">
+        <div className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90" onClick={handleCardClick}>
+          <div className="relative flex items-center justify-start gap-4">
             <CompareItem data={data.left} theme={data.theme || 'sleep'} position="left" standardLabel={standardLabel} />
             <div className="flex items-center justify-center w-8 flex-shrink-0">
               <ChevronRight className="w-6 h-6 text-orange-500" />

@@ -8,8 +8,9 @@
  * - 支持 Selected 按钮显示已选中的项目
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import confetti from 'canvas-confetti'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { widgetBGColor } from '@/config/theme'
@@ -121,6 +122,9 @@ function parseImprovementPlanData(raw: unknown): ImprovementPlanData | null {
 // 子组件
 // ============================================
 
+/** 按钮状态类型 */
+type ButtonState = 'idle' | 'loading' | 'done'
+
 interface PlanItemCardProps {
   item: ImprovementPlanItem
   onAdd: (item: ImprovementPlanItem) => void
@@ -129,6 +133,52 @@ interface PlanItemCardProps {
 
 function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
   const iconSrc = ICON_MAP[item.type] || ICON_MAP.other
+  const [buttonState, setButtonState] = useState<ButtonState>('idle')
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  // 触发小型 confetti 动画
+  const triggerConfetti = useCallback(() => {
+    if (!buttonRef.current) return
+    
+    const rect = buttonRef.current.getBoundingClientRect()
+    // 计算按钮中心点相对于视口的位置（0-1 比例）
+    const x = (rect.left + rect.width / 2) / window.innerWidth
+    const y = (rect.top + rect.height / 2) / window.innerHeight
+
+    // 使用 requestAnimationFrame 确保在渲染帧中执行
+    requestAnimationFrame(() => {
+      // 小型彩色庆祝动画
+      confetti({
+        particleCount: 12,
+        spread: 40,
+        origin: { x, y },
+        startVelocity: 12,
+        gravity: 0.6,
+        scalar: 0.5,
+        ticks: 60,
+        colors: ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#54a0ff'], // 彩色
+        disableForReducedMotion: false,
+        zIndex: 9999,
+      })
+    })
+  }, [])
+
+  // 处理按钮点击
+  const handleClick = useCallback(() => {
+    if (buttonState !== 'idle') return
+    
+    setButtonState('loading')
+    
+    // 1.5秒后切换到完成态
+    setTimeout(() => {
+      setButtonState('done')
+      triggerConfetti()
+      onAdd(item)
+    }, 1500)
+  }, [buttonState, item, onAdd, triggerConfetti])
+
+  // 如果 item 已经是 isAdded 状态，直接显示 Added
+  const isAdded = item.isAdded || buttonState === 'done'
 
   return (
     <div className="flex items-center gap-3 py-3">
@@ -151,19 +201,52 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
         </p>
       </div>
 
-      {/* 按钮：Add 可点击，Added 为灰色框展示 */}
-      {item.isAdded ? (
-        <span className="text-xs text-slate-600 bg-slate-100 px-4 py-1.5 rounded-full flex-shrink-0">
-          {t('widgets.type9.added')}
-        </span>
-      ) : (
-        <button
-          onClick={() => onAdd(item)}
-          className="text-xs text-slate-600 bg-slate-100 hover:bg-slate-200 px-4 py-1.5 rounded-full transition-colors flex-shrink-0"
-        >
-          {t('widgets.type9.add')}
-        </button>
-      )}
+      {/* 按钮：支持 idle/loading/done 三种状态，固定宽高适配中英文 */}
+      <button
+        ref={buttonRef}
+        onClick={handleClick}
+        disabled={isAdded || buttonState === 'loading'}
+        className={`
+          text-xs rounded-full flex-shrink-0 flex items-center justify-center
+          min-w-[60px] h-7 px-3
+          bg-slate-100 text-slate-600
+          transition-colors duration-200
+          ${isAdded
+            ? 'cursor-default'
+            : buttonState === 'loading'
+              ? 'cursor-wait'
+              : 'hover:bg-slate-200 cursor-pointer'
+          }
+        `}
+      >
+        {buttonState === 'loading' ? (
+          /* 加载转圈动画 */
+          <svg
+            className="w-3.5 h-3.5 animate-spin"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
+          </svg>
+        ) : isAdded ? (
+          t('widgets.type9.added')
+        ) : (
+          t('widgets.type9.add')
+        )}
+      </button>
     </div>
   )
 }

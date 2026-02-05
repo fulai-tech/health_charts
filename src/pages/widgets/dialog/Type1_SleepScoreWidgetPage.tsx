@@ -227,28 +227,37 @@ export function Type1_SleepScoreWidgetPage() {
           className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90 shadow-sm"
           onClick={handleCardClick}
         >
-          {/* 顶部紫色区域 */}
+          {/* 顶部紫色区域 - PBR 金属流光效果 */}
           <div
-            className="relative rounded-t-3xl p-6 pb-4"
+            className="relative rounded-t-3xl p-6 pb-4 metal-surface"
             style={{
               background: VITAL_COLORS.sleep,
             }}
           >
-            {/* 顶部区域：标题、分数和标签 */}
-            <div className="relative flex justify-between items-start mb-2">
+            {/* ========== 材质层（静态金属质感）========== */}
+            {/* 1. 噪点纹理层 - 打破塑料感，模拟金属微观凹凸 */}
+            <div className="layer-grain-texture rounded-t-3xl" />
+            {/* 2. 拉丝金属层 - 各向异性反射，模拟拉丝工艺 */}
+            <div className="layer-brushed-metal rounded-t-3xl" />
+            {/* 3. 静态高光层 - 即使没有流光也有环境反射 */}
+            <div className="layer-static-sheen rounded-t-3xl" />
+            
+            {/* ========== 内容层 ========== */}
+            {/* 顶部区域：标题、分数和标签 - z-index 确保不被光遮挡 */}
+            <div className="relative z-10 flex justify-between items-start mb-2 content-layer">
               {/* 左侧：标题和分数 */}
               <div className="flex flex-col min-w-0">
-                {/* 标题行 */}
+                {/* 标题行 - 添加金属雕刻效果 */}
                 <div className="flex items-center gap-2 mb-1">
                   <Moon className="w-5 h-5 text-white/90 flex-shrink-0" />
-                  <span className="text-lg font-medium text-white/95">{t('widgets.type1.title')}</span>
+                  <span className="text-lg font-medium text-white/95 metal-embossed-text">{t('widgets.type1.title')}</span>
                 </div>
-                {/* 分数 - 限制在 0-100 范围内 */}
+                {/* 分数 - 限制在 0-100 范围内，添加金属发光效果 */}
                 <div className="flex items-baseline gap-1">
-                  <span className="text-6xl sm:text-7xl font-bold text-white leading-none tracking-tight">
+                  <span className="text-6xl sm:text-7xl font-bold text-white leading-none tracking-tight metal-glow-text">
                     {clampValue(Math.round(data.score), 0, 100)}
                   </span>
-                  <span className="text-xl sm:text-2xl font-normal text-white/80">/100</span>
+                  <span className="text-xl sm:text-2xl font-normal text-white/80 metal-embossed-text">/100</span>
                 </div>
               </div>
 
@@ -259,6 +268,20 @@ export function Type1_SleepScoreWidgetPage() {
                 ))}
               </div>
             </div>
+            
+            {/* ========== 物理流光层 ========== */}
+            {/* color-dodge 混合：光"点亮"背景而非覆盖 */}
+            <div className="physics-light-group rounded-t-3xl">
+              {/* Bloom 辉光 - 最底层，大范围柔和 */}
+              <div className="light-bloom" />
+              {/* 主光束 - 三段式能量分布 */}
+              <div className="light-beam-main" />
+              {/* 光核热点 - 中心最亮最锐利 */}
+              <div className="light-beam-hotspot" />
+            </div>
+            
+            {/* 环境光 - 菲涅尔顶部高光 */}
+            <div className="ambient-top-light rounded-t-3xl" />
           </div>
 
           {/* 底部统计区域（白色背景） */}

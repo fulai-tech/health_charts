@@ -13,7 +13,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database, FlaskConical, Pin } from 'lucide-react'
+import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database, FlaskConical, Pin, ChevronDown } from 'lucide-react'
 import { SHOW_SUPER_PANEL } from '@/config/config'
 import { cn } from '@/lib/utils'
 import { authService } from '@/services/auth/authService'
@@ -594,13 +594,22 @@ function SuperPanelInner() {
                         {showLogs && (
                             <div className="border-t border-slate-100 flex-shrink-0">
                                 <div className="px-4 py-2 bg-slate-50">
-                                    <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center justify-between">
                                         <span className="text-xs font-medium text-slate-600">
                                             {isEnglish ? 'Console Logs' : '控制台日志'}
                                         </span>
-                                        <span className="text-[10px] text-slate-400">
-                                            {isEnglish ? 'Latest 100' : '最新 100 条'}
-                                        </span>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-[10px] text-slate-400">
+                                                {isEnglish ? 'Latest 100' : '最新 100 条'}
+                                            </span>
+                                            <button
+                                                onClick={() => setShowLogs(false)}
+                                                className="p-1 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+                                                title={isEnglish ? 'Collapse console' : '收起控制台'}
+                                            >
+                                                <ChevronDown className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 {/* 小屏幕时减小日志区高度 */}

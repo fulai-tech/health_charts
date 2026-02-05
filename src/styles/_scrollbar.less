@@ -1,0 +1,55 @@
+// ============================================
+// 滚动条隐藏
+// 支持所有主流浏览器和 WebView
+// ============================================
+
+// ==========================================
+// WebKit 浏览器 (Chrome, Safari, Edge, X5 WebView)
+// ==========================================
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+::-webkit-scrollbar-track {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+// ==========================================
+// Firefox
+// ==========================================
+
+* {
+  scrollbar-width: none;
+}
+
+// ==========================================
+// IE 和 Edge Legacy
+// ==========================================
+
+* {
+  -ms-overflow-style: none;
+}
+
+// ==========================================
+// 全局 HTML/Body 滚动条
+// ==========================================
+
+html,
+body {
+  overflow: -moz-scrollbars-none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  
+  &::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+}
