@@ -13,7 +13,10 @@ import { useTranslation } from 'react-i18next'
 import confetti from 'canvas-confetti'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
 import { widgetBGColor } from '@/config/theme'
+import { AnimatedImage } from '@/components/common/AnimatedImage'
 
 // ============================================
 // 类型定义
@@ -122,8 +125,8 @@ function parseImprovementPlanData(raw: unknown): ImprovementPlanData | null {
 // 子组件
 // ============================================
 
-/** 按钮状态类型 */
-type ButtonState = 'idle' | 'loading' | 'done'
+/** 按钮状态类型：idle -> loading -> cancel (2s倒计时) -> done */
+type ButtonState = 'idle' | 'loading' | 'cancel' | 'done'
 
 interface PlanItemCardProps {
   item: ImprovementPlanItem
@@ -131,23 +134,103 @@ interface PlanItemCardProps {
   t: (key: string) => string
 }
 
+/** 动画阶段类型 */
+type AnimationPhase = 'idle' | 'exit' | 'enter'
+
+/** 各状态对应的按钮宽度(px) */
+const BUTTON_WIDTHS: Record<ButtonState, number> = {
+  idle: 60,     // Add
+  loading: 60,  // spinner
+  cancel: 76,   // Cancel + 导火索边框
+  done: 68,     // Added
+}
+
+/** 导火索边框组件 - 边框从满圈顺时针逐渐缩短消失 */
+function FuseBorder({ 
+  duration = 2000, 
+  width = 76, 
+  height = 28 
+}: { 
+  duration?: number
+  width?: number
+  height?: number 
+}) {
+  const [offset, setOffset] = useState(0)
+  
+  // 计算圆角矩形周长 (pill shape: 两个半圆 + 两条直线)
+  const radius = height / 2
+  const straightPart = (width - height) * 2  // 上下两条直线
+  const curvedPart = Math.PI * height         // 左右两个半圆 = 一个完整圆
+  const perimeter = straightPart + curvedPart
+  
+  // SVG 需要留出 stroke 宽度的空间
+  const strokeWidth = 2
+  const svgWidth = width + strokeWidth * 2
+  const svgHeight = height + strokeWidth * 2
+  
+  // 组件挂载后开始动画（顺时针消失用负值）
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      setOffset(-perimeter)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [perimeter])
+  
+  return (
+    <svg
+      className="absolute pointer-events-none"
+      style={{
+        width: svgWidth,
+        height: svgHeight,
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        filter: 'drop-shadow(0 0 2px #f97316)',
+      }}
+      viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+    >
+      <rect
+        x={strokeWidth}
+        y={strokeWidth}
+        width={width}
+        height={height}
+        rx={radius}
+        ry={radius}
+        fill="none"
+        stroke="#f97316"
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeDasharray={perimeter}
+        strokeDashoffset={offset}
+        style={{
+          transition: `stroke-dashoffset ${duration}ms linear`,
+        }}
+      />
+    </svg>
+  )
+}
+
 function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
   const iconSrc = ICON_MAP[item.type] || ICON_MAP.other
   const [buttonState, setButtonState] = useState<ButtonState>('idle')
+  /** 动画阶段：exit=缩小退出，enter=放大进入 */
+  const [animPhase, setAnimPhase] = useState<AnimationPhase>('idle')
+  /** 实际显示的内容状态（延迟更新，等待退出动画完成） */
+  const [displayState, setDisplayState] = useState<ButtonState>('idle')
+  /** 当前按钮目标宽度 */
+  const [targetWidth, setTargetWidth] = useState(BUTTON_WIDTHS.idle)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const cancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // 触发小型 confetti 动画
   const triggerConfetti = useCallback(() => {
     if (!buttonRef.current) return
     
     const rect = buttonRef.current.getBoundingClientRect()
-    // 计算按钮中心点相对于视口的位置（0-1 比例）
     const x = (rect.left + rect.width / 2) / window.innerWidth
     const y = (rect.top + rect.height / 2) / window.innerHeight
 
-    // 使用 requestAnimationFrame 确保在渲染帧中执行
     requestAnimationFrame(() => {
-      // 小型彩色庆祝动画
       confetti({
         particleCount: 12,
         spread: 40,
@@ -156,38 +239,144 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
         gravity: 0.6,
         scalar: 0.5,
         ticks: 60,
-        colors: ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#54a0ff'], // 彩色
+        colors: ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#54a0ff'],
         disableForReducedMotion: false,
         zIndex: 9999,
       })
     })
   }, [])
 
+  // 状态变化时触发动画序列
+  useEffect(() => {
+    if (buttonState === displayState) return
+    
+    // 更新目标宽度
+    setTargetWidth(BUTTON_WIDTHS[buttonState])
+    
+    // 开始退出动画
+    setAnimPhase('exit')
+    
+    // 退出动画完成后切换内容并开始进入动画
+    const exitTimer = setTimeout(() => {
+      setDisplayState(buttonState)
+      setAnimPhase('enter')
+      
+      // 进入动画完成后恢复 idle
+      const enterTimer = setTimeout(() => {
+        setAnimPhase('idle')
+      }, 150)
+      
+      return () => clearTimeout(enterTimer)
+    }, 150)
+    
+    return () => clearTimeout(exitTimer)
+  }, [buttonState, displayState])
+
+  // Cancel 状态 2 秒后自动完成
+  useEffect(() => {
+    if (buttonState === 'cancel') {
+      cancelTimerRef.current = setTimeout(() => {
+        setButtonState('done')
+        triggerConfetti()
+        onAdd(item)
+      }, 2000)
+    }
+    
+    return () => {
+      if (cancelTimerRef.current) {
+        clearTimeout(cancelTimerRef.current)
+        cancelTimerRef.current = null
+      }
+    }
+  }, [buttonState, item, onAdd, triggerConfetti])
+
   // 处理按钮点击
   const handleClick = useCallback(() => {
+    // Cancel 状态点击：取消操作回到 idle
+    if (buttonState === 'cancel') {
+      if (cancelTimerRef.current) {
+        clearTimeout(cancelTimerRef.current)
+        cancelTimerRef.current = null
+      }
+      setButtonState('idle')
+      return
+    }
+    
+    // idle 状态点击：开始 loading
     if (buttonState !== 'idle') return
     
     setButtonState('loading')
     
-    // 1.5秒后切换到完成态
+    // 1秒后进入 cancel 倒计时状态
     setTimeout(() => {
-      setButtonState('done')
-      triggerConfetti()
-      onAdd(item)
-    }, 1500)
-  }, [buttonState, item, onAdd, triggerConfetti])
+      setButtonState('cancel')
+    }, 1000)
+  }, [buttonState])
 
   // 如果 item 已经是 isAdded 状态，直接显示 Added
   const isAdded = item.isAdded || buttonState === 'done'
 
+  // 根据动画阶段获取动画类名
+  const getAnimClass = () => {
+    if (animPhase === 'exit') return 'animate-scale-out'
+    if (animPhase === 'enter') return 'animate-scale-in'
+    return ''
+  }
+
+  // 获取按钮样式（cursor 等）
+  const getButtonCursor = () => {
+    if (isAdded) return 'cursor-default'
+    if (buttonState === 'loading') return 'cursor-wait'
+    if (buttonState === 'cancel') return 'cursor-pointer'
+    return 'hover:bg-slate-200 cursor-pointer'
+  }
+
+  // 渲染按钮内容
+  const renderButtonContent = () => {
+    const showAdded = item.isAdded || displayState === 'done'
+    
+    if (displayState === 'loading') {
+      return (
+        <svg
+          className="w-3.5 h-3.5 animate-spin"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          />
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          />
+        </svg>
+      )
+    }
+    
+    if (displayState === 'cancel') {
+      return t('widgets.type9.cancel')
+    }
+    
+    return showAdded ? t('widgets.type9.added') : t('widgets.type9.add')
+  }
+
   return (
     <div className="flex items-center gap-3 py-3">
-      {/* 图标 */}
+      {/* 图标 - 使用 AnimatedImage 优化加载体验 */}
       <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center">
-        <img
+        <AnimatedImage
           src={iconSrc}
           alt={item.type}
           className="w-full h-full object-contain"
+          placeholderClassName="bg-orange-50"
+          duration={0.35}
         />
       </div>
 
@@ -201,52 +390,38 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
         </p>
       </div>
 
-      {/* 按钮：支持 idle/loading/done 三种状态，固定宽高适配中英文 */}
-      <button
-        ref={buttonRef}
-        onClick={handleClick}
-        disabled={isAdded || buttonState === 'loading'}
-        className={`
-          text-xs rounded-full flex-shrink-0 flex items-center justify-center
-          min-w-[60px] h-7 px-3
-          bg-slate-100 text-slate-600
-          transition-colors duration-200
-          ${isAdded
-            ? 'cursor-default'
-            : buttonState === 'loading'
-              ? 'cursor-wait'
-              : 'hover:bg-slate-200 cursor-pointer'
-          }
-        `}
-      >
-        {buttonState === 'loading' ? (
-          /* 加载转圈动画 */
-          <svg
-            className="w-3.5 h-3.5 animate-spin"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
+      {/* 按钮容器：固定位置，内部按钮居中变宽 */}
+      <div className="flex-shrink-0 flex items-center justify-center" style={{ width: BUTTON_WIDTHS.cancel }}>
+        <button
+          ref={buttonRef}
+          onClick={handleClick}
+          disabled={isAdded || buttonState === 'loading'}
+          style={{ width: targetWidth }}
+          className={`
+            relative text-xs rounded-full h-7 flex items-center justify-center
+            transition-all duration-300 ease-out
+            ${displayState === 'cancel' 
+              ? 'bg-orange-50 text-orange-600' 
+              : 'bg-slate-100 text-slate-600'
+            }
+            ${getButtonCursor()}
+          `}
+        >
+          {/* Cancel 状态的导火索边框 */}
+          {displayState === 'cancel' && (
+            <FuseBorder 
+              duration={2000} 
+              width={BUTTON_WIDTHS.cancel} 
+              height={28} 
             />
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-        ) : isAdded ? (
-          t('widgets.type9.added')
-        ) : (
-          t('widgets.type9.add')
-        )}
-      </button>
+          )}
+          
+          {/* 动画容器 */}
+          <span className={`relative z-10 inline-flex items-center justify-center ${getAnimClass()}`}>
+            {renderButtonContent()}
+          </span>
+        </button>
+      </div>
     </div>
   )
 }
@@ -280,6 +455,12 @@ export function Type9_ImprovementPlanWidgetPage() {
     pageId: PAGE_CONFIG.pageId,
     pageName: PAGE_CONFIG.pageName,
     debug: import.meta.env.DEV,
+  })
+
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
   })
 
   // 注册数据接收回调
@@ -327,8 +508,9 @@ export function Type9_ImprovementPlanWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        {/* 改善计划卡片 */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm">
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring">
+          {/* 改善计划卡片 */}
+          <div className="bg-white rounded-3xl p-5 shadow-sm">
           {/* 标题 */}
           <div className="flex items-center gap-2 mb-2">
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
@@ -364,7 +546,8 @@ export function Type9_ImprovementPlanWidgetPage() {
           >
             {hasSubmittedSelection ? t('widgets.type9.selected') : t('widgets.type9.completeSelection')}
           </button>
-        </div>
+          </div>
+        </WidgetEntranceContainer>
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (

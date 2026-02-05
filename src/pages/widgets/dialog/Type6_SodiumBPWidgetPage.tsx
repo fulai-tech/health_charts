@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
 import { ChevronRight } from 'lucide-react'
 import { VITAL_COLORS, widgetBGColor } from '@/config/theme'
 import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts'
@@ -198,6 +200,12 @@ export function Type6_SodiumBPWidgetPage() {
     debug: import.meta.env.DEV,
   })
 
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
   // 注册数据接收回调
   useEffect(() => {
     onData((rawData) => {
@@ -224,8 +232,9 @@ export function Type6_SodiumBPWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-lg p-4">
-        {/* 对比卡片 */}
-        <div className="relative flex items-stretch justify-center gap-3">
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
+          {/* 对比卡片 */}
+          <div className="relative flex items-stretch justify-center gap-3">
           {/* 左侧：环形进度条卡片 */}
           <div
             className="flex-1 rounded-2xl p-4 cursor-pointer select-none transition-all duration-200 flex flex-col items-center justify-between min-h-[172px]"
@@ -286,7 +295,8 @@ export function Type6_SodiumBPWidgetPage() {
               {data.alert.label}
             </p>
           </div>
-        </div>
+          </div>
+        </WidgetEntranceContainer>
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (

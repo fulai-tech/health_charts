@@ -17,6 +17,8 @@ import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
 import { useTestEnvStore } from '@/stores'
 import { widgetBGColor } from '@/config/theme'
 
@@ -462,6 +464,12 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
     debug: import.meta.env.DEV,
   })
 
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
   // Canvas 绑定
   const { reset: resetCanvas } = usePPGCanvas(canvasRef, {
     isRunning: status === 'measuring',
@@ -559,8 +567,9 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        {/* PPG 信号卡片 */}
-        <div className="bg-white rounded-3xl p-5 shadow-sm">
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
+          {/* PPG 信号卡片 */}
+          <div className="bg-white rounded-3xl p-5 shadow-sm">
           {/* 标题栏 */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -642,7 +651,8 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
               </p>
             )}
           </div>
-        </div>
+          </div>
+        </WidgetEntranceContainer>
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (

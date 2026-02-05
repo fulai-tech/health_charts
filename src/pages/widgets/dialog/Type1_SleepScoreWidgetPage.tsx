@@ -1,7 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { observer } from 'mobx-react-lite'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { globalStore } from '@/stores/globalStore'
 import { Moon } from 'lucide-react'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 
@@ -185,15 +189,22 @@ function StatItem({ hours, minutes, label, align = 'left', t }: StatItemProps & 
  * - Android -> JS: NativeBridge.receiveData(jsonString)
  * - JS -> Android: window.android.onJsMessage(jsonString)
  */
-export function Type1_SleepScoreWidgetPage() {
+export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidgetPage() {
   const { t } = useTranslation()
   const [data, setData] = useState<SleepScoreData>(DEFAULT_DATA)
+  const isMetalEnabled = globalStore.isTestEnv
 
   // 初始化原生桥接
   const { onData, send, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
     pageName: PAGE_CONFIG.pageName,
     debug: import.meta.env.DEV,
+  })
+
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
   })
 
   // 注册数据接收回调
@@ -222,42 +233,47 @@ export function Type1_SleepScoreWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        {/* 睡眠评分卡片 */}
-        <div
-          className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90 shadow-sm"
-          onClick={handleCardClick}
-        >
-          {/* 顶部紫色区域 - PBR 金属流光效果 */}
+        {/* 睡眠评分卡片 - 带入场动画 */}
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring">
           <div
-            className="relative rounded-t-3xl p-6 pb-4 metal-surface"
+            className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90 shadow-sm"
+            onClick={handleCardClick}
+          >
+          {/* 顶部紫色区域 - 根据 isTestEnv 决定是否启用金属流光效果 */}
+          <div
+            className={`relative rounded-t-3xl p-6 pb-4 ${isMetalEnabled ? 'metal-surface' : ''}`}
             style={{
               background: VITAL_COLORS.sleep,
             }}
           >
-            {/* ========== 材质层（静态金属质感）========== */}
-            {/* 1. 噪点纹理层 - 打破塑料感，模拟金属微观凹凸 */}
-            <div className="layer-grain-texture rounded-t-3xl" />
-            {/* 2. 拉丝金属层 - 各向异性反射，模拟拉丝工艺 */}
-            <div className="layer-brushed-metal rounded-t-3xl" />
-            {/* 3. 静态高光层 - 即使没有流光也有环境反射 */}
-            <div className="layer-static-sheen rounded-t-3xl" />
+            {/* ========== 材质层（静态金属质感）- 仅 isTestEnv 时启用 ========== */}
+            {isMetalEnabled && (
+              <>
+                {/* 1. 噪点纹理层 - 打破塑料感，模拟金属微观凹凸 */}
+                <div className="layer-grain-texture rounded-t-3xl" />
+                {/* 2. 拉丝金属层 - 各向异性反射，模拟拉丝工艺 */}
+                <div className="layer-brushed-metal rounded-t-3xl" />
+                {/* 3. 静态高光层 - 即使没有流光也有环境反射 */}
+                <div className="layer-static-sheen rounded-t-3xl" />
+              </>
+            )}
             
             {/* ========== 内容层 ========== */}
             {/* 顶部区域：标题、分数和标签 - z-index 确保不被光遮挡 */}
-            <div className="relative z-10 flex justify-between items-start mb-2 content-layer">
+            <div className={`relative z-10 flex justify-between items-start mb-2 ${isMetalEnabled ? 'content-layer' : ''}`}>
               {/* 左侧：标题和分数 */}
               <div className="flex flex-col min-w-0">
-                {/* 标题行 - 添加金属雕刻效果 */}
+                {/* 标题行 */}
                 <div className="flex items-center gap-2 mb-1">
                   <Moon className="w-5 h-5 text-white/90 flex-shrink-0" />
-                  <span className="text-lg font-medium text-white/95 metal-embossed-text">{t('widgets.type1.title')}</span>
+                  <span className={`text-lg font-medium text-white/95 ${isMetalEnabled ? 'metal-embossed-text' : ''}`}>{t('widgets.type1.title')}</span>
                 </div>
-                {/* 分数 - 限制在 0-100 范围内，添加金属发光效果 */}
+                {/* 分数 - 限制在 0-100 范围内 */}
                 <div className="flex items-baseline gap-1">
-                  <span className="text-6xl sm:text-7xl font-bold text-white leading-none tracking-tight metal-glow-text">
+                  <span className={`text-6xl sm:text-7xl font-bold text-white leading-none tracking-tight ${isMetalEnabled ? 'metal-embossed-text' : ''}`}>
                     {clampValue(Math.round(data.score), 0, 100)}
                   </span>
-                  <span className="text-xl sm:text-2xl font-normal text-white/80 metal-embossed-text">/100</span>
+                  <span className={`text-xl sm:text-2xl font-normal text-white/80 ${isMetalEnabled ? 'metal-embossed-text' : ''}`}>/100</span>
                 </div>
               </div>
 
@@ -269,19 +285,20 @@ export function Type1_SleepScoreWidgetPage() {
               </div>
             </div>
             
-            {/* ========== 物理流光层 ========== */}
-            {/* color-dodge 混合：光"点亮"背景而非覆盖 */}
-            <div className="physics-light-group rounded-t-3xl">
-              {/* Bloom 辉光 - 最底层，大范围柔和 */}
-              <div className="light-bloom" />
-              {/* 主光束 - 三段式能量分布 */}
-              <div className="light-beam-main" />
-              {/* 光核热点 - 中心最亮最锐利 */}
-              <div className="light-beam-hotspot" />
-            </div>
+            {/* ========== 物理流光层 - 仅 isTestEnv 时启用 ========== */}
+            {isMetalEnabled && (
+              <div className="physics-light-group rounded-t-3xl">
+                {/* Bloom 辉光 - 最底层，大范围柔和 */}
+                <div className="light-bloom" />
+                {/* 主光束 - 三段式能量分布 */}
+                <div className="light-beam-main" />
+                {/* 光核热点 - 中心最亮最锐利 */}
+                <div className="light-beam-hotspot" />
+              </div>
+            )}
             
-            {/* 环境光 - 菲涅尔顶部高光 */}
-            <div className="ambient-top-light rounded-t-3xl" />
+            {/* 环境光 - 仅 isTestEnv 时启用 */}
+            {isMetalEnabled && <div className="ambient-top-light rounded-t-3xl" />}
           </div>
 
           {/* 底部统计区域（白色背景） */}
@@ -304,7 +321,8 @@ export function Type1_SleepScoreWidgetPage() {
               />
             </div>
           </div>
-        </div>
+          </div>
+        </WidgetEntranceContainer>
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (
@@ -315,4 +333,4 @@ export function Type1_SleepScoreWidgetPage() {
       </div>
     </WidgetLayout>
   )
-}
+})

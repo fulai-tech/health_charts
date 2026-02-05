@@ -1,9 +1,14 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { observer } from 'mobx-react-lite'
+import { motion } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
-import { ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
-import { VITAL_COLORS, widgetBGColor } from '@/config/theme'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { globalStore } from '@/stores/globalStore'
+import { TrendingDown, TrendingUp, ArrowRight, Moon, Zap, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
+import { widgetBGColor, VITAL_COLORS } from '@/config/theme'
 
 // ============================================
 // 类型定义
@@ -117,7 +122,7 @@ function parseComparisonData(raw: unknown): SleepFatigueComparisonData | null {
 }
 
 // ============================================
-// 对比项组件
+// 对比项组件 - 静态版 (默认)
 // ============================================
 
 interface CompareItemProps {
@@ -127,7 +132,7 @@ interface CompareItemProps {
   standardLabel: string
 }
 
-function CompareItem({ data, theme, position, standardLabel }: CompareItemProps) {
+function CompareItemStatic({ data, theme, position, standardLabel }: CompareItemProps) {
   const isLow = data.status === 'low'
   const isHigh = data.status === 'high'
   let barColorStyle: string
@@ -161,37 +166,243 @@ function CompareItem({ data, theme, position, standardLabel }: CompareItemProps)
   )
 }
 
+// ============================================
+// 对比项组件 - 动效版 (开发者模式)
+// ============================================
+
+interface CompareItemAnimatedProps {
+  data: CompareItemData
+  position: 'left' | 'right'
+  standardLabel: string
+  delay?: number
+}
+
+/** 获取主题配色 - 高级渐变色 */
+function getThemeColors(position: 'left' | 'right') {
+  return position === 'left' 
+    ? { gradient: 'from-indigo-300 to-indigo-400', text: 'text-indigo-500', bg: 'bg-indigo-50' }
+    : { gradient: 'from-rose-300 to-rose-400', text: 'text-rose-500', bg: 'bg-rose-50' }
+}
+
+function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: CompareItemAnimatedProps) {
+  const isLow = data.status === 'low'
+  const colors = getThemeColors(position)
+  
+  const safeBarPercent = clampPercent(data.barPercent)
+  const safeStandardPercent = clampPercent(data.standardPercent)
+  const displayTitle = truncateText(data.title, 16)
+  const displayValue = truncateText(data.value, 10)
+  const displayStatusText = truncateText(data.statusText, 8)
+
+  const Icon = position === 'left' ? Moon : Zap
+  const TrendIcon = isLow ? TrendingDown : TrendingUp
+  const trendColor = isLow ? 'text-indigo-500' : 'text-rose-500'
+  const trendBg = isLow ? 'bg-indigo-50' : 'bg-rose-50'
+
+  return (
+    <div className="flex-1 flex flex-col items-center min-w-0 group cursor-pointer">
+      {/* 标题 - 带淡入动效 */}
+      <motion.div 
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: delay + 0.5, duration: 0.4 }}
+        className="text-sm font-medium text-slate-600 mb-3 flex items-center gap-1.5"
+      >
+        <Icon size={14} className="text-slate-400" />
+        <span className="truncate">{displayTitle}</span>
+      </motion.div>
+      
+      {/* 图表区域 - 去容器化，直接留白 */}
+      <div className="w-full h-36 relative flex items-end justify-center">
+        {/* 标准线 - 虚线 */}
+        <motion.div 
+          className="absolute left-0 right-0 flex items-center"
+          style={{ bottom: `${safeStandardPercent}%` }}
+          initial={{ opacity: 0, scaleX: 0 }}
+          animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ delay: delay + 0.3, duration: 0.5 }}
+        >
+          <div className="flex-1 border-t border-dashed border-slate-300" />
+          <span className="text-[9px] text-slate-400 font-mono tracking-wider ml-1">
+            {standardLabel}
+          </span>
+        </motion.div>
+        
+        {/* 柱状图 - Spring 物理弹出 */}
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: `${safeBarPercent}%`, opacity: 1 }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 100, 
+            damping: 15, 
+            delay: delay 
+          }}
+          className={`
+            w-16 rounded-t-2xl relative z-10 
+            bg-gradient-to-b ${colors.gradient}
+            shadow-sm backdrop-blur-sm
+            transition-all duration-300 
+            group-hover:w-[4.5rem] group-hover:brightness-105
+          `}
+        >
+          {/* 顶部高光 (Rim Light) */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/40 rounded-full" />
+          {/* 左侧高光 */}
+          <div className="absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-white/20 to-transparent rounded-tl-2xl" />
+        </motion.div>
+      </div>
+      
+      {/* 数值和状态 */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: delay + 0.3, duration: 0.3 }}
+        className="flex flex-col items-center mt-4 gap-1.5"
+      >
+        {data.value && data.value.trim() && (
+          <span className="text-xl font-bold text-slate-800 tabular-nums tracking-tight">
+            {displayValue}
+          </span>
+        )}
+        <div className={`flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full ${trendBg}`}>
+          <TrendIcon size={12} className={trendColor} />
+          <span className={trendColor}>{displayStatusText}</span>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 /**
  * 深睡疲劳对比 Widget 页面 (Type 2)
  * 路由: /widget/type-2
+ * 
+ * 支持两种渲染模式：
+ * - 开发者模式 (isTestEnv=true): Framer Motion 高级动效版
+ * - 默认模式: 静态版
  */
-export function Type2_ComparisonWidgetPage() {
+export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidgetPage() {
   const { t } = useTranslation()
   const [data, setData] = useState<SleepFatigueComparisonData>(DEFAULT_DATA)
-  const { onData, send, isReady } = useNativeBridge({ pageId: PAGE_CONFIG.pageId, pageName: PAGE_CONFIG.pageName, debug: import.meta.env.DEV })
+  const { onData, send, isReady } = useNativeBridge({ 
+    pageId: PAGE_CONFIG.pageId, 
+    pageName: PAGE_CONFIG.pageName, 
+    debug: import.meta.env.DEV 
+  })
+
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
+  // 从 MobX store 获取开发者模式状态
+  const isDevMode = globalStore.isTestEnv
+
   useEffect(() => {
     onData((rawData) => {
       const parsed = parseComparisonData(rawData)
       if (parsed) setData(parsed)
     })
   }, [onData])
-  const handleCardClick = useCallback(() => send('cardClick', { pageId: PAGE_CONFIG.pageId, data }), [send, data])
+
+  const handleCardClick = useCallback(() => {
+    send('cardClick', { pageId: PAGE_CONFIG.pageId, data })
+  }, [send, data])
+
   const standardLabel = t('widgets.type2.standard')
 
+  // 开发者模式：高级动效版
+  if (isDevMode) {
+    return (
+      <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+        <div className="w-full max-w-lg p-4">
+          <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
+            {/* 卡片容器 - 弥散阴影，高级质感 */}
+            <div 
+              className="relative overflow-hidden rounded-3xl bg-white p-6 cursor-pointer select-none 
+                         shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100
+                         transition-all duration-200 active:scale-[0.98] active:opacity-90" 
+              onClick={handleCardClick}
+            >
+            {/* 对比图表区域 */}
+            <div className="relative flex items-end justify-between gap-2 px-2">
+              {/* 左侧图表: 深睡 */}
+              <CompareItemAnimated 
+                data={data.left} 
+                position="left" 
+                standardLabel={standardLabel}
+                delay={0.1}
+              />
+
+              {/* 中间连接符: 动态箭头 (Flow Effect) */}
+              <div className="h-28 flex flex-col items-center justify-center pb-6 opacity-50">
+                <motion.div
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                >
+                  <ArrowRight className="text-slate-300" size={22} />
+                </motion.div>
+              </div>
+
+              {/* 右侧图表: 疲劳 */}
+              <CompareItemAnimated 
+                data={data.right} 
+                position="right" 
+                standardLabel={standardLabel}
+                delay={0.3}
+              />
+            </div>
+            </div>
+          </WidgetEntranceContainer>
+
+          {/* 调试信息 */}
+          {import.meta.env.DEV && (
+            <div className="mt-4 text-xs text-gray-400 text-center">
+              {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'} | 动效模式: ✨
+            </div>
+          )}
+        </div>
+      </WidgetLayout>
+    )
+  }
+
+  // 默认模式：静态版
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-lg p-4">
-        <div className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90" onClick={handleCardClick}>
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
+          <div 
+            className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none 
+                       transition-all duration-200 active:scale-[0.98] active:opacity-90" 
+            onClick={handleCardClick}
+          >
           <div className="relative flex items-center justify-start gap-4">
-            <CompareItem data={data.left} theme={data.theme || 'sleep'} position="left" standardLabel={standardLabel} />
+            <CompareItemStatic 
+              data={data.left} 
+              theme={data.theme || 'sleep'} 
+              position="left" 
+              standardLabel={standardLabel} 
+            />
             <div className="flex items-center justify-center w-8 flex-shrink-0">
               <ChevronRight className="w-6 h-6 text-orange-500" />
             </div>
-            <CompareItem data={data.right} theme={data.theme || 'sleep'} position="right" standardLabel={standardLabel} />
+            <CompareItemStatic 
+              data={data.right} 
+              theme={data.theme || 'sleep'} 
+              position="right" 
+              standardLabel={standardLabel} 
+            />
           </div>
-        </div>
-        {import.meta.env.DEV && <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>}
+          </div>
+        </WidgetEntranceContainer>
+        {import.meta.env.DEV && (
+          <div className="mt-4 text-xs text-gray-400 text-center">
+            {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
+          </div>
+        )}
       </div>
     </WidgetLayout>
   )
-}
+})

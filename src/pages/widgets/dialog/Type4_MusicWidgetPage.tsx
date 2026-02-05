@@ -2,6 +2,8 @@ import { useState, useCallback, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
 import { Music, Headphones, Sparkles } from 'lucide-react'
 import { widgetBGColor } from '@/config/theme'
 
@@ -275,6 +277,12 @@ export function Type4_MusicWidgetPage() {
     debug: import.meta.env.DEV,
   })
 
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
   // ============================================
   // 业务层：注册数据接收回调
   // ============================================
@@ -320,8 +328,9 @@ export function Type4_MusicWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-full md:max-w-[720px] p-4 sm:p-5 md:p-6">
-        {/* 标题区域 */}
-        <div className="flex items-center justify-between mb-5 md:mb-6">
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp" stagger staggerDelay={0.12}>
+          {/* 标题区域 */}
+          <div className="flex items-center justify-between mb-5 md:mb-6">
           <div className="flex items-center gap-3">
             <div>
               <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-tight">
@@ -341,25 +350,26 @@ export function Type4_MusicWidgetPage() {
           </button>
         </div>
 
-        {/* 音乐卡片网格 - 两个并排，超过两个时横向滚动 */}
-        {displayCards.length > 0 ? (
-          <div className="flex gap-2 md:gap-4 w-full overflow-x-auto py-4 px-3 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
-            {displayCards.map((card, index) => (
-              <MusicCard
-                key={card.songId || card.order || index}
-                item={card}
-                index={index}
-                defaultItem={defaultCards[index] || defaultCards[0]}
-                onCardClick={() => handleCardClick(card)}
-                recommendListenLabel={t('widgets.type4.recommendListen')}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center py-8 text-gray-400 text-sm">
-            {t('widgets.type4.noMusic')}
-          </div>
-        )}
+          {/* 音乐卡片网格 - 两个并排，超过两个时横向滚动 */}
+          {displayCards.length > 0 ? (
+            <div className="flex gap-2 md:gap-4 w-full overflow-x-auto py-4 px-3 snap-x snap-mandatory scrollbar-hide touch-pan-x -mx-1">
+              {displayCards.map((card, index) => (
+                <MusicCard
+                  key={card.songId || card.order || index}
+                  item={card}
+                  index={index}
+                  defaultItem={defaultCards[index] || defaultCards[0]}
+                  onCardClick={() => handleCardClick(card)}
+                  recommendListenLabel={t('widgets.type4.recommendListen')}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-8 text-gray-400 text-sm">
+              {t('widgets.type4.noMusic')}
+            </div>
+          )}
+        </WidgetEntranceContainer>
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (

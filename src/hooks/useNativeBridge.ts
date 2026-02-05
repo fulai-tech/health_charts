@@ -130,6 +130,20 @@ export function useNativeBridge(options: UseNativeBridgeOptions) {
 
         logFn('INFO', '解析后的数据：', data)
 
+        // 检查是否是 page-global-animate 事件（入场动画触发信号）
+        const dataObj = data as Record<string, unknown> | null
+        if (dataObj && dataObj.event === 'page-global-animate') {
+          logFn('INFO', '收到 page-global-animate 事件，派发入场动画信号')
+          window.dispatchEvent(
+            new CustomEvent('widget-entrance-animate', {
+              detail: { event: 'page-global-animate', timestamp: Date.now() },
+            })
+          )
+          // page-global-animate 是控制事件，不需要传递给业务层
+          sendToNative('dataReceived', { success: true, timestamp: Date.now() })
+          return
+        }
+
         // 触发业务层回调
         if (this._onDataReceived) {
           this._onDataReceived(data)

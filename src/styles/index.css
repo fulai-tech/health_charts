@@ -1,0 +1,24 @@
+/* ============================================
+   样式主入口文件
+   ============================================ */
+
+/* Tailwind CSS */
+@import "tailwindcss";
+
+/* 变量定义（必须最先导入） */
+@import "./_variables.css";
+
+/* 基础样式 */
+@import "./_base.css";
+
+/* 通用动画 */
+@import "./_animations.css";
+
+/* PBR 金属流光系统 */
+@import "./_metal-shine.css";
+
+/* 图表优化 */
+@import "./_charts.css";
+
+/* 滚动条隐藏 */
+@import "./_scrollbar.css";

@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
 import { BarChart3, Moon, Activity, Utensils } from 'lucide-react'
 import {
   VITAL_COLORS,
@@ -163,6 +165,12 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
     debug: import.meta.env.DEV,
   })
 
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
   useEffect(() => {
     onData((rawData) => {
       const parsed = parseWeeklyHealthScoreData(rawData)
@@ -175,7 +183,8 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        <div className="rounded-2xl p-4 mb-3 text-white" style={{ backgroundColor: HEALTH_COLORS.weeklyScoreHeader }}>
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring" stagger staggerDelay={0.1}>
+          <div className="rounded-2xl p-4 mb-3 text-white" style={{ backgroundColor: HEALTH_COLORS.weeklyScoreHeader }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
@@ -210,11 +219,12 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
             )}
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3">
-          {data.metrics.map((m) => (
-            <MetricCard key={m.type} type={m.type} label={m.label} value={m.value} unit={m.unit} t={t} />
-          ))}
-        </div>
+          <div className="grid grid-cols-3 gap-3">
+            {data.metrics.map((m) => (
+              <MetricCard key={m.type} type={m.type} label={m.label} value={m.value} unit={m.unit} t={t} />
+            ))}
+          </div>
+        </WidgetEntranceContainer>
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>
         )}

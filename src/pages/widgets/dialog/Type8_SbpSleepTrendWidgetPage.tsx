@@ -8,6 +8,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
 import { TrendLineChart, type ChartLine } from '@/components/charts/TrendLineChart'
 import { BP_COLORS, VITAL_COLORS, widgetBGColor } from '@/config/theme'
 
@@ -74,6 +76,12 @@ export function Type8_SbpSleepTrendWidgetPage() {
     debug: import.meta.env.DEV,
   })
 
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
   useEffect(() => {
     onData((rawData) => {
       const parsed = parseSbpSleepTrendData(rawData)
@@ -102,18 +110,20 @@ export function Type8_SbpSleepTrendWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        {chartData.length > 0 ? (
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <TrendLineChart
-              data={chartData}
-              lines={lines}
-              xAxisKey="day"
-              height={224}
-              showLegend={true}
-              chartMargin={{ top: 10, right: 10, left: -15, bottom: 0 }}
-            />
-          </div>
-        ) : null}
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
+          {chartData.length > 0 ? (
+            <div className="bg-white rounded-2xl p-4 shadow-sm">
+              <TrendLineChart
+                data={chartData}
+                lines={lines}
+                xAxisKey="day"
+                height={224}
+                showLegend={true}
+                chartMargin={{ top: 10, right: 10, left: -15, bottom: 0 }}
+              />
+            </div>
+          ) : null}
+        </WidgetEntranceContainer>
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>
         )}

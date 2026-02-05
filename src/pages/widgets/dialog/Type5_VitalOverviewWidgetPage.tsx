@@ -1,7 +1,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { motion } from 'framer-motion'
+import type { Variants } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 
 // ============================================
@@ -100,6 +103,39 @@ const PAGE_CONFIG = {
   pageName: '健康体征总览卡片',
   type: 5, // 健康体征总览卡片类型标识
 } as const
+
+// ============================================
+// 动画配置
+// ============================================
+
+/** 网格容器动画变体 */
+const gridContainerVariants: Variants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+}
+
+/** 卡片动画变体 - 从下方淡入 + 轻微缩放 */
+const cardVariants: Variants = {
+  hidden: { 
+    opacity: 0, 
+    y: 16,
+    scale: 0.96,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.25, 0.46, 0.45, 0.94], // easeOutQuad
+    },
+  },
+}
 
 const DEFAULT_DATA: VitalOverviewData = {
   heartRate: {
@@ -420,6 +456,12 @@ export function Type5_VitalOverviewWidgetPage() {
     debug: import.meta.env.DEV,
   })
 
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
   // 注册数据接收回调（支持 vital_overview_card 或顶层体征字段）
   useEffect(() => {
     onData((rawData) => {
@@ -448,61 +490,75 @@ export function Type5_VitalOverviewWidgetPage() {
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
-        {/* 2x2 网格布局 */}
-        <div className="grid grid-cols-2 gap-3">
+        {/* 2x2 网格布局 - 带交错入场动画，等待 canAnimate 信号 */}
+        <motion.div 
+          key={animationKey}
+          className="grid grid-cols-2 gap-3"
+          initial="hidden"
+          animate={canAnimate ? "visible" : "hidden"}
+          variants={gridContainerVariants}
+        >
           {/* 心率 */}
-          <VitalCard
-            type="heart-rate"
-            title={t('widgets.type5.heartRate')}
-            value={data.heartRate.value}
-            unit={data.heartRate.unit}
-            statusText={data.heartRate.statusText}
-            status={data.heartRate.status}
-            highlighted={data.heartRate.highlighted}
-            isActive={activeCard === 'heart-rate'}
-            onClick={() => handleCardClick('heart-rate')}
-          />
+          <motion.div variants={cardVariants}>
+            <VitalCard
+              type="heart-rate"
+              title={t('widgets.type5.heartRate')}
+              value={data.heartRate.value}
+              unit={data.heartRate.unit}
+              statusText={data.heartRate.statusText}
+              status={data.heartRate.status}
+              highlighted={data.heartRate.highlighted}
+              isActive={activeCard === 'heart-rate'}
+              onClick={() => handleCardClick('heart-rate')}
+            />
+          </motion.div>
           
           {/* 血压 */}
-          <VitalCard
-            type="blood-pressure"
-            title={t('widgets.type5.bloodPressure')}
-            value={data.bloodPressure.systolic}
-            subValue={data.bloodPressure.diastolic}
-            unit={data.bloodPressure.unit}
-            statusText={data.bloodPressure.statusText}
-            status={data.bloodPressure.status}
-            highlighted={data.bloodPressure.highlighted}
-            isActive={activeCard === 'blood-pressure'}
-            onClick={() => handleCardClick('blood-pressure')}
-          />
+          <motion.div variants={cardVariants}>
+            <VitalCard
+              type="blood-pressure"
+              title={t('widgets.type5.bloodPressure')}
+              value={data.bloodPressure.systolic}
+              subValue={data.bloodPressure.diastolic}
+              unit={data.bloodPressure.unit}
+              statusText={data.bloodPressure.statusText}
+              status={data.bloodPressure.status}
+              highlighted={data.bloodPressure.highlighted}
+              isActive={activeCard === 'blood-pressure'}
+              onClick={() => handleCardClick('blood-pressure')}
+            />
+          </motion.div>
           
           {/* 血氧 */}
-          <VitalCard
-            type="spo2"
-            title={t('widgets.type5.spo2')}
-            value={data.spo2.value}
-            unit={data.spo2.unit}
-            statusText={data.spo2.statusText}
-            status={data.spo2.status}
-            highlighted={data.spo2.highlighted}
-            isActive={activeCard === 'spo2'}
-            onClick={() => handleCardClick('spo2')}
-          />
+          <motion.div variants={cardVariants}>
+            <VitalCard
+              type="spo2"
+              title={t('widgets.type5.spo2')}
+              value={data.spo2.value}
+              unit={data.spo2.unit}
+              statusText={data.spo2.statusText}
+              status={data.spo2.status}
+              highlighted={data.spo2.highlighted}
+              isActive={activeCard === 'spo2'}
+              onClick={() => handleCardClick('spo2')}
+            />
+          </motion.div>
           
           {/* POCT */}
-          <VitalCard
-            type="poct"
-            title={t('widgets.type5.poct')}
-            value={data.poct.value}
-            unit={data.poct.unit}
-            statusText={data.poct.statusText}
-            status={data.poct.status}
-            highlighted={data.poct.highlighted}
-            isActive={activeCard === 'poct'}
-            onClick={() => handleCardClick('poct')}
-          />
-        </div>
+          <motion.div variants={cardVariants}>
+            <VitalCard
+              type="poct"
+              title={t('widgets.type5.poct')}
+              value={data.poct.value}
+              unit={data.poct.unit}
+              statusText={data.poct.statusText}
+              status={data.poct.status}
+              highlighted={data.poct.highlighted}
+              isActive={activeCard === 'poct'}
+              onClick={() => handleCardClick('poct')}
+            />
+          </motion.div>
+        </motion.div>
 
         {/* 调试信息（仅开发环境） */}
         {import.meta.env.DEV && (

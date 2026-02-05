@@ -10,10 +10,11 @@
  * Visibility controlled by SHOW_SUPER_PANEL in config (hardcoded).
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database, FlaskConical, Pin, ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database, FlaskConical, Pin, ChevronDown, Zap, Play, Square, Sparkles, Send, MousePointer, Radio, CheckCircle } from 'lucide-react'
 import { SHOW_SUPER_PANEL } from '@/config/config'
 import { cn } from '@/lib/utils'
 import { authService } from '@/services/auth/authService'
@@ -103,6 +104,114 @@ interface LogEntry {
     lastTimestamp: string
 }
 
+// Android 事件模拟配置
+interface AndroidEventConfig {
+    id: string
+    event: string
+    label: string
+    labelEn: string
+    description?: string
+    descriptionEn?: string
+    icon: 'animate' | 'ppg-start' | 'ppg-stop' | 'generic'
+    data?: Record<string, unknown>
+}
+
+// Android -> JS 事件列表（可在此扩展）
+const ANDROID_EVENTS: AndroidEventConfig[] = [
+    {
+        id: 'page-global-animate',
+        event: 'page-global-animate',
+        label: '入场动画',
+        labelEn: 'Entrance Animate',
+        description: '触发页面入场动画',
+        descriptionEn: 'Trigger page entrance animation',
+        icon: 'animate',
+    },
+    {
+        id: 'page-widget-ppg-start',
+        event: 'page-widget-ppg-start',
+        label: 'PPG 开始测量',
+        labelEn: 'PPG Start',
+        description: '发送 PPG 测量开始信号',
+        descriptionEn: 'Send PPG measurement start signal',
+        icon: 'ppg-start',
+    },
+    {
+        id: 'page-widget-ppg-stop',
+        event: 'page-widget-ppg-stop',
+        label: 'PPG 结束测量',
+        labelEn: 'PPG Stop',
+        description: '发送 PPG 测量结束信号',
+        descriptionEn: 'Send PPG measurement stop signal',
+        icon: 'ppg-stop',
+    },
+]
+
+// H5 -> Android 事件配置
+interface H5EventConfig {
+    id: string
+    event: string
+    label: string
+    labelEn: string
+    description?: string
+    descriptionEn?: string
+    icon: 'ready' | 'click' | 'data' | 'generic'
+    data?: Record<string, unknown>
+}
+
+// H5 -> Android 事件列表（JS 发送给 Android 的事件）
+const H5_TO_ANDROID_EVENTS: H5EventConfig[] = [
+    {
+        id: 'page-global-ready',
+        event: 'page-global-ready',
+        label: '页面全局就绪',
+        labelEn: 'Page Global Ready',
+        description: '通知 Android 页面已加载完成',
+        descriptionEn: 'Notify Android that page is ready',
+        icon: 'ready',
+        data: { pageId: 'test-page' },
+    },
+    {
+        id: 'click-weekly-suggestion',
+        event: 'click-weekly-suggestion',
+        label: '周报建议点击',
+        labelEn: 'Weekly Suggestion Click',
+        description: '周报页「查看详情」点击',
+        descriptionEn: 'Weekly report "View Details" click',
+        icon: 'click',
+        data: { suggestionId: 'test-suggestion-001' },
+    },
+    {
+        id: 'click-widget-plan-add',
+        event: 'click-widget-plan-add',
+        label: '改善计划添加',
+        labelEn: 'Plan Add Click',
+        description: '改善计划「添加」按钮点击',
+        descriptionEn: 'Improvement plan "Add" button click',
+        icon: 'click',
+        data: { itemId: 'plan-001', itemType: 'exercise', itemTitle: 'Morning Walk' },
+    },
+    {
+        id: 'click-widget-plan-select',
+        event: 'click-widget-plan-select',
+        label: '改善计划选择',
+        labelEn: 'Plan Select Click',
+        description: '改善计划「已选择」按钮点击',
+        descriptionEn: 'Improvement plan "Selected" button click',
+        icon: 'click',
+    },
+    {
+        id: 'data-global-request',
+        event: 'data-global-request',
+        label: '请求数据',
+        labelEn: 'Request Data',
+        description: 'H5 向 Android 请求数据',
+        descriptionEn: 'H5 requests data from Android',
+        icon: 'data',
+        data: { requestType: 'user-info' },
+    },
+]
+
 // 提取出最大日志数量常量
 const MAX_LOGS = 100
 
@@ -130,6 +239,8 @@ function SuperPanelInner() {
     const [loginError, setLoginError] = useState<string | null>(null)
     const [logs, setLogs] = useState<LogEntry[]>([])
     const [showLogs, setShowLogs] = useState(false)
+    const [showEventSimulator, setShowEventSimulator] = useState(false)
+    const [showEventGenerator, setShowEventGenerator] = useState(false)
     const [isSmallScreen, setIsSmallScreen] = useState(false)
     const panelRef = useRef<HTMLDivElement>(null)
     const logIdRef = useRef(0)
@@ -336,6 +447,48 @@ function SuperPanelInner() {
         window.location.reload()
     }
 
+    // 模拟 Android 发送事件到 H5
+    const simulateAndroidEvent = useCallback((eventConfig: AndroidEventConfig) => {
+        const payload = {
+            event: eventConfig.event,
+            data: {
+                ...eventConfig.data,
+                timestamp: Date.now(),
+            },
+        }
+        
+        // 检查 NativeBridge 是否存在
+        if (typeof window !== 'undefined' && (window as any).NativeBridge?.receiveData) {
+            originalConsoleRef.current?.info?.(`[SuperPanel] 模拟 Android 事件: ${eventConfig.event}`)
+            ;(window as any).NativeBridge.receiveData(JSON.stringify(payload))
+        } else {
+            originalConsoleRef.current?.warn?.(`[SuperPanel] NativeBridge 未初始化，无法发送事件: ${eventConfig.event}`)
+        }
+    }, [])
+
+    // H5 发送事件到 Android（通过 window.android.onJsMessage）
+    const sendH5Event = useCallback((eventConfig: H5EventConfig) => {
+        const payload = JSON.stringify({
+            event: eventConfig.event,
+            data: {
+                ...eventConfig.data,
+                timestamp: Date.now(),
+            },
+            pageId: 'super-panel',
+            timestamp: Date.now(),
+        })
+        
+        // 检查 window.android 是否存在
+        if (typeof window !== 'undefined' && (window as any).android?.onJsMessage) {
+            originalConsoleRef.current?.info?.(`[SuperPanel] 发送 H5 → Android 事件: ${eventConfig.event}`)
+            ;(window as any).android.onJsMessage(payload)
+        } else {
+            // 开发环境下仅打印日志
+            originalConsoleRef.current?.info?.(`[SuperPanel] 发送 H5 → Android 事件 (开发模式): ${eventConfig.event}`)
+            originalConsoleRef.current?.info?.(`[SuperPanel] Payload: ${payload}`)
+        }
+    }, [])
+
     // Handle clear all storage
     const handleClearAllStorage = () => {
         try {
@@ -467,7 +620,7 @@ function SuperPanelInner() {
                             {/* Test Environment Toggle */}
                             <ControlRow
                                 icon={<FlaskConical className="w-4 h-4" />}
-                                label={isEnglish ? 'Test Mode' : '测试模式'}
+                                label={isEnglish ? 'Developer Mode' : '开发者模式'}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] text-slate-400">
@@ -588,6 +741,192 @@ function SuperPanelInner() {
                                     {isEnglish ? 'Clear All' : '清空全部'}
                                 </button>
                             </ControlRow>
+
+                            {/* Android Event Simulator - 可折叠 */}
+                            <div className="py-3 border-b border-slate-100 last:border-b-0">
+                                <motion.button
+                                    onClick={() => setShowEventSimulator(!showEventSimulator)}
+                                    className="flex items-center justify-between w-full text-left"
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ duration: 0.1 }}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600">
+                                            <Zap className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-sm font-medium text-slate-700">
+                                            {isEnglish ? 'Event Simulator' : '事件模拟'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] text-slate-400">
+                                            {ANDROID_EVENTS.length} {isEnglish ? 'events' : '个事件'}
+                                        </span>
+                                        <motion.div
+                                            animate={{ rotate: showEventSimulator ? 90 : 0 }}
+                                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                                        >
+                                            <ChevronDown className="w-4 h-4 text-slate-400 -rotate-90" />
+                                        </motion.div>
+                                    </div>
+                                </motion.button>
+
+                                {/* 事件列表 - 折叠内容 */}
+                                <AnimatePresence>
+                                    {showEventSimulator && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="mt-3 space-y-2 pl-11">
+                                                {ANDROID_EVENTS.map((eventConfig, index) => (
+                                                    <motion.button
+                                                        key={eventConfig.id}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: index * 0.03, duration: 0.15 }}
+                                                        onClick={() => simulateAndroidEvent(eventConfig)}
+                                                        whileTap={{ scale: 0.97 }}
+                                                        whileHover={{ x: 2 }}
+                                                        className={cn(
+                                                            'w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors',
+                                                            'bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300',
+                                                            'text-left group'
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            'w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0',
+                                                            eventConfig.icon === 'animate' && 'bg-blue-100 text-blue-600',
+                                                            eventConfig.icon === 'ppg-start' && 'bg-green-100 text-green-600',
+                                                            eventConfig.icon === 'ppg-stop' && 'bg-red-100 text-red-600',
+                                                            eventConfig.icon === 'generic' && 'bg-slate-100 text-slate-600',
+                                                        )}>
+                                                            {eventConfig.icon === 'animate' && <Sparkles className="w-3.5 h-3.5" />}
+                                                            {eventConfig.icon === 'ppg-start' && <Play className="w-3.5 h-3.5" />}
+                                                            {eventConfig.icon === 'ppg-stop' && <Square className="w-3.5 h-3.5" />}
+                                                            {eventConfig.icon === 'generic' && <Zap className="w-3.5 h-3.5" />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="text-xs font-medium text-slate-700 group-hover:text-purple-700 truncate">
+                                                                {isEnglish ? eventConfig.labelEn : eventConfig.label}
+                                                            </div>
+                                                            <div className="text-[10px] text-slate-400 truncate">
+                                                                {eventConfig.event}
+                                                            </div>
+                                                        </div>
+                                                    </motion.button>
+                                                ))}
+                                                <motion.div 
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ delay: 0.1 }}
+                                                    className="text-[9px] text-slate-400 pt-1"
+                                                >
+                                                    {isEnglish 
+                                                        ? 'Click to simulate Android → JS event' 
+                                                        : '点击模拟 Android → JS 事件'}
+                                                </motion.div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
+                            {/* H5 -> Android Event Generator - 可折叠 */}
+                            <div className="py-3 border-b border-slate-100 last:border-b-0">
+                                <motion.button
+                                    onClick={() => setShowEventGenerator(!showEventGenerator)}
+                                    className="flex items-center justify-between w-full text-left"
+                                    whileTap={{ scale: 0.98 }}
+                                    transition={{ duration: 0.1 }}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center text-blue-600">
+                                            <Send className="w-4 h-4" />
+                                        </div>
+                                        <span className="text-sm font-medium text-slate-700">
+                                            {isEnglish ? 'Event Generator' : '事件生成器'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-[10px] text-slate-400">
+                                            {H5_TO_ANDROID_EVENTS.length} {isEnglish ? 'events' : '个事件'}
+                                        </span>
+                                        <motion.div
+                                            animate={{ rotate: showEventGenerator ? 90 : 0 }}
+                                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                                        >
+                                            <ChevronDown className="w-4 h-4 text-slate-400 -rotate-90" />
+                                        </motion.div>
+                                    </div>
+                                </motion.button>
+
+                                {/* H5 -> Android 事件列表 - 折叠内容 */}
+                                <AnimatePresence>
+                                    {showEventGenerator && (
+                                        <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.2, ease: 'easeOut' }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="mt-3 space-y-2 pl-11">
+                                                {H5_TO_ANDROID_EVENTS.map((eventConfig, index) => (
+                                                    <motion.button
+                                                        key={eventConfig.id}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: index * 0.03, duration: 0.15 }}
+                                                        onClick={() => sendH5Event(eventConfig)}
+                                                        whileTap={{ scale: 0.97 }}
+                                                        whileHover={{ x: 2 }}
+                                                        className={cn(
+                                                            'w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors',
+                                                            'bg-slate-50 hover:bg-blue-50 border border-slate-200 hover:border-blue-300',
+                                                            'text-left group'
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            'w-6 h-6 rounded-md flex items-center justify-center flex-shrink-0',
+                                                            eventConfig.icon === 'ready' && 'bg-green-100 text-green-600',
+                                                            eventConfig.icon === 'click' && 'bg-orange-100 text-orange-600',
+                                                            eventConfig.icon === 'data' && 'bg-cyan-100 text-cyan-600',
+                                                            eventConfig.icon === 'generic' && 'bg-slate-100 text-slate-600',
+                                                        )}>
+                                                            {eventConfig.icon === 'ready' && <CheckCircle className="w-3.5 h-3.5" />}
+                                                            {eventConfig.icon === 'click' && <MousePointer className="w-3.5 h-3.5" />}
+                                                            {eventConfig.icon === 'data' && <Radio className="w-3.5 h-3.5" />}
+                                                            {eventConfig.icon === 'generic' && <Send className="w-3.5 h-3.5" />}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="text-xs font-medium text-slate-700 group-hover:text-blue-700 truncate">
+                                                                {isEnglish ? eventConfig.labelEn : eventConfig.label}
+                                                            </div>
+                                                            <div className="text-[10px] text-slate-400 truncate">
+                                                                {eventConfig.event}
+                                                            </div>
+                                                        </div>
+                                                    </motion.button>
+                                                ))}
+                                                <motion.div 
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ delay: 0.15 }}
+                                                    className="text-[9px] text-slate-400 pt-1"
+                                                >
+                                                    {isEnglish 
+                                                        ? 'Click to send H5 → Android event' 
+                                                        : '点击发送 H5 → Android 事件'}
+                                                </motion.div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
                         </div>
 
                         {/* Console Logs */}
