@@ -1,18 +1,21 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { observer } from 'mobx-react-lite'
 import { cn } from '@/lib/utils'
 import { authService } from '@/services/auth/authService'
-import { IS_TEST_ENV, TOKEN_CHECK_INTERVAL } from '@/config/config'
+import { TOKEN_CHECK_INTERVAL } from '@/config/config'
+import { useTestEnvStore } from '@/stores'
 import { LoginDialog } from './LoginDialog'
 
 /**
  * AuthButton - Authentication button component
  * Shows login button when not authenticated
  * Shows user dropdown with logout when authenticated
- * Only visible in test environment
+ * Only visible in test environment (controlled by MobX store)
  */
-export function AuthButton() {
+export const AuthButton = observer(function AuthButton() {
   const { t } = useTranslation()
+  const { isTestEnv } = useTestEnvStore()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [username, setUsername] = useState<string | null>(null)
   const [showDropdown, setShowDropdown] = useState(false)
@@ -92,8 +95,8 @@ export function AuthButton() {
     checkAuth()
   }
 
-  // Don't render in production environment
-  if (!IS_TEST_ENV) {
+  // Don't render if not in test environment
+  if (!isTestEnv) {
     return null
   }
 
@@ -219,4 +222,4 @@ export function AuthButton() {
       />
     </>
   )
-}
+})

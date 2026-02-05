@@ -3,9 +3,9 @@
  */
 
 import { useEffect, useCallback, useRef, useState } from 'react'
-import { useAuthStore } from '@/stores'
+import { useAuthStore, useTestEnvStore } from '@/stores'
 import { authService, getTokenFromUrl } from '@/services/auth/authService'
-import { TOKEN_CHECK_INTERVAL, IS_TEST_ENV } from '@/config/config'
+import { TOKEN_CHECK_INTERVAL } from '@/config/config'
 
 interface UseTokenValidationOptions {
   /** Check interval in milliseconds */
@@ -39,6 +39,7 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
   const { interval, onTokenExpired, autoReLogin } = normalizeOptions(options)
 
   const { isAuthenticated } = useAuthStore()
+  const { isTestEnv } = useTestEnvStore()
   const [state, setState] = useState<TokenValidationState>({
     phase: 'idle',
     isRefreshing: false,
@@ -60,7 +61,7 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
   }, [isAuthenticated, onTokenExpired])
 
   const attemptReLogin = useCallback(async () => {
-    if (!IS_TEST_ENV) return
+    if (!isTestEnv) return
     if (isRefreshingRef.current) return
     if (isAuthenticated) return
     if (getTokenFromUrl()) return
@@ -100,17 +101,17 @@ export function useTokenValidation(options: UseTokenValidationOptions = {}) {
     } finally {
       isRefreshingRef.current = false
     }
-  }, [autoReLogin, isAuthenticated])
+  }, [autoReLogin, isAuthenticated, isTestEnv])
 
   useEffect(() => {
-    if (!IS_TEST_ENV) return
+    if (!isTestEnv) return
     const checkInterval = setInterval(() => {
       setState((prev) => ({ ...prev, lastChecked: Date.now() }))
       if (!isAuthenticated) attemptReLogin()
     }, interval)
 
     return () => clearInterval(checkInterval)
-  }, [interval, isAuthenticated, attemptReLogin])
+  }, [interval, isAuthenticated, attemptReLogin, isTestEnv])
 
   return {
     isExpired: !isAuthenticated,

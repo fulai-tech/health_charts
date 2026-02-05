@@ -53,17 +53,14 @@ import { WeeklyReportPage } from '@/pages/weekly/WeeklyReportPage'
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
-// Conditional imports for test environment
-import { IS_TEST_ENV } from '@/config/config'
-
 // Page init: token/lang from URL, runs once per URL change for all routes
 import { useInitPage } from '@/lib/initPage'
 
 // Initialize i18n
 import '@/i18n'
 
-// Lazy load SuperPanel only in test environment
-const SuperPanel = IS_TEST_ENV ? lazy(() => import('@/components/common/SuperPanel').then(module => ({ default: module.SuperPanel }))) : null
+// Lazy load SuperPanel (visibility controlled by MobX store internally)
+const SuperPanel = lazy(() => import('@/components/common/SuperPanel').then(module => ({ default: module.SuperPanel })))
 
 /** Runs initPage (token + lang from URL) for every route; only re-runs when URL params change. */
 function InitPageRunner() {
@@ -100,12 +97,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <HashRouter>
         <InitPageRunner />
-        {/* Super Panel - Floating control panel for test environment */}
-        {IS_TEST_ENV && SuperPanel && (
-          <Suspense fallback={null}>
-            <SuperPanel />
-          </Suspense>
-        )}
+        {/* Super Panel - Floating control panel (visibility controlled by MobX store) */}
+        <Suspense fallback={null}>
+          <SuperPanel />
+        </Suspense>
         <Suspense fallback={<PageLoading />}>
           <Routes>
             {/* Home Page - Route Navigation */}

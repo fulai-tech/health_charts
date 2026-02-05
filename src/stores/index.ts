@@ -4,6 +4,7 @@ export {
   useAuthStore, 
   useThemeStore, 
   useLanguageStore,
+  useTestEnvStore,
   type GlobalState,
   type AuthState,
   type Theme,

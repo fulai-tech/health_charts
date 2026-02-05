@@ -9,15 +9,16 @@
  * - Android 通过 page-widget-ppg-start 控制测量开始
  * - Android 通过 page-widget-ppg-stop 控制测量结束
  * - 30s 倒计时显示，每次重新开始都会重置
- * - Start 按钮仅在测试环境显示（IS_TEST_ENV = true）
+ * - Start 按钮仅在测试环境显示（isTestEnv = true，由 MobX store 管理）
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { observer } from 'mobx-react-lite'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
+import { useTestEnvStore } from '@/stores'
 import { widgetBGColor } from '@/config/theme'
-import { IS_TEST_ENV } from '@/config/config'
 
 // ============================================
 // 类型定义
@@ -443,8 +444,9 @@ function ProgressRing({ progress, remainingTime, size = 40 }: ProgressRingProps)
  * - page-widget-ppg-start: Android 发送的开始信号（Android -> JS）
  * - page-widget-ppg-stop: Android 发送的结束信号（Android -> JS）
  */
-export function Type10_PPGSignalWidgetPage() {
+export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidgetPage() {
   const { t } = useTranslation()
+  const { isTestEnv } = useTestEnvStore()
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const [status, setStatus] = useState<MeasureStatus>('idle')
@@ -573,7 +575,7 @@ export function Type10_PPGSignalWidgetPage() {
             </div>
 
             {/* Start 按钮（仅测试环境显示） */}
-            {status === 'idle' && IS_TEST_ENV && (
+            {status === 'idle' && isTestEnv && (
               <button
                 onClick={handleStart}
                 className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-full transition-colors"
@@ -582,8 +584,18 @@ export function Type10_PPGSignalWidgetPage() {
               </button>
             )}
 
+            {/* 测量中的暂停按钮（仅测试环境显示） */}
+            {status === 'measuring' && isTestEnv && (
+              <button
+                onClick={handleStop}
+                className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium rounded-full transition-colors"
+              >
+                {t('widgets.type10.stop', '暂停')}
+              </button>
+            )}
+
             {/* 测量完成后的重新开始按钮（仅测试环境显示） */}
-            {status === 'completed' && IS_TEST_ENV && (
+            {status === 'completed' && isTestEnv && (
               <button
                 onClick={handleRestart}
                 className="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-medium rounded-full transition-colors"
@@ -605,7 +617,7 @@ export function Type10_PPGSignalWidgetPage() {
             {status === 'idle' && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-50/80">
                 <p className="text-sm text-slate-400">
-                  {IS_TEST_ENV
+                  {isTestEnv
                     ? t('widgets.type10.idleHint')
                     : t('widgets.type10.placeFinger')}
                 </p>
@@ -641,4 +653,4 @@ export function Type10_PPGSignalWidgetPage() {
       </div>
     </WidgetLayout>
   )
-}
+})

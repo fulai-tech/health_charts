@@ -1,11 +1,12 @@
 /**
  * 全局状态管理 - MobX 版
  *
- * 管理：auth（登录状态）、theme（主题）、language（语言）
+ * 管理：auth（登录状态）、theme（主题）、language（语言）、isTestEnv（测试环境）
  * 使用 mobx + mobx-react-lite，与 localStorage 同步
  */
 
 import { makeAutoObservable, runInAction } from 'mobx'
+import { DEFAULT_IS_TEST_ENV } from '@/config/config'
 
 // ==================== Types ====================
 
@@ -24,6 +25,7 @@ export interface GlobalState {
   auth: AuthState
   theme: Theme
   language: Language
+  isTestEnv: boolean
 }
 
 // ==================== Storage Keys ====================
@@ -32,6 +34,7 @@ const STORAGE_KEYS = {
   AUTH: 'fulai_auth_data',
   THEME: 'app_theme',
   LANGUAGE: 'app_language',
+  IS_TEST_ENV: 'app_is_test_env',
 } as const
 
 // ==================== Default State ====================
@@ -49,6 +52,7 @@ class GlobalStore {
   auth: AuthState = getDefaultAuth()
   theme: Theme = 'light'
   language: Language = 'zh'
+  isTestEnv: boolean = DEFAULT_IS_TEST_ENV
 
   constructor() {
     makeAutoObservable(this, {}, { autoBind: true })
@@ -61,6 +65,7 @@ class GlobalStore {
       if (e.key === STORAGE_KEYS.AUTH) this.syncAuthFromStorage()
       else if (e.key === STORAGE_KEYS.THEME) this.syncThemeFromStorage()
       else if (e.key === STORAGE_KEYS.LANGUAGE) this.syncLanguageFromStorage()
+      else if (e.key === STORAGE_KEYS.IS_TEST_ENV) this.syncIsTestEnvFromStorage()
     })
   }
 
@@ -91,6 +96,12 @@ class GlobalStore {
       const language = localStorage.getItem(STORAGE_KEYS.LANGUAGE) as Language | null
       if (language === 'en' || language === 'zh') {
         runInAction(() => { this.language = language })
+      }
+
+      // 加载 isTestEnv，如果没有保存过则使用默认值
+      const isTestEnv = localStorage.getItem(STORAGE_KEYS.IS_TEST_ENV)
+      if (isTestEnv !== null) {
+        runInAction(() => { this.isTestEnv = isTestEnv === 'true' })
       }
     } catch (e) {
       console.error('[GlobalStore] Failed to load from storage:', e)
@@ -135,6 +146,16 @@ class GlobalStore {
     const language = localStorage.getItem(STORAGE_KEYS.LANGUAGE) as Language | null
     if ((language === 'en' || language === 'zh') && language !== this.language) {
       runInAction(() => { this.language = language })
+    }
+  }
+
+  private syncIsTestEnvFromStorage(): void {
+    const isTestEnv = localStorage.getItem(STORAGE_KEYS.IS_TEST_ENV)
+    if (isTestEnv !== null) {
+      const value = isTestEnv === 'true'
+      if (value !== this.isTestEnv) {
+        runInAction(() => { this.isTestEnv = value })
+      }
     }
   }
 
@@ -201,6 +222,19 @@ class GlobalStore {
     localStorage.setItem(STORAGE_KEYS.LANGUAGE, language)
     runInAction(() => { this.language = language })
   }
+
+  // ==================== Test Environment Actions ====================
+
+  setIsTestEnv(isTestEnv: boolean): void {
+    localStorage.setItem(STORAGE_KEYS.IS_TEST_ENV, String(isTestEnv))
+    runInAction(() => { this.isTestEnv = isTestEnv })
+  }
+
+  toggleIsTestEnv(): boolean {
+    const newValue = !this.isTestEnv
+    this.setIsTestEnv(newValue)
+    return newValue
+  }
 }
 
 // ==================== Singleton ====================
@@ -215,6 +249,7 @@ export function useGlobalStore(): GlobalState {
     auth: globalStore.auth,
     theme: globalStore.theme,
     language: globalStore.language,
+    isTestEnv: globalStore.isTestEnv,
   }
 }
 
@@ -240,5 +275,13 @@ export function useLanguageStore() {
   return {
     language: globalStore.language,
     setLanguage: globalStore.setLanguage,
+  }
+}
+
+export function useTestEnvStore() {
+  return {
+    isTestEnv: globalStore.isTestEnv,
+    setIsTestEnv: globalStore.setIsTestEnv,
+    toggleIsTestEnv: globalStore.toggleIsTestEnv,
   }
 }

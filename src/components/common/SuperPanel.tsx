@@ -2,29 +2,23 @@
  * Super Panel - Development/Test Environment Control Panel
  * 
  * A floating button that opens a control panel for:
+ * - Test mode toggle (isTestEnv)
  * - Language switching (Chinese/English)
  * - User login/logout
- * - Theme switching (Light/Dark)
- * - Demo mode toggle
+ * - Console logs viewer
  * 
- * Only rendered when IS_TEST_ENV is true.
- * Uses conditional compilation to exclude from production builds.
+ * Visibility controlled by SHOW_SUPER_PANEL in config (hardcoded).
  */
 
 import { useState, useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database } from 'lucide-react'
-import { IS_TEST_ENV } from '@/config/config'
+import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database, FlaskConical, Pin } from 'lucide-react'
+import { SHOW_SUPER_PANEL } from '@/config/config'
 import { cn } from '@/lib/utils'
 import { authService } from '@/services/auth/authService'
-import { useAuthStore, useLanguageStore } from '@/stores'
+import { useAuthStore, useLanguageStore, useTestEnvStore } from '@/stores'
 import { LoginDialog } from '@/components/ui/LoginDialog'
-
-// Don't render anything in production
-if (!IS_TEST_ENV) {
-    // This component will be tree-shaken in production builds
-}
 
 /**
  * Toggle Switch Component
@@ -112,11 +106,25 @@ interface LogEntry {
 // 提取出最大日志数量常量
 const MAX_LOGS = 100
 
+// localStorage key for pin state
+const PIN_STORAGE_KEY = 'super_panel_pinned'
+
+// 从 localStorage 读取 pin 状态
+function getStoredPinState(): boolean {
+    try {
+        return localStorage.getItem(PIN_STORAGE_KEY) === 'true'
+    } catch {
+        return false
+    }
+}
+
 function SuperPanelInner() {
     const { t, i18n } = useTranslation()
     const { isAuthenticated, username: authUsername, logout } = useAuthStore()
     const { language, setLanguage } = useLanguageStore()
-    const [isOpen, setIsOpen] = useState(false)
+    const { isTestEnv, setIsTestEnv } = useTestEnvStore()
+    const [isOpen, setIsOpen] = useState(() => getStoredPinState()) // 如果 pinned，初始就打开
+    const [isPinned, setIsPinned] = useState(() => getStoredPinState())
     const [showLoginDialog, setShowLoginDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [loginError, setLoginError] = useState<string | null>(null)
@@ -139,8 +147,6 @@ function SuperPanelInner() {
 
     // 检测屏幕尺寸，自适应布局
     useEffect(() => {
-        if (!IS_TEST_ENV) return // 生产环境跳过
-        
         const checkScreenSize = () => {
             // 当屏幕宽度小于 360px 或高度小于 500px 时，认为是小屏幕
             const isSmall = window.innerWidth < 360 || window.innerHeight < 500
@@ -157,8 +163,6 @@ function SuperPanelInner() {
 
     // 重写console方法来捕获日志 - 优化版本
     useEffect(() => {
-        if (!IS_TEST_ENV) return
-
         const originalConsole = {
             log: console.log,
             warn: console.warn,
@@ -280,21 +284,33 @@ function SuperPanelInner() {
         }
     }, [])
 
-    // Close panel when clicking outside
+    // Close panel when clicking outside (unless pinned)
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
+            if (isPinned) return // 固定时不关闭
             if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
                 setIsOpen(false)
             }
         }
-        if (isOpen) {
+        if (isOpen && !isPinned) {
             document.addEventListener('mousedown', handleClickOutside)
         }
         return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [isOpen])
+    }, [isOpen, isPinned])
 
-    // Don't render in production - 必须在所有 hooks 之后检查
-    if (!IS_TEST_ENV) {
+    // Handle pin toggle
+    const handlePinToggle = () => {
+        const newValue = !isPinned
+        setIsPinned(newValue)
+        try {
+            localStorage.setItem(PIN_STORAGE_KEY, String(newValue))
+        } catch {
+            // ignore
+        }
+    }
+
+    // Don't render if SHOW_SUPER_PANEL is false (hardcoded in config)
+    if (!SHOW_SUPER_PANEL) {
         return null
     }
 
@@ -422,16 +438,49 @@ function SuperPanelInner() {
                                     Super Panel
                                 </span>
                             </div>
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
-                            >
-                                <X className="w-4 h-4" />
-                            </button>
+                            <div className="flex items-center gap-1">
+                                {/* Pin Button */}
+                                <button
+                                    onClick={handlePinToggle}
+                                    className={cn(
+                                        "p-1 rounded-lg transition-colors",
+                                        isPinned 
+                                            ? "bg-orange-100 text-orange-500" 
+                                            : "hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                                    )}
+                                    title={isPinned ? (isEnglish ? 'Unpin' : '取消固定') : (isEnglish ? 'Pin' : '固定')}
+                                >
+                                    <Pin className={cn("w-4 h-4", isPinned && "rotate-45")} />
+                                </button>
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setIsOpen(false)}
+                                    className="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
 
                         {/* Controls - 可滚动区域 */}
                         <div className="px-4 py-2 overflow-y-auto flex-1 min-h-0">
+                            {/* Test Environment Toggle */}
+                            <ControlRow
+                                icon={<FlaskConical className="w-4 h-4" />}
+                                label={isEnglish ? 'Test Mode' : '测试模式'}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] text-slate-400">
+                                        {isTestEnv ? (isEnglish ? 'ON' : '开') : (isEnglish ? 'OFF' : '关')}
+                                    </span>
+                                    <ToggleSwitch
+                                        enabled={isTestEnv}
+                                        onChange={setIsTestEnv}
+                                        size="sm"
+                                    />
+                                </div>
+                            </ControlRow>
+
                             {/* Language */}
                             <ControlRow
                                 icon={<Globe className="w-4 h-4" />}
