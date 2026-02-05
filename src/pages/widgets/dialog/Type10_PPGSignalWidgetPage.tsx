@@ -476,6 +476,32 @@ export function Type10_PPGSignalWidgetPage() {
     console.log('[PPGSignalWidget] 测量结束')
   }, [])
 
+  // 开始测量（需在 useEffect 之前声明，避免 "accessed before declaration"）
+  const handleStart = useCallback(() => {
+    if (status === 'measuring') return
+
+    // 注意：不再发送 click-widget-ppg-start 事件
+    // Android 通过发送 page-widget-ppg-start 来控制开始
+
+    // 重置状态
+    setStatus('measuring')
+    setRemainingTime(ANIMATION_CONFIG.maxDuration)
+    resetCanvas()
+
+    // 启动倒计时
+    timerRef.current = window.setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev <= 1) {
+          handleStop()
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    console.log('[PPGSignalWidget] 开始测量')
+  }, [status, resetCanvas, handleStop])
+
   // 注册数据接收回调
   useEffect(() => {
     onData((rawData) => {
@@ -506,33 +532,7 @@ export function Type10_PPGSignalWidgetPage() {
         }
       }
     })
-  }, [onData, handleStop])
-
-  // 开始测量
-  const handleStart = useCallback(() => {
-    if (status === 'measuring') return
-
-    // 注意：不再发送 click-widget-ppg-start 事件
-    // Android 通过发送 page-widget-ppg-start 来控制开始
-
-    // 重置状态
-    setStatus('measuring')
-    setRemainingTime(ANIMATION_CONFIG.maxDuration)
-    resetCanvas()
-
-    // 启动倒计时
-    timerRef.current = window.setInterval(() => {
-      setRemainingTime((prev) => {
-        if (prev <= 1) {
-          handleStop()
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    console.log('[PPGSignalWidget] 开始测量')
-  }, [status, resetCanvas, handleStop])
+  }, [onData, handleStop, handleStart])
 
   // 清理定时器
   useEffect(() => {
