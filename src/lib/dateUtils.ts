@@ -170,9 +170,10 @@ export const WEEKDAY_KEYS = [
 ] as const
 
 /**
- * Map Chinese weekday labels to translation keys
+ * Map weekday labels (Chinese and English) to translation keys
  */
 export const WEEKDAY_LABEL_MAP: Record<string, string> = {
+    // Chinese labels
     周一: 'weekdays.mon',
     周二: 'weekdays.tue',
     周三: 'weekdays.wed',
@@ -180,6 +181,22 @@ export const WEEKDAY_LABEL_MAP: Record<string, string> = {
     周五: 'weekdays.fri',
     周六: 'weekdays.sat',
     周日: 'weekdays.sun',
+    // English labels (common variations)
+    Mon: 'weekdays.mon',
+    Tue: 'weekdays.tue',
+    Wed: 'weekdays.wed',
+    Thu: 'weekdays.thu',
+    Fri: 'weekdays.fri',
+    Sat: 'weekdays.sat',
+    Sun: 'weekdays.sun',
+    // Additional English variations
+    Monday: 'weekdays.mon',
+    Tuesday: 'weekdays.tue',
+    Wednesday: 'weekdays.wed',
+    Thursday: 'weekdays.thu',
+    Friday: 'weekdays.fri',
+    Saturday: 'weekdays.sat',
+    Sunday: 'weekdays.sun',
 }
 
 /**

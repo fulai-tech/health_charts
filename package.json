@@ -18,7 +18,9 @@
     "typecheck": "tsc --noEmit",
     "ci": "yarn lint && yarn typecheck && yarn test:run",
     "merge": "node scripts/merge-to-main.mjs",
-    "merge:dev": "node scripts/merge-to-main.mjs dev"
+    "merge:dev": "node scripts/merge-to-main.mjs dev",
+    "deploy": "node scripts/deploy.mjs",
+    "server": "yarn build && yarn deploy"
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.15",
