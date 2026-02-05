@@ -6,9 +6,10 @@
  * - 显示 PPG 信号波形动画（Canvas 绘制）
  * - 网格背景向左滚动
  * - 右侧发光点随信号上下波动
- * - Start 按钮发送开始测量事件
- * - 30s 倒计时显示
- * - 监听 Android 结束信号
+ * - Android 通过 page-widget-ppg-start 控制测量开始
+ * - Android 通过 page-widget-ppg-stop 控制测量结束
+ * - 30s 倒计时显示，每次重新开始都会重置
+ * - Start 按钮仅在测试环境显示（IS_TEST_ENV = true）
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react'
@@ -16,6 +17,7 @@ import { useTranslation } from 'react-i18next'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { widgetBGColor } from '@/config/theme'
+import { IS_TEST_ENV } from '@/config/config'
 
 // ============================================
 // 类型定义
@@ -70,7 +72,7 @@ const ANIMATION_CONFIG = {
   /** 循环周期 (s) */
   loopDuration: 10,
   /** 目标帧率 (fps) - 低端设备优化 */
-  targetFPS: 30,
+  targetFPS: 60,
 } as const
 
 // ============================================
@@ -435,8 +437,8 @@ function ProgressRing({ progress, remainingTime, size = 40 }: ProgressRingProps)
  * - JS -> Android: window.android.onJsMessage(jsonString)
  *
  * 事件：
- * - click-widget-ppg-start: 点击开始按钮
- * - page-widget-ppg-stop: Android 发送的结束信号
+ * - page-widget-ppg-start: Android 发送的开始信号（Android -> JS）
+ * - page-widget-ppg-stop: Android 发送的结束信号（Android -> JS）
  */
 export function Type10_PPGSignalWidgetPage() {
   const { t } = useTranslation()
@@ -474,36 +476,12 @@ export function Type10_PPGSignalWidgetPage() {
     console.log('[PPGSignalWidget] 测量结束')
   }, [])
 
-  // 注册数据接收回调
-  useEffect(() => {
-    onData((rawData) => {
-      console.log('[PPGSignalWidget] 收到原生数据:', rawData)
-
-      // 检查是否是结束信号
-      if (typeof rawData === 'object' && rawData !== null) {
-        const data = rawData as Record<string, unknown>
-        if (data.event === 'page-widget-ppg-stop') {
-          handleStop()
-          return
-        }
-
-        // 处理 PPG 数据
-        if (Array.isArray(data.values)) {
-          // 未来可以在这里处理真实的 PPG 数据
-          console.log('[PPGSignalWidget] 收到 PPG 数据:', data.values.length, '个点')
-        }
-      }
-    })
-  }, [onData, handleStop])
-
-  // 开始测量
+  // 开始测量（需在 useEffect 之前声明，避免 "accessed before declaration"）
   const handleStart = useCallback(() => {
     if (status === 'measuring') return
 
-    // 发送开始事件到 Android
-    send('click-widget-ppg-start', {
-      timestamp: Date.now(),
-    })
+    // 注意：不再发送 click-widget-ppg-start 事件
+    // Android 通过发送 page-widget-ppg-start 来控制开始
 
     // 重置状态
     setStatus('measuring')
@@ -522,7 +500,39 @@ export function Type10_PPGSignalWidgetPage() {
     }, 1000)
 
     console.log('[PPGSignalWidget] 开始测量')
-  }, [status, send, resetCanvas, handleStop])
+  }, [status, resetCanvas, handleStop])
+
+  // 注册数据接收回调
+  useEffect(() => {
+    onData((rawData) => {
+      console.log('[PPGSignalWidget] 收到原生数据:', rawData)
+
+      // 检查事件类型
+      if (typeof rawData === 'object' && rawData !== null) {
+        const data = rawData as Record<string, unknown>
+
+        // Android 发送开始信号
+        if (data.event === 'page-widget-ppg-start') {
+          console.log('[PPGSignalWidget] 收到 Android 开始信号')
+          handleStart()
+          return
+        }
+
+        // Android 发送结束信号
+        if (data.event === 'page-widget-ppg-stop') {
+          console.log('[PPGSignalWidget] 收到 Android 结束信号')
+          handleStop()
+          return
+        }
+
+        // 处理 PPG 数据
+        if (Array.isArray(data.values)) {
+          // 未来可以在这里处理真实的 PPG 数据
+          console.log('[PPGSignalWidget] 收到 PPG 数据:', data.values.length, '个点')
+        }
+      }
+    })
+  }, [onData, handleStop, handleStart])
 
   // 清理定时器
   useEffect(() => {
@@ -558,8 +568,8 @@ export function Type10_PPGSignalWidgetPage() {
               </h3>
             </div>
 
-            {/* Start 按钮 */}
-            {status === 'idle' && (
+            {/* Start 按钮（仅测试环境显示） */}
+            {status === 'idle' && IS_TEST_ENV && (
               <button
                 onClick={handleStart}
                 className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-full transition-colors"
@@ -591,7 +601,9 @@ export function Type10_PPGSignalWidgetPage() {
             {status === 'idle' && (
               <div className="absolute inset-0 flex items-center justify-center bg-slate-50/80">
                 <p className="text-sm text-slate-400">
-                  {t('widgets.type10.idleHint')}
+                  {IS_TEST_ENV
+                    ? t('widgets.type10.idleHint')
+                    : t('widgets.type10.placeFinger')}
                 </p>
               </div>
             )}

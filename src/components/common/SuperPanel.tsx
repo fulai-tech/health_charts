@@ -14,13 +14,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
-import { Settings, Globe, User, Sun, Moon, Database, LogIn, LogOut, X } from 'lucide-react'
+import { Settings, Globe, User, LogIn, LogOut, X, Terminal, Trash2, RotateCcw, Database } from 'lucide-react'
 import { IS_TEST_ENV } from '@/config/config'
 import { cn } from '@/lib/utils'
 import { authService } from '@/services/auth/authService'
-import { useTheme } from '@/hooks/useTheme'
 import { useAuthStore, useLanguageStore } from '@/stores'
-import { isGlobalDemoModeEnabled, setGlobalDemoMode } from '@/config/globalDemoMode'
 import { LoginDialog } from '@/components/ui/LoginDialog'
 
 // Don't render anything in production
@@ -99,26 +97,173 @@ function ControlRow({ icon, label, children }: ControlRowProps) {
 /**
  * Super Panel Component（使用 MobX store 同步登录/主题/语言，observer 保证响应式）
  */
+// 日志接口定义
+interface LogEntry {
+    id: number
+    timestamp: string
+    level: 'log' | 'warn' | 'error' | 'info'
+    message: string
+    args: any[]
+    count: number
+    firstTimestamp: string
+    lastTimestamp: string
+}
+
+// 提取出最大日志数量常量
+const MAX_LOGS = 100
+
 function SuperPanelInner() {
     const { t, i18n } = useTranslation()
-    const { theme, toggleTheme } = useTheme()
     const { isAuthenticated, username: authUsername, logout } = useAuthStore()
     const { language, setLanguage } = useLanguageStore()
     const [isOpen, setIsOpen] = useState(false)
-    const [isDemoMode, setIsDemoMode] = useState(isGlobalDemoModeEnabled)
     const [showLoginDialog, setShowLoginDialog] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
     const [loginError, setLoginError] = useState<string | null>(null)
+    const [logs, setLogs] = useState<LogEntry[]>([])
+    const [showLogs, setShowLogs] = useState(false)
     const panelRef = useRef<HTMLDivElement>(null)
+    const logIdRef = useRef(0)
+    // 增加一个 Ref 来充当"互斥锁"，防止处理日志时产生新日志造成的死循环
+    const isProcessingLog = useRef(false)
+    // 增加一个 Ref 缓存待处理的日志队列，用于批量更新
+    const pendingLogsQueue = useRef<LogEntry[]>([])
+    // 保存原始console方法的引用，供其他函数使用
+    const originalConsoleRef = useRef<{
+        log: typeof console.log
+        warn: typeof console.warn
+        error: typeof console.error
+        info: typeof console.info
+    } | null>(null)
 
     // Don't render in production
     if (!IS_TEST_ENV) {
         return null
     }
 
-    // Sync demo mode state
+    // 重写console方法来捕获日志 - 优化版本
     useEffect(() => {
-        setIsDemoMode(isGlobalDemoModeEnabled())
+        if (!IS_TEST_ENV) return
+
+        const originalConsole = {
+            log: console.log,
+            warn: console.warn,
+            error: console.error,
+            info: console.info,
+        }
+        
+        // 保存到ref中供其他函数使用
+        originalConsoleRef.current = originalConsole
+
+        const createLogEntry = (level: LogEntry['level'], args: any[]): LogEntry => {
+            logIdRef.current += 1
+            const timestamp = new Date().toLocaleTimeString()
+            
+            // 优化：只有当需要渲染日志时，才去进行昂贵的 stringify 操作
+            // 限制 stringify 的深度/长度，防止大对象卡死
+            const message = args.map(arg => {
+                if (typeof arg === 'object' && arg !== null) {
+                    try {
+                        // 简单的防止大对象卡死策略：截断
+                        const str = JSON.stringify(arg, null, 2)
+                        return str.length > 2000 ? str.slice(0, 2000) + '... (truncated)' : str
+                    } catch (e) {
+                        return '[Circular/Unserializable Object]'
+                    }
+                }
+                return String(arg)
+            }).join(' ')
+
+            return {
+                id: logIdRef.current,
+                timestamp,
+                level,
+                message,
+                args, // 保留原始引用，万一以后想做点击展开看详情
+                count: 1,
+                firstTimestamp: timestamp,
+                lastTimestamp: timestamp
+            }
+        }
+
+        // 批量更新函数：每 500ms 执行一次状态更新
+        // 解决"性能雪崩"问题
+        const flushLogs = () => {
+            if (pendingLogsQueue.current.length === 0) return
+
+            setLogs(prev => {
+                // 复制一份当前的日志进行操作
+                let newLogs = [...prev]
+                const incomingLogs = [...pendingLogsQueue.current]
+                pendingLogsQueue.current = [] // 清空队列
+
+                incomingLogs.forEach(newLog => {
+                    const lastLog = newLogs[newLogs.length - 1]
+                    // 合并逻辑
+                    if (lastLog && lastLog.level === newLog.level && lastLog.message === newLog.message) {
+                        newLogs[newLogs.length - 1] = {
+                            ...lastLog,
+                            count: lastLog.count + 1,
+                            lastTimestamp: newLog.timestamp,
+                            timestamp: newLog.timestamp
+                        }
+                    } else {
+                        newLogs.push(newLog)
+                    }
+                })
+
+                // 截断日志数组，防止内存泄漏
+                if (newLogs.length > MAX_LOGS) {
+                    newLogs = newLogs.slice(-MAX_LOGS)
+                }
+                return newLogs
+            })
+        }
+
+        // 使用 setInterval 来做批量更新
+        const intervalId = setInterval(flushLogs, 500)
+
+        const intercept = (level: LogEntry['level']) => (...args: any[]) => {
+            // 1. 先执行原生 console，保证开发者工具里能看到
+            originalConsole[level].apply(console, args)
+
+            // 2. 死循环熔断机制：如果当前正在处理日志逻辑，直接忽略新进来的日志
+            if (isProcessingLog.current) return
+
+            try {
+                isProcessingLog.current = true
+
+                // 3. 过滤逻辑
+                const msgStr = args.join(' ')
+                if (msgStr.includes('i18next::translator: missingKey')) return
+                if (msgStr.includes('SuperPanel') && msgStr.includes('translation')) return
+
+                // 4. 将日志加入队列，而不是直接 setState
+                const entry = createLogEntry(level, args)
+                pendingLogsQueue.current.push(entry)
+
+            } catch (err) {
+                // 如果处理日志本身报错了，不要再 console.error，否则会死循环
+                // 默默吞掉错误
+            } finally {
+                isProcessingLog.current = false
+            }
+        }
+
+        // 覆盖 console
+        console.log = intercept('log')
+        console.warn = intercept('warn')
+        console.error = intercept('error')
+        console.info = intercept('info')
+
+        return () => {
+            // 还原 console
+            console.log = originalConsole.log
+            console.warn = originalConsole.warn
+            console.error = originalConsole.error
+            console.info = originalConsole.info
+            clearInterval(intervalId)
+        }
     }, [])
 
     // Close panel when clicking outside
@@ -141,17 +286,57 @@ function SuperPanelInner() {
         setLanguage(newLang as 'en' | 'zh')
     }
 
-    // Handle theme toggle
-    const handleThemeToggle = () => {
-        toggleTheme()
+    // Handle log toggle
+    const handleLogToggle = () => {
+        setShowLogs(!showLogs)
     }
 
-    // Handle demo mode toggle
-    const handleDemoModeToggle = (enabled: boolean) => {
-        setGlobalDemoMode(enabled)
-        setIsDemoMode(enabled)
-        // Reload to apply changes
+    // Handle clear logs
+    const handleClearLogs = () => {
+        setLogs([])
+    }
+
+    // Handle page reload
+    const handlePageReload = () => {
         window.location.reload()
+    }
+
+    // Handle clear all storage
+    const handleClearAllStorage = () => {
+        try {
+            // Clear localStorage
+            localStorage.clear()
+            
+            // Clear sessionStorage
+            sessionStorage.clear()
+            
+            // Clear all cookies
+            document.cookie.split(";").forEach(cookie => {
+                const eqPos = cookie.indexOf("=")
+                const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim()
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.${window.location.hostname}`
+            })
+            
+            // Clear IndexedDB (if any)
+            if ('indexedDB' in window) {
+                indexedDB.databases().then(databases => {
+                    databases.forEach(db => {
+                        if (db.name) {
+                            indexedDB.deleteDatabase(db.name)
+                        }
+                    })
+                }).catch(() => {})
+            }
+            
+            // Show confirmation and reload
+            alert(isEnglish ? 'All storage cleared! Page will reload.' : '所有存储已清空！页面即将重新加载。')
+            window.location.reload()
+        } catch (error) {
+            originalConsoleRef.current?.error?.('Clear storage failed:', error) || console.error('Clear storage failed:', error)
+            alert(isEnglish ? 'Failed to clear storage completely' : '清空存储失败')
+        }
     }
 
     // Handle login
@@ -163,7 +348,8 @@ function SuperPanelInner() {
             // authService 会更新 localStorage，globalStore 会自动同步
             setShowLoginDialog(false)
         } catch (error) {
-            console.error('Login failed:', error)
+            // 使用原始console.error避免循环，并且不触发日志拦截
+            originalConsoleRef.current?.error?.('Login failed:', error) || console.error('Login failed:', error)
             setLoginError(error instanceof Error ? error.message : t('auth.loginFailed'))
         } finally {
             setIsLoading(false)
@@ -176,7 +362,6 @@ function SuperPanelInner() {
     }
 
     const isEnglish = i18n.language.startsWith('en')
-    const isDark = theme === 'dark'
 
     return (
         <>
@@ -264,39 +449,123 @@ function SuperPanelInner() {
                                 )}
                             </ControlRow>
 
-                            {/* Theme */}
+                            {/* Console Logs */}
                             <ControlRow
-                                icon={isDark ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                                label={t('superPanel.theme', '主题')}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Sun className="w-3.5 h-3.5 text-slate-400" />
-                                    <ToggleSwitch
-                                        enabled={isDark}
-                                        onChange={handleThemeToggle}
-                                        size="sm"
-                                    />
-                                    <Moon className="w-3.5 h-3.5 text-slate-400" />
-                                </div>
-                            </ControlRow>
-
-                            {/* Demo Mode */}
-                            <ControlRow
-                                icon={<Database className="w-4 h-4" />}
-                                label={t('superPanel.demoMode', 'Demo 模式')}
+                                icon={<Terminal className="w-4 h-4" />}
+                                label={isEnglish ? 'Console' : '控制台'}
                             >
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] text-slate-400">
-                                        {isDemoMode ? t('superPanel.mockData', '假数据') : t('superPanel.realData', '真数据')}
+                                        {logs.length} {isEnglish ? 'logs' : '条日志'}
                                     </span>
+                                    <button
+                                        onClick={handleClearLogs}
+                                        className="p-1 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600"
+                                        title={isEnglish ? 'Clear logs' : '清空日志'}
+                                        disabled={logs.length === 0}
+                                    >
+                                        <Trash2 className="w-3 h-3" />
+                                    </button>
                                     <ToggleSwitch
-                                        enabled={isDemoMode}
-                                        onChange={handleDemoModeToggle}
+                                        enabled={showLogs}
+                                        onChange={handleLogToggle}
                                         size="sm"
                                     />
                                 </div>
                             </ControlRow>
+
+                            {/* Page Reload */}
+                            <ControlRow
+                                icon={<RotateCcw className="w-4 h-4" />}
+                                label={isEnglish ? 'Reload' : '重新加载'}
+                            >
+                                <button
+                                    onClick={handlePageReload}
+                                    className={cn(
+                                        'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+                                        'bg-blue-50 hover:bg-blue-100 text-blue-600'
+                                    )}
+                                >
+                                    {isEnglish ? 'Reload Page' : '重载页面'}
+                                </button>
+                            </ControlRow>
+
+                            {/* Clear Storage */}
+                            <ControlRow
+                                icon={<Database className="w-4 h-4" />}
+                                label={isEnglish ? 'Storage' : '存储'}
+                            >
+                                <button
+                                    onClick={handleClearAllStorage}
+                                    className={cn(
+                                        'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+                                        'bg-red-50 hover:bg-red-100 text-red-600'
+                                    )}
+                                >
+                                    {isEnglish ? 'Clear All' : '清空全部'}
+                                </button>
+                            </ControlRow>
                         </div>
+
+                        {/* Console Logs */}
+                        {showLogs && (
+                            <div className="border-t border-slate-100">
+                                <div className="px-4 py-2 bg-slate-50">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-medium text-slate-600">
+                                            {isEnglish ? 'Console Logs' : '控制台日志'}
+                                        </span>
+                                        <span className="text-[10px] text-slate-400">
+                                            {isEnglish ? 'Latest 100' : '最新 100 条'}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="max-h-48 overflow-y-auto bg-slate-900 text-green-400 font-mono text-[10px]">
+                                    {logs.length === 0 ? (
+                                        <div className="p-3 text-slate-500 text-center">
+                                            {isEnglish ? 'No logs' : '暂无日志'}
+                                        </div>
+                                    ) : (
+                                        logs.map(log => (
+                                            <div
+                                                key={log.id}
+                                                className={cn(
+                                                    'px-3 py-1 border-b border-slate-800',
+                                                    log.level === 'error' && 'text-red-400',
+                                                    log.level === 'warn' && 'text-yellow-400',
+                                                    log.level === 'info' && 'text-blue-400',
+                                                    log.level === 'log' && 'text-green-400'
+                                                )}
+                                            >
+                                                <div className="flex items-start gap-2">
+                                                    <span className="text-slate-500 shrink-0">
+                                                        [{log.timestamp}]
+                                                    </span>
+                                                    <span className="text-slate-400 shrink-0 uppercase">
+                                                        {log.level}:
+                                                    </span>
+                                                    <div className="flex-1">
+                                                        <span className="break-all whitespace-pre-wrap">
+                                                            {log.message}
+                                                        </span>
+                                                        {log.count > 1 && (
+                                                            <div className="mt-1 flex items-center gap-2">
+                                                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-medium bg-orange-500 text-white">
+                                                                    × {log.count}
+                                                                </span>
+                                                                <span className="text-[8px] text-slate-400">
+                                                                    {log.firstTimestamp} - {log.lastTimestamp}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Footer */}
                         <div className="px-4 py-2 bg-slate-50 rounded-b-2xl">
