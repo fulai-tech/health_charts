@@ -674,21 +674,20 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
               />
             </motion.div>
 
-            {/* 状态文字 - 使用 AnimatePresence 实现平滑切换，completed 状态不显示 */}
+            {/* 状态文字 - 使用 AnimatePresence 实现平滑切换 */}
             <AnimatePresence mode="wait">
-              {status !== 'completed' && (
-                <motion.p
-                  key={status}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className="text-sm text-slate-500"
-                >
-                  {status === 'idle' && t('widgets.type10.statusIdle')}
-                  {status === 'measuring' && t('widgets.type10.statusMeasuring')}
-                </motion.p>
-              )}
+              <motion.p
+                key={status}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                className="text-sm text-slate-500"
+              >
+                {status === 'idle' && t('widgets.type10.statusIdle')}
+                {status === 'measuring' && t('widgets.type10.statusMeasuring')}
+                {status === 'completed' && t('widgets.type10.statusCompleted')}
+              </motion.p>
             </AnimatePresence>
           </div>
           </div>

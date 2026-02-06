@@ -363,7 +363,7 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <EmbeddedContainer maxWidth="md" fullHeight={false}>
+      <EmbeddedContainer maxWidth="md" fullHeight={false} paddingTop="sm" paddingLeft="sm" paddingRight="sm">
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring" stagger staggerDelay={0.1}>
           {/* 主评分卡片 - 可翻转 */}
           <FlipScoreCard data={data} t={t} onSummaryClick={handleSummaryClick} />

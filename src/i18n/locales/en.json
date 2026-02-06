@@ -598,7 +598,7 @@
       "placeFinger": "Place your finger on the sensor to start measurement",
       "statusIdle": "Ready to measure",
       "statusMeasuring": "In acquiring infrared signals...",
-      "statusCompleted": "Measurement completed"
+      "statusCompleted": "Measurement ended"
     }
   },
   "aiSecurity": {

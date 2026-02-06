@@ -13,6 +13,41 @@ const PADDING_MAP = {
 } as const
 
 /**
+ * 单方向内边距配置映射
+ */
+const PADDING_TOP_MAP = {
+  none: '',
+  xs: 'pt-1',
+  sm: 'pt-2',
+  md: 'pt-4',
+  lg: 'pt-6',
+} as const
+
+const PADDING_BOTTOM_MAP = {
+  none: '',
+  xs: 'pb-1',
+  sm: 'pb-2',
+  md: 'pb-4',
+  lg: 'pb-6',
+} as const
+
+const PADDING_LEFT_MAP = {
+  none: '',
+  xs: 'pl-1',
+  sm: 'pl-2',
+  md: 'pl-4',
+  lg: 'pl-6',
+} as const
+
+const PADDING_RIGHT_MAP = {
+  none: '',
+  xs: 'pr-1',
+  sm: 'pr-2',
+  md: 'pr-4',
+  lg: 'pr-6',
+} as const
+
+/**
  * 最大宽度配置映射
  */
 const MAX_WIDTH_MAP = {
@@ -38,6 +73,26 @@ export interface EmbeddedContainerProps {
    * @default 'none'
    */
   padding?: keyof typeof PADDING_MAP
+  /**
+   * 上内边距配置（会覆盖 padding 的上边距）
+   * @default undefined
+   */
+  paddingTop?: keyof typeof PADDING_TOP_MAP
+  /**
+   * 下内边距配置（会覆盖 padding 的下边距）
+   * @default undefined
+   */
+  paddingBottom?: keyof typeof PADDING_BOTTOM_MAP
+  /**
+   * 左内边距配置（会覆盖 padding 的左边距）
+   * @default undefined
+   */
+  paddingLeft?: keyof typeof PADDING_LEFT_MAP
+  /**
+   * 右内边距配置（会覆盖 padding 的右边距）
+   * @default undefined
+   */
+  paddingRight?: keyof typeof PADDING_RIGHT_MAP
   /**
    * 最大宽度
    * @default 'full'
@@ -116,6 +171,10 @@ export function EmbeddedContainer({
   style,
   fullHeight = true,
   padding = 'none',
+  paddingTop,
+  paddingBottom,
+  paddingLeft,
+  paddingRight,
   maxWidth = 'full',
   centered = false,
   responsivePadding = false,
@@ -127,6 +186,14 @@ export function EmbeddedContainer({
   const paddingClass = responsivePadding
     ? 'p-2 sm:p-3 md:p-4 lg:p-6'
     : PADDING_MAP[padding]
+
+  // 构建方向性内边距类名
+  const directionalPaddingClasses = [
+    paddingTop && PADDING_TOP_MAP[paddingTop],
+    paddingBottom && PADDING_BOTTOM_MAP[paddingBottom],
+    paddingLeft && PADDING_LEFT_MAP[paddingLeft],
+    paddingRight && PADDING_RIGHT_MAP[paddingRight],
+  ].filter(Boolean)
 
   return (
     <div
@@ -142,6 +209,8 @@ export function EmbeddedContainer({
         centered && 'mx-auto',
         // 内边距
         paddingClass,
+        // 方向性内边距（覆盖 padding 对应方向）
+        ...directionalPaddingClasses,
         // 自定义类名
         className
       )}

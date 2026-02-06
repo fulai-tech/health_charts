@@ -602,7 +602,7 @@
       "placeFinger": "请将手指放在传感器上开始测量",
       "statusIdle": "准备测量",
       "statusMeasuring": "正在采集红外信号...",
-      "statusCompleted": "测量完成"
+      "statusCompleted": "结束测量"
     }
   },
   "aiSecurity": {

@@ -21,10 +21,10 @@ interface UseMetalShineOptions {
 
 /**
  * 金属高光动效控制 Hook
- * 
+ *
  * 功能：
- * - 首次加载时自动播放一次高光动效
- * - 之后不再自动播放，但点击可手动触发
+ * - 不自动播放，需要手动调用 triggerShine 触发
+ * - 点击可手动触发
  */
 function useMetalShine(options: UseMetalShineOptions = {}) {
   const {
@@ -32,7 +32,6 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
   } = options
 
   const lightGroupRef = useRef<HTMLDivElement>(null)
-  const hasAutoPlayedRef = useRef(false)
   const isAnimatingRef = useRef(false)
   const hasPendingRef = useRef(false)
   const animationEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -49,11 +48,11 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
   const hideShine = useCallback(() => {
     const lightGroup = lightGroupRef.current
     if (!lightGroup) return
-    
+
     // 隐藏整个光泽组
     lightGroup.style.opacity = '0'
     lightGroup.style.visibility = 'hidden'
-    
+
     const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
     animatedElements.forEach((el) => {
       const htmlEl = el as HTMLElement
@@ -65,7 +64,7 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
   const showShine = useCallback(() => {
     const lightGroup = lightGroupRef.current
     if (!lightGroup) return
-    
+
     lightGroup.style.opacity = '1'
     lightGroup.style.visibility = 'visible'
   }, [])
@@ -82,7 +81,7 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
 
     // 获取所有需要动画的元素
     const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
-    
+
     // 重置并启动动画
     animatedElements.forEach((el) => {
       const htmlEl = el as HTMLElement
@@ -90,14 +89,14 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
       void htmlEl.offsetHeight // 强制重绘
       htmlEl.style.animation = `quickLightMove ${quickAnimationDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards`
     })
-    
+
     // 清除之前的定时器
     clearAnimationEndTimer()
-    
+
     // 动画结束后处理
     animationEndTimerRef.current = setTimeout(() => {
       isAnimatingRef.current = false
-      
+
       if (hasPendingRef.current) {
         // 有待触发的动画，立即播放
         hasPendingRef.current = false
@@ -116,21 +115,9 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
       hasPendingRef.current = true
       return false
     }
-    
+
     playShine()
     return true
-  }, [playShine])
-
-  // 首次自动播放（只自动播放一次）
-  useEffect(() => {
-    if (!hasAutoPlayedRef.current && lightGroupRef.current) {
-      hasAutoPlayedRef.current = true
-      // 延迟一点启动首次动画，让组件先渲染
-      const timer = setTimeout(() => {
-        playShine()
-      }, 500)
-      return () => clearTimeout(timer)
-    }
   }, [playShine])
 
   // 清理
@@ -355,7 +342,7 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
     animateDelay: DELAY_ANIMATE_START,
   })
 
-  // 金属高光动效控制（首次自动播放一次，之后点击触发）
+  // 金属高光动效控制（不自动播放，只通过点击触发）
   const { lightGroupRef, triggerShine } = useMetalShine({
     quickAnimationDuration: 1200,  // 动画 1.2 秒
   })
@@ -382,6 +369,19 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
     }
     send('cardClick', { pageId: PAGE_CONFIG.pageId, data })
   }, [send, data, isMetalEnabled, triggerShine])
+
+  // 进场动画完成后，自动触发一次高光（只触发一次）
+  const hasAutoTriggeredRef = useRef(false)
+  useEffect(() => {
+    if (canAnimate && isMetalEnabled && !hasAutoTriggeredRef.current) {
+      hasAutoTriggeredRef.current = true
+      // 等待进场动画完成后触发高光（进场动画大约需要 800ms）
+      const timer = setTimeout(() => {
+        triggerShine()
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+  }, [canAnimate, isMetalEnabled, triggerShine])
 
   // 格式化时长
   const totalDuration = formatDuration(data.totalSleepMinutes)
