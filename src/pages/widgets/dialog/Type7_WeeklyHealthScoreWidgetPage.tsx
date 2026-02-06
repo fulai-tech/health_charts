@@ -10,6 +10,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { BarChart3, Moon, Activity, Utensils, Sparkles, Target, Heart, Leaf } from 'lucide-react'
 import {
   VITAL_COLORS,
@@ -40,6 +41,11 @@ interface WeeklyHealthScoreData {
 }
 
 const PAGE_CONFIG = { pageId: 'weekly-health-score', pageName: '每周健康分数卡片', type: 7 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 const DEFAULT_DATA: WeeklyHealthScoreData = {
   weeklyScore: 92,
@@ -340,7 +346,8 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   useEffect(() => {
@@ -356,7 +363,7 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring" stagger staggerDelay={0.1}>
           {/* 主评分卡片 - 可翻转 */}
           <FlipScoreCard data={data} t={t} onSummaryClick={handleSummaryClick} />
@@ -371,7 +378,7 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

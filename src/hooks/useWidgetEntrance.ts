@@ -54,6 +54,8 @@ interface UseWidgetEntranceOptions {
   pageId: string
   /** 开发环境自动触发延迟（毫秒），默认 300ms */
   devAutoTriggerDelay?: number
+  /** 收到 page-global-animate 后延迟多久触发动画（毫秒），默认 0 */
+  animateDelay?: number
   /** 是否在开发环境禁用自动触发，默认 false */
   disableDevAutoTrigger?: boolean
   /** 是否开启调试日志 */
@@ -79,6 +81,7 @@ export function useWidgetEntrance(options: UseWidgetEntranceOptions): UseWidgetE
   const {
     pageId,
     devAutoTriggerDelay = 300,
+    animateDelay = 0,
     disableDevAutoTrigger = false,
     debug = import.meta.env.DEV,
   } = options
@@ -89,6 +92,7 @@ export function useWidgetEntrance(options: UseWidgetEntranceOptions): UseWidgetE
   const [animationKey, setAnimationKey] = useState(0)
   const hasTriggeredRef = useRef(false)
   const autoTriggerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const animateDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // 日志工具
   const log = useCallback(
@@ -167,11 +171,22 @@ export function useWidgetEntrance(options: UseWidgetEntranceOptions): UseWidgetE
           clearTimeout(autoTriggerTimerRef.current)
           autoTriggerTimerRef.current = null
         }
-        // 如果已经触发过，使用 replayAnimate 重新播放（用于调试场景）
-        if (hasTriggeredRef.current) {
-          replayAnimate()
+        
+        // 延迟触发动画
+        const doTrigger = () => {
+          // 如果已经触发过，使用 replayAnimate 重新播放（用于调试场景）
+          if (hasTriggeredRef.current) {
+            replayAnimate()
+          } else {
+            triggerAnimate()
+          }
+        }
+        
+        if (animateDelay > 0) {
+          log('INFO', `延迟 ${animateDelay}ms 后触发动画`)
+          animateDelayTimerRef.current = setTimeout(doTrigger, animateDelay)
         } else {
-          triggerAnimate()
+          doTrigger()
         }
       }
     }
@@ -201,10 +216,13 @@ export function useWidgetEntrance(options: UseWidgetEntranceOptions): UseWidgetE
       if (autoTriggerTimerRef.current) {
         clearTimeout(autoTriggerTimerRef.current)
       }
+      if (animateDelayTimerRef.current) {
+        clearTimeout(animateDelayTimerRef.current)
+      }
       window.removeEventListener('widget-entrance-animate', handleAnimateEvent as EventListener)
       log('INFO', '入场动画控制已销毁')
     }
-  }, [pageId, devAutoTriggerDelay, disableDevAutoTrigger, log, sendToAndroid, triggerAnimate, replayAnimate])
+  }, [pageId, devAutoTriggerDelay, animateDelay, disableDevAutoTrigger, log, sendToAndroid, triggerAnimate, replayAnimate])
 
   return {
     canAnimate,

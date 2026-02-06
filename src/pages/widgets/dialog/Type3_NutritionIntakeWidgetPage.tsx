@@ -5,6 +5,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer, useWidgetAnimation } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { AlertTriangle } from 'lucide-react'
 import { widgetBGColor } from '@/config/theme'
 
@@ -63,6 +64,11 @@ const PAGE_CONFIG = {
   pageName: '营养摄入卡片',
   type: 3, // 营养摄入卡片类型标识
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 const DEFAULT_DATA: NutritionIntakeData = {
   nutritionScore: 85,
@@ -371,7 +377,8 @@ export function Type3_NutritionIntakeWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // 注册数据接收回调
@@ -395,7 +402,7 @@ export function Type3_NutritionIntakeWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
           <CardContent data={data} onClick={handleCardClick} t={t} />
         </WidgetEntranceContainer>
@@ -406,7 +413,7 @@ export function Type3_NutritionIntakeWidgetPage() {
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

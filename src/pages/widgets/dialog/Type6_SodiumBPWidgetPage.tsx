@@ -4,6 +4,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { ChevronRight } from 'lucide-react'
 import { VITAL_COLORS, widgetBGColor } from '@/config/theme'
 import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts'
@@ -60,6 +61,11 @@ const PAGE_CONFIG = {
   pageName: '钠摄入与血压关联卡片',
   type: 6, // 钠摄入与血压关联卡片类型标识
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 const DEFAULT_DATA: SodiumBPData = {
   intake: {
@@ -203,7 +209,8 @@ export function Type6_SodiumBPWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // 注册数据接收回调
@@ -231,7 +238,7 @@ export function Type6_SodiumBPWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-lg p-4">
+      <EmbeddedContainer maxWidth="lg" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
           {/* 对比卡片 */}
           <div className="relative flex items-stretch justify-center gap-3">
@@ -304,7 +311,7 @@ export function Type6_SodiumBPWidgetPage() {
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

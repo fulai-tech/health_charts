@@ -21,6 +21,7 @@
     "dailyReportPages": "日报页面",
     "urlParameters": "URL 参数",
     "weeklyReportCategory": "周报",
+    "aiSecurityCategory": "AI 安全",
     "widgetType1": "睡眠评分",
     "widgetType2": "柱状图对比",
     "widgetType3": "营养摄入",
@@ -602,6 +603,27 @@
       "statusIdle": "准备测量",
       "statusMeasuring": "正在采集红外信号...",
       "statusCompleted": "测量完成"
+    }
+  },
+  "aiSecurity": {
+    "title": "AI 智能急救系统",
+    "appName": "AI 安全核心",
+    "moduleName": "智能急救系统",
+    "systemLog": "系统日志",
+    "status": {
+      "processing": "处理中",
+      "complete": "已完成"
+    },
+    "actions": {
+      "message": "消息",
+      "wechat": "微信",
+      "app": "应用",
+      "emergency": "120"
+    },
+    "chat": {
+      "title": "120 急救通话记录",
+      "recording": "录音中...",
+      "thankYou": "谢谢。"
     }
   }
 }

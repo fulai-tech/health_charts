@@ -50,6 +50,9 @@ import HealthyDailyPage from '@/pages/daily/HealthyDailyPage'
 // Weekly Report Page
 import { WeeklyReportPage } from '@/pages/weekly/WeeklyReportPage'
 
+// AI Security Page
+import { AISecurityPage } from '@/pages/ai-security/AISecurityPage'
+
 // Home Page
 import { HomePage } from '@/pages/HomePage'
 
@@ -147,6 +150,12 @@ function App() {
             {/* ============================================ */}
 
             <Route path="/weekly/report" element={<WeeklyReportPage />} />
+
+            {/* ============================================ */}
+            {/* AI Security Page */}
+            {/* ============================================ */}
+
+            <Route path="/ai-security" element={<AISecurityPage />} />
 
             {/* ============================================ */}
             {/* Widget Routes (for iframe embedding) */}

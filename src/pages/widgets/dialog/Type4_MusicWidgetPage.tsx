@@ -4,6 +4,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { Music, Headphones, Sparkles } from 'lucide-react'
 import { widgetBGColor } from '@/config/theme'
 
@@ -60,6 +61,11 @@ const PAGE_CONFIG = {
   pageName: '音乐推荐',
   type: 4, // 音乐推荐卡片类型标识
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 const DEFAULT_DATA: MusicNativeData = {
   items: [
@@ -172,7 +178,7 @@ function MusicCard({ item, index: _index, defaultItem, onCardClick, recommendLis
 
   return (
     <div
-      className="group relative overflow-hidden bg-white/60 backdrop-blur-sm flex-shrink-0 w-[calc(50%-0.5rem)] min-w-[calc(50%-0.5rem)] md:w-[calc(50%-1rem)] md:min-w-[calc(50%-1rem)] snap-start cursor-pointer rounded-2xl md:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-1"
+      className="group relative overflow-hidden bg-white/60 backdrop-blur-sm flex-shrink-0 w-[calc(50%-0.5rem)] min-w-[calc(50%-0.5rem)] md:w-[calc(50%-1rem)] md:min-w-[calc(50%-1rem)] snap-start cursor-pointer rounded-2xl md:rounded-3xl transition-all duration-500 ease-out hover:scale-[1.02] hover:-translate-y-1"
       style={{ aspectRatio: '4/5' }}
       onClick={onCardClick}
       onMouseEnter={() => setIsHovered(true)}
@@ -280,7 +286,8 @@ export function Type4_MusicWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // ============================================
@@ -327,7 +334,7 @@ export function Type4_MusicWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-full md:max-w-[720px] p-4 sm:p-5 md:p-6">
+      <EmbeddedContainer maxWidth="full" fullHeight={false} className="md:max-w-[720px]">
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp" stagger staggerDelay={0.12}>
           {/* 标题区域 */}
           <div className="flex items-center justify-between mb-5 md:mb-6">
@@ -342,7 +349,7 @@ export function Type4_MusicWidgetPage() {
           
           {/* 查看更多按钮 */}
           <button 
-            className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 text-sm font-medium text-gray-600 hover:bg-white hover:border-orange-300 hover:text-orange-600 transition-all duration-300 shadow-sm hover:shadow-md"
+            className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 text-sm font-medium text-gray-600 hover:bg-white hover:border-orange-300 hover:text-orange-600 transition-all duration-300"
             onClick={() => send('viewAll', { pageId: PAGE_CONFIG.pageId })}
           >
             <span>{t('widgets.type4.viewAll')}</span>
@@ -377,7 +384,7 @@ export function Type4_MusicWidgetPage() {
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

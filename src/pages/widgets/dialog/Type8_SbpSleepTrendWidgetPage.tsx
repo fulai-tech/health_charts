@@ -10,6 +10,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { TrendLineChart, type ChartLine } from '@/components/charts/TrendLineChart'
 import { BP_COLORS, VITAL_COLORS, widgetBGColor } from '@/config/theme'
 
@@ -28,6 +29,11 @@ interface SbpSleepTrendChartData {
 }
 
 const PAGE_CONFIG = { pageId: 'sbp-sleep-trend', pageName: 'SBP与睡眠趋势图', type: 8 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 const DEFAULT_DATA: SbpSleepTrendChartData = {
   data: [
@@ -79,7 +85,8 @@ export function Type8_SbpSleepTrendWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   useEffect(() => {
@@ -109,10 +116,10 @@ export function Type8_SbpSleepTrendWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
           {chartData.length > 0 ? (
-            <div className="bg-white rounded-2xl p-4 shadow-sm">
+            <div className="bg-white rounded-2xl p-4">
               <TrendLineChart
                 data={chartData}
                 lines={lines}
@@ -127,7 +134,7 @@ export function Type8_SbpSleepTrendWidgetPage() {
         {import.meta.env.DEV && (
           <div className="mt-4 text-xs text-gray-400 text-center">{t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}</div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

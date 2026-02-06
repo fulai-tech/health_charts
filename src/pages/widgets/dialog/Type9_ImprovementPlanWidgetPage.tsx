@@ -15,6 +15,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { widgetBGColor } from '@/config/theme'
 import { AnimatedImage } from '@/components/common/AnimatedImage'
 
@@ -49,6 +50,11 @@ const PAGE_CONFIG = {
   pageName: '定制改善计划',
   type: 9,
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 /** 图标路径映射 */
 const ICON_MAP: Record<PlanItemType, string> = {
@@ -460,7 +466,8 @@ export function Type9_ImprovementPlanWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // 注册数据接收回调
@@ -507,10 +514,10 @@ export function Type9_ImprovementPlanWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring">
           {/* 改善计划卡片 */}
-          <div className="bg-white rounded-3xl p-5 shadow-sm">
+          <div className="bg-white rounded-3xl p-5">
           {/* 标题 */}
           <div className="flex items-center gap-2 mb-2">
             <div className="w-5 h-5 rounded-full bg-gradient-to-br from-orange-400 to-orange-500 flex items-center justify-center">
@@ -555,7 +562,7 @@ export function Type9_ImprovementPlanWidgetPage() {
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

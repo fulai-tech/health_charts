@@ -21,6 +21,7 @@
     "dailyReportPages": "Daily Report Pages",
     "urlParameters": "URL Parameters",
     "weeklyReportCategory": "Weekly Report",
+    "aiSecurityCategory": "AI Security",
     "widgetType1": "Sleep Score",
     "widgetType2": "Bar Chart Comparison",
     "widgetType3": "Nutrition Intake",
@@ -598,6 +599,27 @@
       "statusIdle": "Ready to measure",
       "statusMeasuring": "In acquiring infrared signals...",
       "statusCompleted": "Measurement completed"
+    }
+  },
+  "aiSecurity": {
+    "title": "AI Smart Emergency Rescue",
+    "appName": "AI Security Core",
+    "moduleName": "Smart Emergency Rescue System",
+    "systemLog": "SYSTEM LOG",
+    "status": {
+      "processing": "Processing",
+      "complete": "Complete"
+    },
+    "actions": {
+      "message": "Message",
+      "wechat": "Wechat",
+      "app": "APP",
+      "emergency": "120"
+    },
+    "chat": {
+      "title": "120 Emergency Call Log",
+      "recording": "Recording...",
+      "thankYou": "Thank you."
     }
   }
 }

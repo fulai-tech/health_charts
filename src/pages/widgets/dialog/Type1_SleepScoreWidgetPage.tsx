@@ -5,6 +5,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { globalStore } from '@/stores/globalStore'
 import { Moon } from 'lucide-react'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
@@ -14,27 +15,24 @@ import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 // ============================================
 
 interface UseMetalShineOptions {
-  /** 快速动画时长（毫秒），默认 1200ms - 点击触发时使用 */
+  /** 动画时长（毫秒），默认 1200ms */
   quickAnimationDuration?: number
-  /** 自动循环动画时长（毫秒），默认 4000ms */
-  autoAnimationDuration?: number
 }
 
 /**
  * 金属高光动效控制 Hook
  * 
  * 功能：
- * - 点击时立即触发一次快速高光动效
- * - 动画进行中点击会排队，等当前动画结束后再触发
- * - 动画结束后恢复自动循环
+ * - 首次加载时自动播放一次高光动效
+ * - 之后不再自动播放，但点击可手动触发
  */
 function useMetalShine(options: UseMetalShineOptions = {}) {
   const {
     quickAnimationDuration = 1200,
-    autoAnimationDuration = 4000,
   } = options
 
   const lightGroupRef = useRef<HTMLDivElement>(null)
+  const hasAutoPlayedRef = useRef(false)
   const isAnimatingRef = useRef(false)
   const hasPendingRef = useRef(false)
   const animationEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -47,53 +45,71 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
     }
   }, [])
 
-  // 执行快速高光动画
-  const playQuickShine = useCallback(() => {
+  // 隐藏光泽（动画结束后）
+  const hideShine = useCallback(() => {
+    const lightGroup = lightGroupRef.current
+    if (!lightGroup) return
+    
+    // 隐藏整个光泽组
+    lightGroup.style.opacity = '0'
+    lightGroup.style.visibility = 'hidden'
+    
+    const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
+    animatedElements.forEach((el) => {
+      const htmlEl = el as HTMLElement
+      htmlEl.style.animation = 'none'
+    })
+  }, [])
+
+  // 显示光泽（触发动画前）
+  const showShine = useCallback(() => {
+    const lightGroup = lightGroupRef.current
+    if (!lightGroup) return
+    
+    lightGroup.style.opacity = '1'
+    lightGroup.style.visibility = 'visible'
+  }, [])
+
+  // 执行高光动画
+  const playShine = useCallback(() => {
     const lightGroup = lightGroupRef.current
     if (!lightGroup) return
 
     isAnimatingRef.current = true
 
-    // 获取所有需要重置动画的元素
+    // 先显示光泽
+    showShine()
+
+    // 获取所有需要动画的元素
     const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
     
-    // 重置动画：通过移除并重新添加动画来强制重新开始
+    // 重置并启动动画
     animatedElements.forEach((el) => {
       const htmlEl = el as HTMLElement
-      // 暂停动画
       htmlEl.style.animation = 'none'
-      // 强制重绘
-      void htmlEl.offsetHeight
-      // 使用快速动画（更短时长 + 从更近的位置开始）
+      void htmlEl.offsetHeight // 强制重绘
       htmlEl.style.animation = `quickLightMove ${quickAnimationDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards`
     })
     
     // 清除之前的定时器
     clearAnimationEndTimer()
     
-    // 动画结束后检查是否有待触发的动画
+    // 动画结束后处理
     animationEndTimerRef.current = setTimeout(() => {
       isAnimatingRef.current = false
       
       if (hasPendingRef.current) {
         // 有待触发的动画，立即播放
         hasPendingRef.current = false
-        playQuickShine()
+        playShine()
       } else {
-        // 没有待触发的，恢复自动循环动画
-        const lightGroup = lightGroupRef.current
-        if (!lightGroup) return
-        
-        const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
-        animatedElements.forEach((el) => {
-          const htmlEl = el as HTMLElement
-          htmlEl.style.animation = ''  // 恢复默认的 infinite 动画
-        })
+        // 隐藏光泽
+        hideShine()
       }
     }, quickAnimationDuration)
-  }, [quickAnimationDuration, clearAnimationEndTimer])
+  }, [quickAnimationDuration, clearAnimationEndTimer, showShine, hideShine])
 
-  // 触发高光动效（对外接口）
+  // 手动触发高光动效（对外接口）
   const triggerShine = useCallback(() => {
     if (isAnimatingRef.current) {
       // 动画进行中，标记待触发
@@ -101,10 +117,21 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
       return false
     }
     
-    // 立即播放
-    playQuickShine()
+    playShine()
     return true
-  }, [playQuickShine])
+  }, [playShine])
+
+  // 首次自动播放（只自动播放一次）
+  useEffect(() => {
+    if (!hasAutoPlayedRef.current && lightGroupRef.current) {
+      hasAutoPlayedRef.current = true
+      // 延迟一点启动首次动画，让组件先渲染
+      const timer = setTimeout(() => {
+        playShine()
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [playShine])
 
   // 清理
   useEffect(() => {
@@ -162,6 +189,11 @@ const PAGE_CONFIG = {
   pageName: '睡眠评分卡片',
   type: 1, // 睡眠评分卡片类型标识
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 300
 
 const DEFAULT_DATA: SleepScoreData = {
   score: 88,
@@ -252,9 +284,14 @@ interface TagProps {
 
 function Tag({ tag }: TagProps) {
   // 不做 JS 截断，让 CSS truncate 自然处理溢出
+  // 移除 backdrop-blur-sm 以兼容旧浏览器，使用更高不透明度的背景替代
   return (
     <span
-      className="px-3 py-1.5 rounded-full text-xs font-medium bg-white/15 backdrop-blur-sm border border-white/20 text-white max-w-[180px] truncate"
+      className="px-3 py-1.5 rounded-full text-xs font-medium border text-white max-w-[180px] truncate"
+      style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderColor: 'rgba(255, 255, 255, 0.25)',
+      }}
     >
       {tag.text}
     </span>
@@ -314,12 +351,13 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
-  // 金属高光动效控制
+  // 金属高光动效控制（首次自动播放一次，之后点击触发）
   const { lightGroupRef, triggerShine } = useMetalShine({
-    quickAnimationDuration: 1200,  // 快速动画 1.2 秒
+    quickAnimationDuration: 1200,  // 动画 1.2 秒
   })
 
   // 注册数据接收回调
@@ -351,11 +389,11 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         {/* 睡眠评分卡片 - 带入场动画 */}
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring">
           <div
-            className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90 shadow-sm"
+            className="relative overflow-hidden rounded-3xl bg-white cursor-pointer select-none transition-transform duration-200 active:scale-[0.98] active:opacity-90"
             onClick={handleCardClick}
           >
           {/* 顶部紫色区域 - 根据 isTestEnv 决定是否启用金属流光效果 */}
@@ -449,7 +487,7 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 })

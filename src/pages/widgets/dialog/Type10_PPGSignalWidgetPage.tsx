@@ -20,6 +20,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { useTestEnvStore } from '@/stores'
 import { widgetBGColor } from '@/config/theme'
 
@@ -42,6 +43,11 @@ const PAGE_CONFIG = {
   pageName: 'PPG信号采集',
   type: 10,
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 /** PPG 信号颜色配置 */
 const PPG_COLORS = {
@@ -475,7 +481,8 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // Canvas 绑定
@@ -575,10 +582,10 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
           {/* PPG 信号卡片 */}
-          <div className="bg-white rounded-3xl p-5 shadow-sm">
+          <div className="bg-white rounded-3xl p-5">
           {/* 标题栏 */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
@@ -693,7 +700,7 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 })

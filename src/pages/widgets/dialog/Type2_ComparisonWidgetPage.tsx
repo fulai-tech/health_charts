@@ -6,6 +6,7 @@ import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer, useWidgetAnimation } from '@/components/common/WidgetEntranceContainer'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { globalStore } from '@/stores/globalStore'
 import { TrendingDown, TrendingUp, ArrowRight, Moon, Zap, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
 import { widgetBGColor, VITAL_COLORS } from '@/config/theme'
@@ -67,6 +68,11 @@ const PAGE_CONFIG = {
   pageName: '深睡疲劳对比卡片',
   type: 2, // 深睡疲劳对比卡片类型标识
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 const DEFAULT_DATA: SleepFatigueComparisonData = {
   theme: 'sleep',
@@ -177,11 +183,11 @@ interface CompareItemAnimatedProps {
   delay?: number
 }
 
-/** 获取主题配色 - 高级渐变色 */
+/** 获取主题配色 - 使用基础 CSS 颜色（兼容 X5 内核） */
 function getThemeColors(position: 'left' | 'right') {
   return position === 'left' 
-    ? { gradient: 'from-indigo-300 to-indigo-400', text: 'text-indigo-500', bg: 'bg-indigo-50' }
-    : { gradient: 'from-rose-300 to-rose-400', text: 'text-rose-500', bg: 'bg-rose-50' }
+    ? { barColor: '#a5b4fc', text: 'text-indigo-500', bg: 'bg-indigo-50' }  // indigo-300
+    : { barColor: '#fda4af', text: 'text-rose-500', bg: 'bg-rose-50' }      // rose-300
 }
 
 function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: CompareItemAnimatedProps) {
@@ -244,13 +250,8 @@ function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: Compa
             damping: 15, 
             delay: delay 
           }}
-          className={`
-            w-16 rounded-t-2xl relative z-10 
-            bg-gradient-to-b ${colors.gradient}
-            shadow-sm backdrop-blur-sm
-            transition-all duration-300 
-            group-hover:w-[4.5rem] group-hover:brightness-105
-          `}
+          className="w-16 rounded-t-2xl relative z-10 transition-all duration-300 group-hover:w-[4.5rem] group-hover:brightness-105"
+          style={{ backgroundColor: colors.barColor }}
         >
           {/* 顶部高光 (Rim Light) */}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/40 rounded-full" />
@@ -301,7 +302,8 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // 从 MobX store 获取开发者模式状态
@@ -324,13 +326,11 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
   if (isDevMode) {
     return (
       <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-        <div className="w-full max-w-lg p-4">
+        <EmbeddedContainer maxWidth="lg" fullHeight={false}>
           <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
             {/* 卡片容器 - 弥散阴影，高级质感 */}
             <div 
-              className="relative overflow-hidden rounded-3xl bg-white p-6 cursor-pointer select-none 
-                         shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100
-                         transition-all duration-200 active:scale-[0.98] active:opacity-90" 
+              className="relative overflow-hidden rounded-3xl bg-white p-6 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90" 
               onClick={handleCardClick}
             >
             {/* 对比图表区域 */}
@@ -370,7 +370,7 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
               {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'} | 动效模式: ✨
             </div>
           )}
-        </div>
+        </EmbeddedContainer>
       </WidgetLayout>
     )
   }
@@ -378,7 +378,7 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
   // 默认模式：静态版
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-lg p-4">
+      <EmbeddedContainer maxWidth="lg" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
           <div 
             className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none 
@@ -409,7 +409,7 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 })

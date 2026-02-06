@@ -5,6 +5,7 @@ import type { Variants } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
+import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
 
 // ============================================
@@ -103,6 +104,11 @@ const PAGE_CONFIG = {
   pageName: '健康体征总览卡片',
   type: 5, // 健康体征总览卡片类型标识
 } as const
+
+/** 开发环境自动触发延迟 (ms) */
+const DELAY_START = 200
+/** 收到 page-global-animate 后延迟触发动画 (ms) */
+const DELAY_ANIMATE_START = 200
 
 // ============================================
 // 动画配置
@@ -459,7 +465,8 @@ export function Type5_VitalOverviewWidgetPage() {
   // 入场动画控制
   const { canAnimate, animationKey } = useWidgetEntrance({
     pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
+    devAutoTriggerDelay: DELAY_START,
+    animateDelay: DELAY_ANIMATE_START,
   })
 
   // 注册数据接收回调（支持 vital_overview_card 或顶层体征字段）
@@ -489,7 +496,7 @@ export function Type5_VitalOverviewWidgetPage() {
 
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         {/* 2x2 网格布局 - 带交错入场动画，等待 canAnimate 信号 */}
         <motion.div 
           key={animationKey}
@@ -566,7 +573,7 @@ export function Type5_VitalOverviewWidgetPage() {
             {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'}
           </div>
         )}
-      </div>
+      </EmbeddedContainer>
     </WidgetLayout>
   )
 }

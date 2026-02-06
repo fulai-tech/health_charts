@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar, BarChart3, TrendingUp, Zap, Radio, ChevronRight } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar, BarChart3, TrendingUp, Zap, Radio, ChevronRight, ShieldAlert } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { AuthButton } from '@/components/ui/AuthButton'
 import { useTokenValidation } from '@/hooks/useTokenValidation'
@@ -80,6 +80,12 @@ export function HomePage() {
       category: t('home.weeklyReportCategory'),
       items: [
         { path: '/weekly/report', label: t('weeklyReport.title'), icon: Calendar, color: '#F97316', alphaColor: 'rgba(249, 115, 22, 0.125)' },
+      ],
+    },
+    {
+      category: t('home.aiSecurityCategory', 'AI 安全'),
+      items: [
+        { path: '/ai-security', label: t('aiSecurity.title', 'AI 智能急救系统'), icon: ShieldAlert, color: '#FF7A00', alphaColor: 'rgba(255, 122, 0, 0.125)' },
       ],
     },
     {
