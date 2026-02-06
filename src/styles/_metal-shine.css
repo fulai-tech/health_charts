@@ -137,6 +137,26 @@
   }
 }
 
+/* 快速流光动画 - 点击触发时使用，从更近的位置开始 */
+@keyframes quickLightMove {
+  0% {
+    transform: translateX(-80%) skewX(-15deg) scaleX(1.5);
+    opacity: 0.8;
+  }
+  /* 立刻可见 */
+  5% {
+    opacity: 1;
+  }
+  /* 保持可见直到离开 */
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(180%) skewX(-15deg) scaleX(1.5);
+    opacity: 0;
+  }
+}
+
 /* 物理流光组容器 */
 .physics-light-group {
   position: absolute;

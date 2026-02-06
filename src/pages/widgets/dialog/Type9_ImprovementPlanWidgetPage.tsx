@@ -147,9 +147,9 @@ const BUTTON_WIDTHS: Record<ButtonState, number> = {
 
 /** 导火索边框组件 - 边框从满圈顺时针逐渐缩短消失 */
 function FuseBorder({ 
-  duration = 2000, 
+  duration = 1200, 
   width = 76, 
-  height = 28 
+  height = 32 
 }: { 
   duration?: number
   width?: number
@@ -272,14 +272,14 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
     return () => clearTimeout(exitTimer)
   }, [buttonState, displayState])
 
-  // Cancel 状态 2 秒后自动完成
+  // Cancel 状态 1.2 秒后自动完成
   useEffect(() => {
     if (buttonState === 'cancel') {
       cancelTimerRef.current = setTimeout(() => {
         setButtonState('done')
         triggerConfetti()
         onAdd(item)
-      }, 2000)
+      }, 1200)
     }
     
     return () => {
@@ -368,9 +368,9 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
   }
 
   return (
-    <div className="flex items-center gap-3 py-3">
+    <div className="flex items-center gap-3 px-2 py-4">
       {/* 图标 - 使用 AnimatedImage 优化加载体验 */}
-      <div className="w-12 h-12 flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center">
+      <div className="w-9 h-9 flex-shrink-0 rounded-full overflow-hidden flex items-center justify-center">
         <AnimatedImage
           src={iconSrc}
           alt={item.type}
@@ -398,7 +398,7 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
           disabled={isAdded || buttonState === 'loading'}
           style={{ width: targetWidth }}
           className={`
-            relative text-xs rounded-full h-7 flex items-center justify-center
+            relative text-xs rounded-full h-8 flex items-center justify-center
             transition-all duration-300 ease-out
             ${displayState === 'cancel' 
               ? 'bg-orange-50 text-orange-600' 
@@ -410,9 +410,9 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
           {/* Cancel 状态的导火索边框 */}
           {displayState === 'cancel' && (
             <FuseBorder 
-              duration={2000} 
+              duration={1200} 
               width={BUTTON_WIDTHS.cancel} 
-              height={28} 
+              height={32} 
             />
           )}
           

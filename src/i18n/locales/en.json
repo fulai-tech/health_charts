@@ -560,7 +560,22 @@
       "min": "min",
       "h": "h",
       "times": "times",
-      "goal": "Goal"
+      "goal": "Goal",
+      "backTips": {
+        "main": {
+          "tip1": "Small daily habits lead to big changes!",
+          "tip2": "Keep it up!"
+        },
+        "sleep": {
+          "tip": "7-8h quality sleep\nboosts energy"
+        },
+        "exercise": {
+          "tip": "150 min/week\nis ideal"
+        },
+        "dietary": {
+          "tip": "Balanced diet\nis key"
+        }
+      }
     },
     "type8": {
       "sbp": "SBP",

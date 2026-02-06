@@ -5,6 +5,7 @@
  * - 等待 `canAnimate` 信号后播放入场动画
  * - 支持多种动画模式：fade（淡入）、slide（滑入）、scale（缩放）、spring（弹性）
  * - 支持子元素交错动画
+ * - 提供 WidgetAnimationContext 让子组件可以访问 canAnimate 状态
  * 
  * @example
  * ```tsx
@@ -19,13 +20,64 @@
  *   <Card2 />
  *   <Card3 />
  * </WidgetEntranceContainer>
+ * 
+ * // 子组件中使用 canAnimate 状态
+ * function MyAnimatedComponent() {
+ *   const { canAnimate, animationKey } = useWidgetAnimation()
+ *   return (
+ *     <motion.div
+ *       key={animationKey}
+ *       initial={{ opacity: 0 }}
+ *       animate={canAnimate ? { opacity: 1 } : { opacity: 0 }}
+ *     />
+ *   )
+ * }
  * ```
  */
 
-import { Children } from 'react'
+import { Children, createContext, useContext } from 'react'
 import type { ReactNode, CSSProperties } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Variants, Transition } from 'framer-motion'
+
+// ============================================
+// Animation Context - 让子组件访问 canAnimate 状态
+// ============================================
+
+interface WidgetAnimationContextValue {
+  /** 是否可以开始动画 */
+  canAnimate: boolean
+  /** 动画 key，改变时强制重新挂载 */
+  animationKey: number
+}
+
+const WidgetAnimationContext = createContext<WidgetAnimationContextValue>({
+  canAnimate: false,
+  animationKey: 0,
+})
+
+/**
+ * 获取 Widget 动画状态的 Hook
+ * 
+ * 用于子组件中需要与 WidgetEntranceContainer 同步动画的场景
+ * 
+ * @example
+ * ```tsx
+ * function MyChart() {
+ *   const { canAnimate, animationKey } = useWidgetAnimation()
+ *   return (
+ *     <motion.div
+ *       key={animationKey}
+ *       initial={{ height: 0 }}
+ *       animate={canAnimate ? { height: '100%' } : { height: 0 }}
+ *     />
+ *   )
+ * }
+ * ```
+ */
+export function useWidgetAnimation(): WidgetAnimationContextValue {
+  return useContext(WidgetAnimationContext)
+}
 
 /** 动画模式 */
 type AnimationMode = 'fade' | 'slide' | 'scale' | 'spring' | 'slideUp'
@@ -130,25 +182,33 @@ export function WidgetEntranceContainer({
   const variants = getVariants(mode)
   const transition = getTransition(mode, duration)
 
+  // Context 值 - 让子组件可以访问 canAnimate 状态
+  const contextValue: WidgetAnimationContextValue = {
+    canAnimate: animate,
+    animationKey,
+  }
+
   // 非交错模式：整体动画
   if (!stagger) {
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={animationKey}
-          className={className}
-          style={style}
-          initial="hidden"
-          animate={animate ? 'visible' : 'hidden'}
-          variants={variants}
-          transition={{
-            ...transition,
-            delay: initialDelay,
-          }}
-        >
-          {children}
-        </motion.div>
-      </AnimatePresence>
+      <WidgetAnimationContext.Provider value={contextValue}>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={animationKey}
+            className={className}
+            style={style}
+            initial="hidden"
+            animate={animate ? 'visible' : 'hidden'}
+            variants={variants}
+            transition={{
+              ...transition,
+              delay: initialDelay,
+            }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
+      </WidgetAnimationContext.Provider>
     )
   }
 
@@ -176,22 +236,24 @@ export function WidgetEntranceContainer({
   }
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={animationKey}
-        className={className}
-        style={style}
-        initial="hidden"
-        animate={animate ? 'visible' : 'hidden'}
-        variants={containerVariants}
-      >
-        {childArray.map((child, index) => (
-          <motion.div key={index} variants={itemVariants}>
-            {child}
-          </motion.div>
-        ))}
-      </motion.div>
-    </AnimatePresence>
+    <WidgetAnimationContext.Provider value={contextValue}>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={animationKey}
+          className={className}
+          style={style}
+          initial="hidden"
+          animate={animate ? 'visible' : 'hidden'}
+          variants={containerVariants}
+        >
+          {childArray.map((child, index) => (
+            <motion.div key={index} variants={itemVariants}>
+              {child}
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+    </WidgetAnimationContext.Provider>
   )
 }
 

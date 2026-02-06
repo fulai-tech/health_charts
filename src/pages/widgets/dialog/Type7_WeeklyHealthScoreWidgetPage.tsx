@@ -5,11 +5,12 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { motion } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
 import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
-import { BarChart3, Moon, Activity, Utensils } from 'lucide-react'
+import { BarChart3, Moon, Activity, Utensils, Sparkles, Target, Heart, Leaf } from 'lucide-react'
 import {
   VITAL_COLORS,
   VITAL_COLORS_ALPHA,
@@ -62,29 +63,30 @@ function getMetricDisplay(
   unit?: string,
   t?: (key: string) => string
 ): { main: string; suffix: string; segments?: DisplaySegment[] } {
-  const minLabel = t ? t('widgets.type7.min') : ' min'
-  const hLabel = t ? t('widgets.type7.h') : ' h'
+  const minLabel = t ? t('widgets.type7.min') : 'min'
+  const hLabel = t ? t('widgets.type7.h') : 'h'
   const timesLabel = t ? ` ${t('widgets.type7.times')}` : ' times'
   const goalLabel = t ? t('widgets.type7.goal') : 'Goal'
   if (type === 'sleep' && typeof value === 'number') {
     const clamped = Math.max(0, Math.min(5999, Math.round(value)))
     const hours = Math.floor(clamped / 60)
     const minutes = clamped % 60
-    if (hours === 0) return { main: '', suffix: '', segments: [{ text: String(minutes), isValue: true }, { text: ` ${minLabel}`, isValue: false }] }
-    if (minutes === 0) return { main: '', suffix: '', segments: [{ text: String(hours), isValue: true }, { text: ` ${hLabel}`, isValue: false }] }
+    // 使用紧凑格式防止溢出：5小时24分
+    if (hours === 0) return { main: '', suffix: '', segments: [{ text: String(minutes), isValue: true }, { text: minLabel, isValue: false }] }
+    if (minutes === 0) return { main: '', suffix: '', segments: [{ text: String(hours), isValue: true }, { text: hLabel, isValue: false }] }
     return {
       main: '',
       suffix: '',
       segments: [
         { text: String(hours), isValue: true },
-        { text: ` ${hLabel} `, isValue: false },
+        { text: hLabel, isValue: false },
         { text: String(minutes), isValue: true },
-        { text: ` ${minLabel}`, isValue: false },
+        { text: minLabel, isValue: false },
       ],
     }
   }
-  if (type === 'exercise' && typeof value === 'number') return { main: String(value), suffix: unit ? ` ${unit}` : timesLabel, segments: undefined }
-  if (type === 'dietary') return { main: typeof value === 'string' ? value : goalLabel, suffix: '', segments: undefined }
+  if (type === 'exercise' && typeof value === 'number') return { main: String(value), suffix: timesLabel, segments: undefined }
+  if (type === 'dietary') return { main: typeof value === 'string' && value !== 'Goal' ? value : goalLabel, suffix: '', segments: undefined }
   return { main: String(value), suffix: unit ? ` ${unit}` : '', segments: undefined }
 }
 
@@ -94,6 +96,30 @@ function getMetricStyle(type: 'sleep' | 'exercise' | 'dietary') {
     case 'exercise': return { bg: VITAL_COLORS_ALPHA.spo2, iconColor: VITAL_COLORS.spo2 }
     case 'dietary': return { bg: HEALTHY_COLORS.alpha, iconColor: HEALTHY_COLORS.primary }
     default: return { bg: 'rgb(248, 248, 248)', iconColor: 'rgb(31, 41, 55)' }
+  }
+}
+
+/** 获取卡片背面的提示内容 */
+function getBackContent(type: 'sleep' | 'exercise' | 'dietary', t: (key: string) => string) {
+  switch (type) {
+    case 'sleep':
+      return {
+        icon: Moon,
+        title: t('widgets.type7.backTips.sleep.title'),
+        tip: t('widgets.type7.backTips.sleep.tip'),
+      }
+    case 'exercise':
+      return {
+        icon: Target,
+        title: t('widgets.type7.backTips.exercise.title'),
+        tip: t('widgets.type7.backTips.exercise.tip'),
+      }
+    case 'dietary':
+      return {
+        icon: Leaf,
+        title: t('widgets.type7.backTips.dietary.title'),
+        tip: t('widgets.type7.backTips.dietary.tip'),
+      }
   }
 }
 
@@ -123,68 +149,123 @@ function parseWeeklyHealthScoreData(raw: unknown): WeeklyHealthScoreData | null 
   }
 }
 
-function MetricCard({
-  type,
-  label,
-  value,
-  unit,
-  t,
-}: {
+// ============================================
+// 可翻转的 Metric 卡片
+// ============================================
+
+/** 获取指标的 i18n 翻译标签 */
+function getMetricLabel(type: 'sleep' | 'exercise' | 'dietary', t: (key: string) => string): string {
+  switch (type) {
+    case 'sleep': return t('widgets.type7.sleepDuration')
+    case 'exercise': return t('widgets.type7.exercise')
+    case 'dietary': return t('widgets.type7.dietary')
+    default: return ''
+  }
+}
+
+interface FlipMetricCardProps {
   type: 'sleep' | 'exercise' | 'dietary'
-  label: string
   value: number | string
   unit?: string
-  t?: (key: string) => string
-}) {
+  t: (key: string) => string
+}
+
+function FlipMetricCard({ type, value, unit, t }: FlipMetricCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false)
   const style = getMetricStyle(type)
   const { main, suffix, segments } = getMetricDisplay(type, value, unit, t)
   const Icon = type === 'sleep' ? Moon : type === 'exercise' ? Activity : Utensils
+  const backContent = getBackContent(type, t)
+  const BackIcon = backContent.icon
+  // 使用 i18n 翻译的标签而不是数据中的 label
+  const translatedLabel = getMetricLabel(type, t)
+
   return (
-    <div className="rounded-2xl p-4 flex flex-col items-center justify-center text-center" style={{ backgroundColor: style.bg }}>
-      <div className="flex justify-center mb-2">
-        <Icon className="w-6 h-6" style={{ color: style.iconColor }} />
-      </div>
-      <div className="text-sm font-medium text-slate-600 mb-1 w-full text-center">{label}</div>
-      <div className="text-base font-semibold text-slate-800 w-full text-center">
-        {segments ? (
-          segments.map((seg, i) => <span key={i}>{seg.text}</span>)
-        ) : (
-          <>{main}{suffix}</>
-        )}
-      </div>
+    <div 
+      className="relative cursor-pointer select-none"
+      style={{ perspective: '1000px' }}
+      onClick={() => setIsFlipped(!isFlipped)}
+    >
+      <motion.div
+        className="relative w-full"
+        style={{ transformStyle: 'preserve-3d' }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+      >
+        {/* 正面 - 用于撑起高度 */}
+        <div 
+          className="rounded-2xl p-4 flex flex-col items-center justify-center text-center"
+          style={{ backgroundColor: style.bg, backfaceVisibility: 'hidden' }}
+        >
+          <div className="flex justify-center mb-2">
+            <Icon className="w-6 h-6" style={{ color: style.iconColor }} />
+          </div>
+          <div className="text-sm font-medium text-slate-600 mb-1 w-full text-center">{translatedLabel}</div>
+          <div className="text-base font-semibold text-slate-800 w-full text-center">
+            {segments ? (
+              segments.map((seg, i) => <span key={i}>{seg.text}</span>)
+            ) : (
+              <>{main}{suffix}</>
+            )}
+          </div>
+        </div>
+
+        {/* 背面 - 绝对定位覆盖 */}
+        <div 
+          className="absolute inset-0 rounded-2xl p-2 flex flex-col items-center justify-center text-center gap-1"
+          style={{ 
+            backgroundColor: style.bg, 
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+          }}
+        >
+          <BackIcon className="w-5 h-5 flex-shrink-0" style={{ color: style.iconColor }} />
+          <div className="text-[13px] text-slate-600 leading-snug whitespace-pre-line">{backContent.tip}</div>
+        </div>
+      </motion.div>
     </div>
   )
 }
 
-export function Type7_WeeklyHealthScoreWidgetPage() {
-  const { t } = useTranslation()
-  const [data, setData] = useState<WeeklyHealthScoreData>(DEFAULT_DATA)
-  const { onData, send, isReady } = useNativeBridge({
-    pageId: PAGE_CONFIG.pageId,
-    pageName: PAGE_CONFIG.pageName,
-    debug: import.meta.env.DEV,
-  })
+// ============================================
+// 可翻转的主评分卡片
+// ============================================
 
-  // 入场动画控制
-  const { canAnimate, animationKey } = useWidgetEntrance({
-    pageId: PAGE_CONFIG.pageId,
-    devAutoTriggerDelay: 300,
-  })
+interface FlipScoreCardProps {
+  data: WeeklyHealthScoreData
+  t: (key: string, options?: Record<string, unknown>) => string
+  onSummaryClick: () => void
+}
 
-  useEffect(() => {
-    onData((rawData) => {
-      const parsed = parseWeeklyHealthScoreData(rawData)
-      if (parsed) setData(parsed)
-    })
-  }, [onData])
-
+function FlipScoreCard({ data, t, onSummaryClick }: FlipScoreCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false)
   const maxScore = data.maxScore ?? 100
 
+  const handleClick = (e: React.MouseEvent) => {
+    // 如果点击的是按钮，不翻转卡片
+    if ((e.target as HTMLElement).closest('button')) {
+      return
+    }
+    setIsFlipped(!isFlipped)
+  }
+
   return (
-    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <div className="w-full max-w-md p-4">
-        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring" stagger staggerDelay={0.1}>
-          <div className="rounded-2xl p-4 mb-3 text-white" style={{ backgroundColor: HEALTH_COLORS.weeklyScoreHeader }}>
+    <div 
+      className="relative cursor-pointer select-none mb-3"
+      style={{ perspective: '1000px' }}
+      onClick={handleClick}
+    >
+      <motion.div
+        className="relative w-full"
+        style={{ transformStyle: 'preserve-3d' }}
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ duration: 0.6, ease: 'easeInOut' }}
+      >
+        {/* 正面 - 评分内容（撑起高度） */}
+        <div 
+          className="rounded-2xl p-4 text-white"
+          style={{ backgroundColor: HEALTH_COLORS.weeklyScoreHeader, backfaceVisibility: 'hidden' }}
+        >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <BarChart3 className="w-5 h-5" />
@@ -194,7 +275,7 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
               type="button"
               className="px-3 py-1.5 rounded-xl text-sm font-medium"
               style={{ backgroundColor: HEALTH_COLORS.weeklyScoreButtonBg, color: HEALTH_COLORS.weeklyScoreButtonText }}
-              onClick={() => send('summaryClick', { pageId: PAGE_CONFIG.pageId, weekNumber: data.weekNumber })}
+              onClick={onSummaryClick}
             >
               {t('widgets.type7.weekSummary', { week: data.weekNumber })}
             </button>
@@ -219,9 +300,71 @@ export function Type7_WeeklyHealthScoreWidgetPage() {
             )}
           </div>
         </div>
+
+        {/* 背面 - 健康小贴士（绝对定位覆盖） */}
+        <div 
+          className="absolute inset-0 rounded-2xl p-5 text-white flex flex-col items-center justify-center"
+          style={{ 
+            backgroundColor: HEALTH_COLORS.weeklyScoreHeader, 
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+          }}
+        >
+          <Sparkles className="w-8 h-8 mb-3" />
+          <p className="text-base font-medium text-center leading-relaxed mb-3">
+            {t('widgets.type7.backTips.main.tip1')}
+          </p>
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl" style={{ backgroundColor: HEALTH_COLORS.weeklyScoreButtonBg }}>
+            <Heart className="w-4 h-4 text-red-300" />
+            <span className="text-sm">{t('widgets.type7.backTips.main.tip2')}</span>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+// ============================================
+// 主组件
+// ============================================
+
+export function Type7_WeeklyHealthScoreWidgetPage() {
+  const { t } = useTranslation()
+  const [data, setData] = useState<WeeklyHealthScoreData>(DEFAULT_DATA)
+  const { onData, send, isReady } = useNativeBridge({
+    pageId: PAGE_CONFIG.pageId,
+    pageName: PAGE_CONFIG.pageName,
+    debug: import.meta.env.DEV,
+  })
+
+  // 入场动画控制
+  const { canAnimate, animationKey } = useWidgetEntrance({
+    pageId: PAGE_CONFIG.pageId,
+    devAutoTriggerDelay: 300,
+  })
+
+  useEffect(() => {
+    onData((rawData) => {
+      const parsed = parseWeeklyHealthScoreData(rawData)
+      if (parsed) setData(parsed)
+    })
+  }, [onData])
+
+  const handleSummaryClick = () => {
+    send('summaryClick', { pageId: PAGE_CONFIG.pageId, weekNumber: data.weekNumber })
+  }
+
+  return (
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
+      <div className="w-full max-w-md p-4">
+        <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="spring" stagger staggerDelay={0.1}>
+          {/* 主评分卡片 - 可翻转 */}
+          <FlipScoreCard data={data} t={t} onSummaryClick={handleSummaryClick} />
+          
+          {/* 指标卡片网格 - 可翻转 */}
           <div className="grid grid-cols-3 gap-3">
             {data.metrics.map((m) => (
-              <MetricCard key={m.type} type={m.type} label={m.label} value={m.value} unit={m.unit} t={t} />
+              <FlipMetricCard key={m.type} type={m.type} value={m.value} unit={m.unit} t={t} />
             ))}
           </div>
         </WidgetEntranceContainer>

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
@@ -8,6 +8,116 @@ import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceConta
 import { globalStore } from '@/stores/globalStore'
 import { Moon } from 'lucide-react'
 import { VITAL_COLORS, UI_COLORS, widgetBGColor } from '@/config/theme'
+
+// ============================================
+// 高光动效控制 Hook
+// ============================================
+
+interface UseMetalShineOptions {
+  /** 快速动画时长（毫秒），默认 1200ms - 点击触发时使用 */
+  quickAnimationDuration?: number
+  /** 自动循环动画时长（毫秒），默认 4000ms */
+  autoAnimationDuration?: number
+}
+
+/**
+ * 金属高光动效控制 Hook
+ * 
+ * 功能：
+ * - 点击时立即触发一次快速高光动效
+ * - 动画进行中点击会排队，等当前动画结束后再触发
+ * - 动画结束后恢复自动循环
+ */
+function useMetalShine(options: UseMetalShineOptions = {}) {
+  const {
+    quickAnimationDuration = 1200,
+    autoAnimationDuration = 4000,
+  } = options
+
+  const lightGroupRef = useRef<HTMLDivElement>(null)
+  const isAnimatingRef = useRef(false)
+  const hasPendingRef = useRef(false)
+  const animationEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // 清除动画结束定时器
+  const clearAnimationEndTimer = useCallback(() => {
+    if (animationEndTimerRef.current) {
+      clearTimeout(animationEndTimerRef.current)
+      animationEndTimerRef.current = null
+    }
+  }, [])
+
+  // 执行快速高光动画
+  const playQuickShine = useCallback(() => {
+    const lightGroup = lightGroupRef.current
+    if (!lightGroup) return
+
+    isAnimatingRef.current = true
+
+    // 获取所有需要重置动画的元素
+    const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
+    
+    // 重置动画：通过移除并重新添加动画来强制重新开始
+    animatedElements.forEach((el) => {
+      const htmlEl = el as HTMLElement
+      // 暂停动画
+      htmlEl.style.animation = 'none'
+      // 强制重绘
+      void htmlEl.offsetHeight
+      // 使用快速动画（更短时长 + 从更近的位置开始）
+      htmlEl.style.animation = `quickLightMove ${quickAnimationDuration}ms cubic-bezier(0.25, 0.1, 0.25, 1) forwards`
+    })
+    
+    // 清除之前的定时器
+    clearAnimationEndTimer()
+    
+    // 动画结束后检查是否有待触发的动画
+    animationEndTimerRef.current = setTimeout(() => {
+      isAnimatingRef.current = false
+      
+      if (hasPendingRef.current) {
+        // 有待触发的动画，立即播放
+        hasPendingRef.current = false
+        playQuickShine()
+      } else {
+        // 没有待触发的，恢复自动循环动画
+        const lightGroup = lightGroupRef.current
+        if (!lightGroup) return
+        
+        const animatedElements = lightGroup.querySelectorAll('.light-bloom, .light-beam-main, .light-beam-hotspot')
+        animatedElements.forEach((el) => {
+          const htmlEl = el as HTMLElement
+          htmlEl.style.animation = ''  // 恢复默认的 infinite 动画
+        })
+      }
+    }, quickAnimationDuration)
+  }, [quickAnimationDuration, clearAnimationEndTimer])
+
+  // 触发高光动效（对外接口）
+  const triggerShine = useCallback(() => {
+    if (isAnimatingRef.current) {
+      // 动画进行中，标记待触发
+      hasPendingRef.current = true
+      return false
+    }
+    
+    // 立即播放
+    playQuickShine()
+    return true
+  }, [playQuickShine])
+
+  // 清理
+  useEffect(() => {
+    return () => {
+      clearAnimationEndTimer()
+    }
+  }, [clearAnimationEndTimer])
+
+  return {
+    lightGroupRef,
+    triggerShine,
+  }
+}
 
 // ============================================
 // 类型定义
@@ -207,6 +317,11 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
     devAutoTriggerDelay: 300,
   })
 
+  // 金属高光动效控制
+  const { lightGroupRef, triggerShine } = useMetalShine({
+    quickAnimationDuration: 1200,  // 快速动画 1.2 秒
+  })
+
   // 注册数据接收回调
   useEffect(() => {
     onData((rawData) => {
@@ -223,8 +338,12 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
 
   // 处理卡片点击
   const handleCardClick = useCallback(() => {
+    // 触发高光动效（如果启用了金属效果）
+    if (isMetalEnabled) {
+      triggerShine()
+    }
     send('cardClick', { pageId: PAGE_CONFIG.pageId, data })
-  }, [send, data])
+  }, [send, data, isMetalEnabled, triggerShine])
 
   // 格式化时长
   const totalDuration = formatDuration(data.totalSleepMinutes)
@@ -287,7 +406,7 @@ export const Type1_SleepScoreWidgetPage = observer(function Type1_SleepScoreWidg
             
             {/* ========== 物理流光层 - 仅 isTestEnv 时启用 ========== */}
             {isMetalEnabled && (
-              <div className="physics-light-group rounded-t-3xl">
+              <div ref={lightGroupRef} className="physics-light-group rounded-t-3xl">
                 {/* Bloom 辉光 - 最底层，大范围柔和 */}
                 <div className="light-bloom" />
                 {/* 主光束 - 三段式能量分布 */}

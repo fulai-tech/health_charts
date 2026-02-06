@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
-import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
+import { WidgetEntranceContainer, useWidgetAnimation } from '@/components/common/WidgetEntranceContainer'
 import { globalStore } from '@/stores/globalStore'
 import { TrendingDown, TrendingUp, ArrowRight, Moon, Zap, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
 import { widgetBGColor, VITAL_COLORS } from '@/config/theme'
@@ -185,6 +185,9 @@ function getThemeColors(position: 'left' | 'right') {
 }
 
 function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: CompareItemAnimatedProps) {
+  // 使用 Context 获取 canAnimate 状态，确保动画与外层容器同步
+  const { canAnimate, animationKey } = useWidgetAnimation()
+  
   const isLow = data.status === 'low'
   const colors = getThemeColors(position)
   
@@ -203,8 +206,9 @@ function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: Compa
     <div className="flex-1 flex flex-col items-center min-w-0 group cursor-pointer">
       {/* 标题 - 带淡入动效 */}
       <motion.div 
+        key={`title-${animationKey}`}
         initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
+        animate={canAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 5 }}
         transition={{ delay: delay + 0.5, duration: 0.4 }}
         className="text-sm font-medium text-slate-600 mb-3 flex items-center gap-1.5"
       >
@@ -216,10 +220,11 @@ function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: Compa
       <div className="w-full h-36 relative flex items-end justify-center">
         {/* 标准线 - 虚线 */}
         <motion.div 
+          key={`line-${animationKey}`}
           className="absolute left-0 right-0 flex items-center"
           style={{ bottom: `${safeStandardPercent}%` }}
           initial={{ opacity: 0, scaleX: 0 }}
-          animate={{ opacity: 1, scaleX: 1 }}
+          animate={canAnimate ? { opacity: 1, scaleX: 1 } : { opacity: 0, scaleX: 0 }}
           transition={{ delay: delay + 0.3, duration: 0.5 }}
         >
           <div className="flex-1 border-t border-dashed border-slate-300" />
@@ -230,8 +235,9 @@ function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: Compa
         
         {/* 柱状图 - Spring 物理弹出 */}
         <motion.div
+          key={`bar-${animationKey}`}
           initial={{ height: 0, opacity: 0 }}
-          animate={{ height: `${safeBarPercent}%`, opacity: 1 }}
+          animate={canAnimate ? { height: `${safeBarPercent}%`, opacity: 1 } : { height: 0, opacity: 0 }}
           transition={{ 
             type: "spring", 
             stiffness: 100, 
@@ -255,8 +261,9 @@ function CompareItemAnimated({ data, position, standardLabel, delay = 0 }: Compa
       
       {/* 数值和状态 */}
       <motion.div 
+        key={`stats-${animationKey}`}
         initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
+        animate={canAnimate ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
         transition={{ delay: delay + 0.3, duration: 0.3 }}
         className="flex flex-col items-center mt-4 gap-1.5"
       >

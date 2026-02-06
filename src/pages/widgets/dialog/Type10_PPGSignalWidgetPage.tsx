@@ -15,6 +15,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
+import { motion, AnimatePresence } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
@@ -127,6 +128,7 @@ function generateSimulatedPPGData(): number[] {
 interface UsePPGCanvasOptions {
   isRunning: boolean
   isPaused: boolean // 是否暂停动画（completed 状态）
+  isIdle: boolean // 是否为 idle 状态（不显示任何波形）
   ppgData: number[]
 }
 
@@ -174,7 +176,7 @@ function usePPGCanvas(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
   options: UsePPGCanvasOptions
 ) {
-  const { isRunning, isPaused, ppgData } = options
+  const { isRunning, isPaused, isIdle, ppgData } = options
   const animationRef = useRef<number>(0)
   const gridOffsetRef = useRef(0)
   const dataIndexRef = useRef(0)
@@ -331,6 +333,12 @@ function usePPGCanvas(
       ctx.fillStyle = '#F8FAFC' // slate-50
       ctx.fillRect(0, 0, width, height)
 
+      // idle 状态：只显示纯背景，不绘制任何内容
+      if (isIdle) {
+        animationRef.current = requestAnimationFrame(animate)
+        return
+      }
+
       // 绘制网格（暂停时停止滚动）
       if (!isPaused) {
         gridOffsetRef.current += ANIMATION_CONFIG.gridSpeed * (elapsed / frameInterval)
@@ -369,7 +377,7 @@ function usePPGCanvas(
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [canvasRef, isRunning, isPaused, ppgData])
+  }, [canvasRef, isRunning, isPaused, isIdle, ppgData])
 
   // 重置显示数据
   const reset = useCallback(() => {
@@ -474,6 +482,7 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
   const { reset: resetCanvas } = usePPGCanvas(canvasRef, {
     isRunning: status === 'measuring',
     isPaused: status === 'completed', // 完成测量后暂停网格滚动
+    isIdle: status === 'idle', // idle 状态不显示任何波形
     ppgData,
   })
 
@@ -622,34 +631,58 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
               style={{ display: 'block' }}
             />
 
-            {/* 空闲状态提示 */}
-            {status === 'idle' && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-50/80">
-                <p className="text-sm text-slate-400">
-                  {isTestEnv
-                    ? t('widgets.type10.idleHint')
-                    : t('widgets.type10.placeFinger')}
-                </p>
-              </div>
-            )}
+            {/* 空闲状态提示 - 使用 AnimatePresence 实现平滑淡出 */}
+            <AnimatePresence>
+              {status === 'idle' && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  className="absolute inset-0 flex items-center justify-center bg-slate-50/80"
+                >
+                  <p className="text-sm text-slate-400">
+                    {isTestEnv
+                      ? t('widgets.type10.idleHint')
+                      : t('widgets.type10.placeFinger')}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* 底部状态栏 */}
-          <div className="flex items-center justify-between mt-4">
-            {/* 进度环和倒计时 */}
-            {status === 'measuring' ? (
-              <ProgressRing progress={progress} remainingTime={remainingTime} />
-            ) : (
-              <div className="w-10" /> // 占位
-            )}
+          {/* 底部状态栏 - 始终保持相同布局，使用动画过渡 */}
+          <div className="flex items-center justify-between mt-4 h-10">
+            {/* 进度环和倒计时 - 所有状态都显示，保持布局稳定 */}
+            <motion.div
+              initial={false}
+              animate={{ 
+                opacity: status === 'completed' ? 0.5 : 1,
+              }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <ProgressRing 
+                progress={status === 'idle' ? 0 : progress} 
+                remainingTime={remainingTime} 
+              />
+            </motion.div>
 
-            {/* 状态文字（完成测量后不显示） */}
-            {status !== 'completed' && (
-              <p className="text-sm text-slate-500">
-                {status === 'idle' && t('widgets.type10.statusIdle')}
-                {status === 'measuring' && t('widgets.type10.statusMeasuring')}
-              </p>
-            )}
+            {/* 状态文字 - 使用 AnimatePresence 实现平滑切换，completed 状态不显示 */}
+            <AnimatePresence mode="wait">
+              {status !== 'completed' && (
+                <motion.p
+                  key={status}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                  className="text-sm text-slate-500"
+                >
+                  {status === 'idle' && t('widgets.type10.statusIdle')}
+                  {status === 'measuring' && t('widgets.type10.statusMeasuring')}
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
           </div>
         </WidgetEntranceContainer>

@@ -1,13 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { observer } from 'mobx-react-lite'
 import { motion } from 'framer-motion'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
 import { useNativeBridge } from '@/hooks/useNativeBridge'
 import { useWidgetEntrance } from '@/hooks/useWidgetEntrance'
-import { WidgetEntranceContainer } from '@/components/common/WidgetEntranceContainer'
-import { globalStore } from '@/stores/globalStore'
-import { AlertTriangle, Flame, Utensils, TrendingUp } from 'lucide-react'
+import { WidgetEntranceContainer, useWidgetAnimation } from '@/components/common/WidgetEntranceContainer'
+import { AlertTriangle } from 'lucide-react'
 import { widgetBGColor } from '@/config/theme'
 
 // ============================================
@@ -170,7 +168,7 @@ function parseNutritionData(raw: unknown): NutritionIntakeData | null {
 }
 
 // ============================================
-// 进度条组件 - 静态版 (默认)
+// 进度条组件 - 带入场微动画
 // ============================================
 
 interface IntakeProgressProps {
@@ -178,34 +176,51 @@ interface IntakeProgressProps {
   intake: IntakeData
   recommendedLabel: string
   exceedLabel: string
+  delay?: number
 }
 
-function IntakeProgressStatic({ label, intake, recommendedLabel, exceedLabel }: IntakeProgressProps) {
+function IntakeProgress({ label, intake, recommendedLabel, exceedLabel, delay = 0 }: IntakeProgressProps) {
+  const { canAnimate, animationKey } = useWidgetAnimation()
   const progress = calcProgress(intake.value, intake.recommended)
   const isExceeded = intake.exceedPercent > 0
   
   const displayValue = formatLargeNumber(intake.value)
   
   return (
-    <div className="mb-4 last:mb-0">
+    <motion.div 
+      key={`progress-${animationKey}`}
+      className="mb-4 last:mb-0"
+      initial={{ opacity: 0, y: 8 }}
+      animate={canAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+      transition={{ delay, duration: 0.35, ease: 'easeOut' }}
+    >
       {/* 标题行 */}
       <div className="flex justify-between items-center mb-2 min-w-0">
         <span className="text-sm text-slate-700 truncate mr-2">{label}</span>
-        <div className="flex items-baseline gap-1 flex-shrink-0">
+        <motion.div 
+          key={`value-${animationKey}`}
+          className="flex items-baseline gap-1 flex-shrink-0"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={canAnimate ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+          transition={{ delay: delay + 0.1, duration: 0.3 }}
+        >
           <span className="text-2xl font-semibold text-slate-800">{displayValue}</span>
           <span className="text-sm text-slate-500">{intake.unit}</span>
-        </div>
+        </motion.div>
       </div>
       
       {/* 进度条 */}
       <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-500 ${
+        <motion.div
+          key={`bar-${animationKey}`}
+          initial={{ width: 0 }}
+          animate={canAnimate ? { width: `${progress}%` } : { width: 0 }}
+          transition={{ delay: delay + 0.15, duration: 0.6, ease: 'easeOut' }}
+          className={`h-full rounded-full ${
             isExceeded
               ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500'
               : 'bg-gradient-to-r from-emerald-400 to-green-500'
           }`}
-          style={{ width: `${progress}%` }}
         />
       </div>
       
@@ -215,93 +230,121 @@ function IntakeProgressStatic({ label, intake, recommendedLabel, exceedLabel }: 
           {recommendedLabel}
         </span>
         {isExceeded && (
-          <span className="text-xs font-medium text-orange-500 flex-shrink-0">
+          <motion.span 
+            key={`exceed-${animationKey}`}
+            className="text-xs font-medium text-orange-500 flex-shrink-0"
+            initial={{ opacity: 0 }}
+            animate={canAnimate ? { opacity: 1 } : { opacity: 0 }}
+            transition={{ delay: delay + 0.4, duration: 0.25 }}
+          >
             {exceedLabel}
-          </span>
+          </motion.span>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 // ============================================
-// 进度条组件 - 动效版 (开发者模式)
+// 卡片内容组件 - 使用 Context 同步动画
 // ============================================
 
-interface IntakeProgressAnimatedProps extends IntakeProgressProps {
-  delay?: number
+interface CardContentProps {
+  data: NutritionIntakeData
+  onClick: () => void
+  t: (key: string, params?: Record<string, unknown>) => string
 }
 
-function IntakeProgressAnimated({ label, intake, recommendedLabel, exceedLabel, delay = 0 }: IntakeProgressAnimatedProps) {
-  const progress = calcProgress(intake.value, intake.recommended)
-  const isExceeded = intake.exceedPercent > 0
-  
-  const displayValue = formatLargeNumber(intake.value)
-  
+function CardContent({ data, onClick, t }: CardContentProps) {
+  const { canAnimate, animationKey } = useWidgetAnimation()
+
   return (
-    <motion.div 
-      className="mb-5 last:mb-0"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay, duration: 0.4 }}
+    <div
+      className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90"
+      onClick={onClick}
     >
-      {/* 标题行 */}
-      <div className="flex justify-between items-center mb-2.5 min-w-0">
-        <span className="text-sm font-medium text-slate-600 truncate mr-2">{label}</span>
-        <motion.div 
-          className="flex items-baseline gap-1 flex-shrink-0"
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: delay + 0.2, type: "spring", stiffness: 200 }}
-        >
-          <span className="text-2xl font-bold text-slate-800 tabular-nums">{displayValue}</span>
-          <span className="text-sm text-slate-400">{intake.unit}</span>
-        </motion.div>
-      </div>
-      
-      {/* 进度条 - 带动画 */}
-      <div className="h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ delay: delay + 0.1, duration: 0.8, ease: "easeOut" }}
-          className={`h-full rounded-full relative ${
-            isExceeded
-              ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500'
-              : 'bg-gradient-to-r from-emerald-400 to-green-500'
-          }`}
-        >
-          {/* 进度条高光 */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
-          {/* 进度条尾部发光 */}
-          {isExceeded && (
-            <motion.div 
-              className="absolute right-0 top-0 bottom-0 w-4 bg-gradient-to-l from-white/50 to-transparent"
-              animate={{ opacity: [0.3, 0.8, 0.3] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            />
-          )}
-        </motion.div>
-      </div>
-      
-      {/* 说明行 */}
-      <div className="flex justify-between items-center mt-2">
-        <span className="text-xs text-slate-400 truncate mr-2">
-          {recommendedLabel}
-        </span>
-        {isExceeded && (
-          <motion.div 
-            className="flex items-center gap-1 text-xs font-semibold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full"
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: delay + 0.5, type: "spring" }}
+      {/* 顶部统计行 */}
+      <motion.div 
+        key={`stats-${animationKey}`}
+        className="relative flex gap-6 sm:gap-10 mb-5 flex-wrap"
+        initial={{ opacity: 0, y: 10 }}
+        animate={canAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        transition={{ duration: 0.35, ease: 'easeOut' }}
+      >
+        <div className="flex items-baseline gap-2 min-w-0">
+          <motion.span 
+            key={`score-${animationKey}`}
+            className="text-2xl sm:text-3xl font-semibold text-emerald-500"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={canAnimate ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ delay: 0.1, duration: 0.3 }}
           >
-            <TrendingUp size={10} />
-            {exceedLabel}
-          </motion.div>
-        )}
+            {clampValue(Math.round(data.nutritionScore), 0, 100)}
+          </motion.span>
+          <span className="text-sm text-slate-500">{t('widgets.type3.nutritionalScore')}</span>
+        </div>
+        <div className="flex items-baseline gap-2 min-w-0">
+          <motion.span 
+            key={`calories-${animationKey}`}
+            className="text-2xl sm:text-3xl font-semibold text-slate-800"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={canAnimate ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.9 }}
+            transition={{ delay: 0.15, duration: 0.3 }}
+          >
+            {formatLargeNumber(data.totalCalories)}
+          </motion.span>
+          <span className="text-sm text-slate-500">{t('widgets.type3.totalCalories')}</span>
+        </div>
+      </motion.div>
+
+      {/* 警告区域 */}
+      <div className="relative mb-4">
+        {/* 警告标题 */}
+        <motion.div 
+          key={`warning-${animationKey}`}
+          className="flex items-center gap-2 mb-4 min-w-0"
+          initial={{ opacity: 0, x: -8 }}
+          animate={canAnimate ? { opacity: 1, x: 0 } : { opacity: 0, x: -8 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+        >
+          <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0" />
+          <span className="text-base font-medium text-orange-500 truncate">
+            {data.warningTitle.length > 30 ? data.warningTitle.slice(0, 28) + '...' : data.warningTitle}
+          </span>
+        </motion.div>
+
+        {/* 本餐摄入 */}
+        <IntakeProgress
+          label={t('widgets.type3.thisMealIntake')}
+          intake={data.mealIntake}
+          recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.mealIntake.recommended), unit: data.mealIntake.unit })}
+          exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.mealIntake.exceedPercent), 0, 999) })}
+          delay={0.25}
+        />
+
+        {/* 每日总摄入 */}
+        <IntakeProgress
+          label={t('widgets.type3.totalDailyIntake')}
+          intake={data.dailyIntake}
+          recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.dailyIntake.recommended), unit: data.dailyIntake.unit })}
+          exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.dailyIntake.exceedPercent), 0, 999) })}
+          delay={0.35}
+        />
       </div>
-    </motion.div>
+
+      {/* 提示卡片 */}
+      <motion.div 
+        key={`tip-${animationKey}`}
+        className="relative bg-amber-50 rounded-xl p-4 overflow-hidden"
+        initial={{ opacity: 0, y: 8 }}
+        animate={canAnimate ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
+        transition={{ delay: 0.5, duration: 0.35 }}
+      >
+        <p className="text-sm text-amber-900 leading-relaxed line-clamp-4">
+          {truncateTipText(data.tipText, 200)}
+        </p>
+      </motion.div>
+    </div>
   )
 }
 
@@ -313,17 +356,10 @@ function IntakeProgressAnimated({ label, intake, recommendedLabel, exceedLabel, 
  * 营养摄入 Widget 页面
  * 
  * 路由: /widget/nutrition-intake
- * 
- * 支持两种渲染模式：
- * - 开发者模式 (isTestEnv=true): Framer Motion 高级动效版
- * - 默认模式: 静态版
  */
-export const Type3_NutritionIntakeWidgetPage = observer(function Type3_NutritionIntakeWidgetPage() {
+export function Type3_NutritionIntakeWidgetPage() {
   const { t } = useTranslation()
   const [data, setData] = useState<NutritionIntakeData>(DEFAULT_DATA)
-
-  // 从 MobX store 获取开发者模式状态
-  const isDevMode = globalStore.isTestEnv
 
   // 初始化原生桥接
   const { onData, send, isReady } = useNativeBridge({
@@ -357,196 +393,11 @@ export const Type3_NutritionIntakeWidgetPage = observer(function Type3_Nutrition
     send('cardClick', { pageId: PAGE_CONFIG.pageId, data })
   }, [send, data])
 
-  // 开发者模式：高级动效版
-  if (isDevMode) {
-    return (
-      <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-        <div className="w-full max-w-md p-4">
-          <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
-            {/* 营养摄入卡片 - 高级质感 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            className="relative overflow-hidden rounded-3xl bg-white p-6 cursor-pointer select-none 
-                       shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100
-                       transition-all duration-200 active:scale-[0.98] active:opacity-90"
-            onClick={handleCardClick}
-          >
-            {/* 顶部统计行 - 带动效 */}
-            <div className="relative flex gap-6 mb-6">
-              {/* 营养评分 */}
-              <motion.div 
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1, type: "spring" }}
-              >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-200">
-                  <Utensils className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <motion.span 
-                    className="text-3xl font-bold text-emerald-500 tabular-nums block"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    {clampValue(Math.round(data.nutritionScore), 0, 100)}
-                  </motion.span>
-                  <span className="text-xs text-slate-400">{t('widgets.type3.nutritionalScore')}</span>
-                </div>
-              </motion.div>
-
-              {/* 总热量 */}
-              <motion.div 
-                className="flex items-center gap-3"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2, type: "spring" }}
-              >
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center shadow-lg shadow-orange-200">
-                  <Flame className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <motion.span 
-                    className="text-3xl font-bold text-slate-800 tabular-nums block"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                  >
-                    {formatLargeNumber(data.totalCalories)}
-                  </motion.span>
-                  <span className="text-xs text-slate-400">{t('widgets.type3.totalCalories')}</span>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* 警告区域 */}
-            <div className="relative mb-5">
-              {/* 警告标题 - 带脉冲动效 */}
-              <motion.div 
-                className="flex items-center gap-2 mb-5 min-w-0"
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  <AlertTriangle className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                </motion.div>
-                <span className="text-base font-semibold text-orange-500 truncate">
-                  {data.warningTitle.length > 30 ? data.warningTitle.slice(0, 28) + '...' : data.warningTitle}
-                </span>
-              </motion.div>
-
-              {/* 本餐摄入 */}
-              <IntakeProgressAnimated
-                label={t('widgets.type3.thisMealIntake')}
-                intake={data.mealIntake}
-                recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.mealIntake.recommended), unit: data.mealIntake.unit })}
-                exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.mealIntake.exceedPercent), 0, 999) })}
-                delay={0.4}
-              />
-
-              {/* 每日总摄入 */}
-              <IntakeProgressAnimated
-                label={t('widgets.type3.totalDailyIntake')}
-                intake={data.dailyIntake}
-                recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.dailyIntake.recommended), unit: data.dailyIntake.unit })}
-                exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.dailyIntake.exceedPercent), 0, 999) })}
-                delay={0.6}
-              />
-            </div>
-
-            {/* 提示卡片 - 带渐变背景 */}
-            <motion.div 
-              className="relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 overflow-hidden border border-amber-100"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8 }}
-            >
-              <p className="text-sm text-amber-800 leading-relaxed line-clamp-4">
-                {truncateTipText(data.tipText, 200)}
-              </p>
-            </motion.div>
-            </motion.div>
-          </WidgetEntranceContainer>
-
-          {/* 调试信息 */}
-          {import.meta.env.DEV && (
-            <div className="mt-4 text-xs text-gray-400 text-center">
-              {t('widgets.nativeBridgeReady')}: {isReady ? '✅' : '⏳'} | 动效模式: ✨
-            </div>
-          )}
-        </div>
-      </WidgetLayout>
-    )
-  }
-
-  // 默认模式：静态版
   return (
     <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
       <div className="w-full max-w-md p-4">
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
-          {/* 营养摄入卡片 */}
-          <div
-            className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90"
-            onClick={handleCardClick}
-          >
-
-          {/* 顶部统计行 */}
-          <div className="relative flex gap-6 sm:gap-10 mb-5 flex-wrap">
-            <div className="flex items-baseline gap-2 min-w-0">
-              <span className="text-2xl sm:text-3xl font-semibold text-emerald-500">
-                {clampValue(Math.round(data.nutritionScore), 0, 100)}
-              </span>
-              <span className="text-sm text-slate-500">{t('widgets.type3.nutritionalScore')}</span>
-            </div>
-            <div className="flex items-baseline gap-2 min-w-0">
-              <span className="text-2xl sm:text-3xl font-semibold text-slate-800">
-                {formatLargeNumber(data.totalCalories)}
-              </span>
-              <span className="text-sm text-slate-500">{t('widgets.type3.totalCalories')}</span>
-            </div>
-          </div>
-
-          {/* 警告区域 */}
-          <div className="relative mb-4">
-            {/* 警告标题 */}
-            <div className="flex items-center gap-2 mb-4 min-w-0">
-              <AlertTriangle className="w-4 h-4 text-orange-500 flex-shrink-0" />
-              <span className="text-base font-medium text-orange-500 truncate">
-                {data.warningTitle.length > 30 ? data.warningTitle.slice(0, 28) + '...' : data.warningTitle}
-              </span>
-            </div>
-
-            {/* 本餐摄入 */}
-            <IntakeProgressStatic
-              label={t('widgets.type3.thisMealIntake')}
-              intake={data.mealIntake}
-              recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.mealIntake.recommended), unit: data.mealIntake.unit })}
-              exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.mealIntake.exceedPercent), 0, 999) })}
-            />
-
-            {/* 每日总摄入 */}
-            <IntakeProgressStatic
-              label={t('widgets.type3.totalDailyIntake')}
-              intake={data.dailyIntake}
-              recommendedLabel={t('widgets.type3.recommendedValue', { value: formatLargeNumber(data.dailyIntake.recommended), unit: data.dailyIntake.unit })}
-              exceedLabel={t('widgets.type3.exceedPercent', { percent: clampValue(Math.round(data.dailyIntake.exceedPercent), 0, 999) })}
-            />
-          </div>
-
-          {/* 提示卡片 */}
-          <div className="relative bg-amber-50 rounded-xl p-4 overflow-hidden">
-            <p className="text-sm text-amber-900 leading-relaxed line-clamp-4">
-              {truncateTipText(data.tipText, 200)}
-            </p>
-          </div>
-          </div>
+          <CardContent data={data} onClick={handleCardClick} t={t} />
         </WidgetEntranceContainer>
 
         {/* 调试信息 */}
@@ -558,4 +409,4 @@ export const Type3_NutritionIntakeWidgetPage = observer(function Type3_Nutrition
       </div>
     </WidgetLayout>
   )
-})
+}
