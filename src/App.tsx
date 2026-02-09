@@ -30,6 +30,7 @@ import { Type8_SbpSleepTrendWidgetPage } from '@/pages/widgets/dialog/Type8_SbpS
 import { Type9_ImprovementPlanWidgetPage } from '@/pages/widgets/dialog/Type9_ImprovementPlanWidgetPage'
 import { Type10_PPGSignalWidgetPage } from '@/pages/widgets/dialog/Type10_PPGSignalWidgetPage'
 import { Type11_HealthInterventionWidgetPage } from '@/pages/widgets/dialog/Type11_HealthInterventionWidgetPage'
+import { Type12_HRERecommendationWidgetPage } from '@/pages/widgets/dialog/Type12_HRERecommendationWidgetPage'
 
 // Healthy Page
 import { HealthyPage } from '@/pages/details/HealthyPage'
@@ -206,6 +207,9 @@ function App() {
 
             {/* Type 11 - Health Intervention Video Widget */}
             <Route path="/widget/type-11" element={<Type11_HealthInterventionWidgetPage />} />
+
+            {/* Type 12 - HRE Recommendation Widget */}
+            <Route path="/widget/type-12" element={<Type12_HRERecommendationWidgetPage />} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

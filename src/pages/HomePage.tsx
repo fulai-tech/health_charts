@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
-import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar, BarChart3, TrendingUp, Zap, Radio, ChevronRight, ShieldAlert } from 'lucide-react'
+import { Heart, Droplets, Activity, Pill, LayoutDashboard, Moon, Smile, Utensils, Music, GitCompare, Grid2X2, FlaskConical, Calendar, BarChart3, TrendingUp, Zap, Radio, ChevronRight, ShieldAlert, Sparkles } from 'lucide-react'
 import { VITAL_COLORS, VITAL_COLORS_ALPHA, HEALTHY_COLORS, EMOTION_COLORS } from '@/config/theme'
 import { AuthButton } from '@/components/ui/AuthButton'
 import { useTokenValidation } from '@/hooks/useTokenValidation'
@@ -102,6 +102,7 @@ export function HomePage() {
         { path: '/widget/type-9', label: t('home.widgetType9'), icon: Zap, color: '#F97316', alphaColor: 'rgba(249, 115, 22, 0.125)', type: 9 },
         { path: '/widget/type-10', label: t('home.widgetType10'), icon: Radio, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate, type: 10 },
         { path: '/widget/type-11', label: t('home.widgetType11'), icon: Zap, color: '#FF7F27', alphaColor: 'rgba(255, 127, 39, 0.125)', type: 11 },
+        { path: '/widget/type-12', label: t('home.widgetType12'), icon: Sparkles, color: '#FF7F27', alphaColor: 'rgba(255, 127, 39, 0.125)', type: 12 },
       ],
     },
   ]

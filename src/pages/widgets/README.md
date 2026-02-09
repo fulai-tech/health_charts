@@ -289,6 +289,104 @@ function WidgetEmbed({ type, data }) {
 
 ---
 
+## 5. HRE 推荐 Widget (Type 12)
+
+**路由**: `/widget/type-12`  
+**组件**: `Type12_HRERecommendationWidgetPage`  
+**数据类型**: `HRERecommendationData`  
+**通信方式**: NativeBridge（Android -> JS）
+
+### 功能说明
+
+展示 HRE（Health Recommendation Engine）推荐的健康内容。支持四种展示模式：
+
+| 模式 | 条件 | 展示内容 |
+|------|------|----------|
+| 视频推荐 | `has_match=true` + `type=video` | 图片 + 时长徽章 + 标题 + Start + 详情 |
+| 音频推荐 | `has_match=true` + `type=audio` | 图片 + 时长徽章 + 标题 + Start + 详情 |
+| 图文推荐 | `has_match=true` + `type=image_text` | 图片 + 标题 + Start + 详情（无时长） |
+| 纯文本 | `has_match=false` | 仅标题 + 简介 + 详情文字 |
+
+**注意**: 一期只取 `rank=1` 的首个推荐进行展示。
+
+### 数据类型
+
+```typescript
+interface HRERecommendationItem {
+  content_id?: string                                    // 内容唯一标识
+  type?: 'video' | 'audio' | 'image_text'               // 媒体类型
+  content_type?: 'exercise' | 'food' | 'music' | 'sleep' | 'other'  // 内容分类
+  image_url?: string                                     // 主图 URL
+  url?: string                                           // 内容 URL（video/audio 有；image_text 无此字段）
+  minutes?: number                                       // 时长（分钟）
+  title: string                                          // 标题文字
+  explanation_text: string                               // 简介文字
+  detailed_text: string                                  // 详细介绍文字
+  has_match: boolean                                     // 是否从内容库推荐
+  rank: number                                           // 排名（一期取首个）
+  total_count: number                                    // 总推荐数
+}
+
+interface HRERecommendationData {
+  hre_recommendations: HRERecommendationItem[]
+}
+```
+
+### 示例数据
+
+#### 视频推荐（有匹配）
+
+```json
+{
+  "hre_recommendations": [{
+    "content_id": "697c7ee5492c5a6580b1fe85",
+    "type": "video",
+    "content_type": "exercise",
+    "image_url": "https://cdn.fulai.tech/comm/image/1769750270125_456l864te",
+    "url": "https://cdn.fulai.tech/comm/video/1769749075286_73302i411",
+    "minutes": 15,
+    "title": "Gentle 5-Minute Move",
+    "explanation_text": "Knees bent, arm swing, leg kick, waist twist, ankle rotation, stretch & breathe.",
+    "detailed_text": "As someone with gout and blood sugar concerns, this easy workout is great for you!",
+    "has_match": true,
+    "rank": 1,
+    "total_count": 1
+  }]
+}
+```
+
+#### 纯文本推荐（无匹配）
+
+```json
+{
+  "hre_recommendations": [{
+    "title": "Take a Short Walk",
+    "explanation_text": "A 10-minute walk after meals can help regulate blood sugar levels.",
+    "detailed_text": "Research shows that even a brief walk after eating can significantly reduce post-meal blood sugar spikes.",
+    "has_match": false,
+    "rank": 1,
+    "total_count": 1
+  }]
+}
+```
+
+### Android 端调用
+
+```kotlin
+// 发送数据
+val jsonData = """{"hre_recommendations": [{...}]}"""
+webView.evaluateJavascript(
+    "NativeBridge.receiveData('${jsonData.replace("'", "\\'")}')",
+    null
+)
+
+// 监听事件
+// click-start: 用户点击 Start 按钮
+// cardClick: 用户点击卡片
+```
+
+---
+
 ## 注意事项
 
 1. **URL 编码**: JSON 必须使用 `encodeURIComponent` 编码

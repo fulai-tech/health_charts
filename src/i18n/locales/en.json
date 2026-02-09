@@ -32,7 +32,8 @@
     "widgetType8": "SBP & Sleep Trend",
     "widgetType9": "Improvement Plan",
     "widgetType10": "PPG Signal",
-    "widgetType11": "Health Intervention"
+    "widgetType11": "Health Intervention",
+    "widgetType12": "HRE Recommendation"
   },
   "common": {
     "loading": "Loading...",
@@ -605,6 +606,13 @@
       "urgencyBadge": "Recommendations for immediate action",
       "startButton": "Start",
       "minutes": "min"
+    },
+    "type12": {
+      "urgencyBadge": "Recommendations for immediate action",
+      "startButton": "Start",
+      "minutes": "min",
+      "textOnlyTitle": "Health Recommendation",
+      "noRecommendation": "No recommendation available"
     }
   },
   "aiSecurity": {

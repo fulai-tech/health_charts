@@ -32,7 +32,8 @@
     "widgetType8": "SBP与睡眠趋势图",
     "widgetType9": "定制改善计划",
     "widgetType10": "PPG 信号采集",
-    "widgetType11": "健康干预视频"
+    "widgetType11": "健康干预视频",
+    "widgetType12": "HRE 推荐"
   },
   "common": {
     "loading": "加载中...",
@@ -609,6 +610,13 @@
       "urgencyBadge": "立即行动推荐",
       "startButton": "开始",
       "minutes": "分钟"
+    },
+    "type12": {
+      "urgencyBadge": "立即开始行动",
+      "startButton": "开始",
+      "minutes": "分钟",
+      "textOnlyTitle": "健康建议",
+      "noRecommendation": "暂无推荐"
     }
   },
   "aiSecurity": {
