@@ -223,10 +223,11 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
   const [animPhase, setAnimPhase] = useState<AnimationPhase>('idle')
   /** 实际显示的内容状态（延迟更新，等待退出动画完成） */
   const [displayState, setDisplayState] = useState<ButtonState>('idle')
-  /** 当前按钮目标宽度 */
-  const [targetWidth, setTargetWidth] = useState(BUTTON_WIDTHS.idle)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const cancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  
+  // 根据 buttonState 计算目标宽度（避免在 effect 中同步 setState）
+  const targetWidth = BUTTON_WIDTHS[buttonState]
 
   // 触发小型 confetti 动画
   const triggerConfetti = useCallback(() => {
@@ -255,9 +256,6 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
   // 状态变化时触发动画序列
   useEffect(() => {
     if (buttonState === displayState) return
-    
-    // 更新目标宽度
-    setTargetWidth(BUTTON_WIDTHS[buttonState])
     
     // 开始退出动画
     setAnimPhase('exit')

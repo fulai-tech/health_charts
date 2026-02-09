@@ -35,6 +35,7 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
   const isAnimatingRef = useRef(false)
   const hasPendingRef = useRef(false)
   const animationEndTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const playShineRef = useRef<(() => void) | null>(null)
 
   // 清除动画结束定时器
   const clearAnimationEndTimer = useCallback(() => {
@@ -100,13 +101,18 @@ function useMetalShine(options: UseMetalShineOptions = {}) {
       if (hasPendingRef.current) {
         // 有待触发的动画，立即播放
         hasPendingRef.current = false
-        playShine()
+        playShineRef.current?.()
       } else {
         // 隐藏光泽
         hideShine()
       }
     }, quickAnimationDuration)
   }, [quickAnimationDuration, clearAnimationEndTimer, showShine, hideShine])
+
+  // 更新 playShineRef
+  useEffect(() => {
+    playShineRef.current = playShine
+  }, [playShine])
 
   // 手动触发高光动效（对外接口）
   const triggerShine = useCallback(() => {
