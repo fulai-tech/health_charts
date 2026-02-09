@@ -201,6 +201,16 @@ const H5_TO_ANDROID_EVENTS: H5EventConfig[] = [
         icon: 'click',
     },
     {
+        id: 'click-widget-video-start',
+        event: 'click-widget-video-start',
+        label: '视频开始播放',
+        labelEn: 'Video Start Click',
+        description: '健康干预 Widget「开始播放」按钮点击',
+        descriptionEn: 'Health intervention widget "Start Play" button click',
+        icon: 'click',
+        data: { pageId: 'health-intervention', videoUrl: 'https://example.com/sample.mp4' },
+    },
+    {
         id: 'data-global-request',
         event: 'data-global-request',
         label: '请求数据',

@@ -101,6 +101,7 @@ export function HomePage() {
         { path: '/widget/type-8', label: t('home.widgetType8'), icon: TrendingUp, color: VITAL_COLORS.bp, alphaColor: VITAL_COLORS_ALPHA.bp, type: 8 },
         { path: '/widget/type-9', label: t('home.widgetType9'), icon: Zap, color: '#F97316', alphaColor: 'rgba(249, 115, 22, 0.125)', type: 9 },
         { path: '/widget/type-10', label: t('home.widgetType10'), icon: Radio, color: VITAL_COLORS.heartRate, alphaColor: VITAL_COLORS_ALPHA.heartRate, type: 10 },
+        { path: '/widget/type-11', label: t('home.widgetType11'), icon: Zap, color: '#FF7F27', alphaColor: 'rgba(255, 127, 39, 0.125)', type: 11 },
       ],
     },
   ]

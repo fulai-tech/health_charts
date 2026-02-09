@@ -1,5 +1,5 @@
-{
-  "sleep_score_card": {
+[
+  {
     "widget_name": "sleep_score_card",
     "widget_type": "type-1",
     "widget_data_format": {
@@ -22,7 +22,7 @@
       ]
     }
   },
-  "sleep_fatigue_comparison_card": {
+  {
     "widget_name": "sleep_fatigue_comparison_card",
     "widget_type": "type-2",
     "widget_data_format": {
@@ -85,7 +85,7 @@
       }
     }
   },
-  "nutrition_intake_card": {
+  {
     "widget_name": "nutrition_intake_card",
     "widget_type": "type-3",
     "widget_data_format": {
@@ -107,7 +107,7 @@
       "tipText": "您的钠摄入超出每日基准14%，且本餐摄入也超出基准。超标钠主要来源于宫保鸡丁和酱油。"
     }
   },
-  "music_recommendation_card": {
+  {
     "widget_name": "music_recommendation_card",
     "widget_type": "type-4",
     "widget_data_format": {
@@ -136,7 +136,7 @@
       ]
     }
   },
-  "vital_overview_card": {
+  {
     "widget_name": "vital_overview_card",
     "widget_type": "type-5",
     "widget_data_format": {
@@ -168,7 +168,7 @@
       }
     }
   },
-  "sodium_bp_card": {
+  {
     "widget_name": "sodium_bp_card",
     "widget_type": "type-6",
     "widget_data_format": {
@@ -186,7 +186,7 @@
       }
     }
   },
-  "weekly_health_score_card": {
+  {
     "widget_name": "weekly_health_score_card",
     "widget_type": "type-7",
     "widget_data_format": {
@@ -218,7 +218,7 @@
       ]
     }
   },
-  "sbp_sleep_trend_chart_card": {
+  {
     "widget_name": "sbp_sleep_trend_chart_card",
     "widget_type": "type-8",
     "widget_data_format": {
@@ -237,7 +237,7 @@
       "sleepDurationColor": "rgb(167, 139, 250)"
     }
   },
-  "improvement_plan_card": {
+  {
     "widget_name": "improvement_plan_card",
     "widget_type": "type-9",
     "widget_data_format": {
@@ -267,11 +267,23 @@
       ]
     }
   },
-  "ppg_signal_card": {
+  {
     "widget_name": "ppg_signal_card",
     "widget_type": "type-10",
     "widget_data_format": {
       "note": "Type-10 (PPG Signal Widget) is controlled by events, not data. Android sends 'page-widget-ppg-start' and 'page-widget-ppg-stop' events through NativeBridge to control the measurement process. Real PPG data can be sent optionally with { values: number[] } format."
     }
+  },
+  {
+    "widget_name": "video_recommendation",
+    "widget_type": "type-11",
+    "widget_data_format": {
+      "title": "Meditation and Breath Regulation",
+      "videoUrl": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "videoPoster": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg",
+      "durationMinutes": 3,
+      "reasoning": "Given the currently high systolic blood pressure, it is recommended to immediately put down your work, close your eyes, and sit quietly for 3 minutes."
+    },
+    "note": "Type-11 (Health Intervention Video Widget) displays urgent health recommendations with instructional videos. The videoUrl should be a direct MP4 URL or HLS stream (.m3u8). Video playback is controlled with click interactions and fullscreen is disabled for security."
   }
-}
+]

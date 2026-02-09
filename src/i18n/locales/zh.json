@@ -31,7 +31,8 @@
     "widgetType7": "每周健康分数",
     "widgetType8": "SBP与睡眠趋势图",
     "widgetType9": "定制改善计划",
-    "widgetType10": "PPG 信号采集"
+    "widgetType10": "PPG 信号采集",
+    "widgetType11": "健康干预视频"
   },
   "common": {
     "loading": "加载中...",
@@ -603,6 +604,11 @@
       "statusIdle": "准备测量",
       "statusMeasuring": "正在采集红外信号...",
       "statusCompleted": "结束测量"
+    },
+    "type11": {
+      "urgencyBadge": "立即行动推荐",
+      "startButton": "开始",
+      "minutes": "分钟"
     }
   },
   "aiSecurity": {

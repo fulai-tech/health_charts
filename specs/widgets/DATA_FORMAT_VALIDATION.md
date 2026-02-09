@@ -51,6 +51,7 @@
 | Type-8 | `/widget/type-8` | `sbp_sleep_trend_chart_card` | `{ data: [{day, sbp, sleepDuration}], sbpLabel?, ... }` | ✅ 已验证 |
 | Type-9 | `/widget/type-9` | `improvement_plan_card` | `{ title?, items: [{id, type, title, description, isAdded}] }` | ✅ 已补充 |
 | Type-10 | `/widget/type-10` | `ppg_signal_card` | 事件驱动，无需数据（可选传 `{ values: number[] }`） | ✅ 已补充 |
+| Type-11 | `/widget/type-11` | `video_recommendation` | `{ title, videoUrl, videoPoster?, durationMinutes, reasoning }` | ✅ 已补充 |
 
 ---
 
@@ -243,6 +244,66 @@ interface ImprovementPlanData {
 
 ---
 
+### Type-11: 健康干预视频卡片 ✅ (新增)
+
+**功能说明**：展示基于生物指标分析的健康干预建议，包含视频指导。
+
+**Android 发送的数据结构**：
+
+```json
+{
+  "title": "冥想与调息",
+  "videoUrl": "https://cdn.example.com/meditation-3min.mp4",
+  "videoPoster": "https://cdn.example.com/meditation-thumb.jpg",
+  "durationMinutes": 3,
+  "reasoning": "鉴于目前收缩压偏高，建议立即放下工作，闭上眼睛，静坐3分钟。"
+}
+```
+
+**字段说明**：
+- `title` (string, 必需): 视频标题
+- `videoUrl` (string, 必需): 视频文件直接 URL
+  - 推荐格式：MP4（兼容性最好）
+  - 也支持：HLS (.m3u8) 用于长视频自适应码率
+- `videoPoster` (string, 可选): 视频封面图 URL
+  - ⚠️ **强烈推荐提供**，以获得最佳加载体验
+  - 如果不提供，前端会自动提取视频第一帧（可能有短暂延迟）
+- `durationMinutes` (number, 必需): 视频时长（分钟）
+- `reasoning` (string, 必需): 干预原因说明文本
+
+**TypeScript 接口**：
+
+```typescript
+interface HealthInterventionData {
+  title: string
+  videoUrl: string
+  videoPoster?: string
+  durationMinutes: number
+  reasoning: string
+}
+```
+
+**前端解析函数**：位于 [Type11_HealthInterventionWidgetPage.tsx](../../src/pages/widgets/dialog/Type11_HealthInterventionWidgetPage.tsx#L74)
+
+**视频播放特性**：
+- ✅ 智能封面加载
+  - 优先使用 `videoPoster`（推荐）
+  - 无封面时自动提取视频第一帧（避免黑屏）
+- ✅ 点击视频区域即可播放/暂停
+- ✅ 禁用全屏播放（提高安全性）
+- ✅ 禁用下载和画中画
+- ✅ 中心播放按钮仅在悬停时显示（避免遮挡内容）
+- ✅ 明亮橙色时长徽章（匹配设计稿）
+
+**通信事件**：
+- JS → Android: `playButtonClick` (点击开始按钮)
+- JS → Android: `videoClick` (点击视频)
+- JS → Android: `videoEnded` (视频播放结束)
+
+**format_v2.2.json 定义**：✅ 需要添加
+
+---
+
 ## 📌 给 Android 开发者的提示
 
 ### ✅ 正确用法
@@ -287,11 +348,12 @@ NativeBridge.sendData(data.toString())  // 前端解析会失败！
 
 ### ✅ 已完成的工作
 
-1. ✅ 验证所有 10 个组件的数据格式对应关系
+1. ✅ 验证所有 11 个组件的数据格式对应关系
 2. ✅ 修正 Type-2 的数据结构（移除错误的平行示例）
 3. ✅ 补充 Type-9 的完整定义
 4. ✅ 补充 Type-10 的事件说明
-5. ✅ 统一所有组件的数据格式为 `{ widget_name, widget_type, widget_data_format }` 结构
+5. ✅ 补充 Type-11 的健康干预视频卡片定义（2026-02-09 新增）
+6. ✅ 统一所有组件的数据格式为 `{ widget_name, widget_type, widget_data_format }` 结构
 
 ### 🎉 结论
 

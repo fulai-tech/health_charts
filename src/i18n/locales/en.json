@@ -31,7 +31,8 @@
     "widgetType7": "Weekly Health Score",
     "widgetType8": "SBP & Sleep Trend",
     "widgetType9": "Improvement Plan",
-    "widgetType10": "PPG Signal"
+    "widgetType10": "PPG Signal",
+    "widgetType11": "Health Intervention"
   },
   "common": {
     "loading": "Loading...",
@@ -599,6 +600,11 @@
       "statusIdle": "Ready to measure",
       "statusMeasuring": "In acquiring infrared signals...",
       "statusCompleted": "Measurement ended"
+    },
+    "type11": {
+      "urgencyBadge": "Recommendations for immediate action",
+      "startButton": "Start",
+      "minutes": "min"
     }
   },
   "aiSecurity": {
