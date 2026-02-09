@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { observer } from 'mobx-react-lite'
 import { WidgetLayout } from '@/components/layouts/WidgetLayout'
@@ -18,12 +18,19 @@ import { widgetBGColor } from '@/config/theme'
  * 
  * JSON 数据格式规范（必须是 JSON 对象，不支持数组）：
  * {
- *   "title": "冥想与调息",                    // 视频标题
- *   "videoUrl": "https://cdn.example.com/meditation-3min.mp4",  // 视频地址
- *   "videoPoster": "https://cdn.example.com/meditation-thumb.jpg", // 视频封面（可选）
- *   "durationMinutes": 3,                    // 视频时长（分钟）
- *   "reasoning": "鉴于目前收缩压偏高，建议立即放下工作，闭上眼睛，静坐3分钟。" // 干预原因说明
+ *   "title": "冥想与调息",
+ *   "videoUrl": "https://www.bilibili.com/video/BVxxx",
+ *   "videoPoster": "https://cdn.example.com/meditation-thumb.jpg",
+ *   "durationMinutes": 3,
+ *   "reasoning": "鉴于目前收缩压偏高，建议立即放下工作，闭上眼睛，静坐3分钟。"
  * }
+ * 
+ * 支持的 videoUrl 格式：
+ * - Bilibili: https://www.bilibili.com/video/BVxxx 或 https://player.bilibili.com/player.html?bvid=BVxxx
+ * - YouTube: https://www.youtube.com/watch?v=xxx 或 https://youtu.be/xxx
+ * - 直链 MP4: https://cdn.example.com/meditation-3min.mp4
+ * 
+ * 注意：videoPoster 和自动截帧仅对直链 MP4 视频生效，Bilibili/YouTube 使用各自播放器内置封面。
  */
 interface HealthInterventionData {
   title: string
@@ -31,6 +38,71 @@ interface HealthInterventionData {
   videoPoster?: string
   durationMinutes: number
   reasoning: string
+}
+
+// ============================================
+// 视频源类型检测
+// ============================================
+
+type VideoSourceType = 'direct' | 'bilibili' | 'youtube'
+
+/**
+ * 根据 URL 自动检测视频源类型
+ */
+function detectVideoSourceType(url: string): VideoSourceType {
+  if (/bilibili\.com|b23\.tv|player\.bilibili\.com/i.test(url)) return 'bilibili'
+  if (/youtube\.com|youtu\.be|youtube-nocookie\.com/i.test(url)) return 'youtube'
+  return 'direct'
+}
+
+/**
+ * 将 Bilibili / YouTube 视频 URL 转换为 iframe 嵌入地址
+ * 
+ * 支持自动转换：
+ * - https://www.bilibili.com/video/BVxxx → player.bilibili.com 嵌入
+ * - https://www.youtube.com/watch?v=xxx → youtube.com/embed 嵌入
+ * - 已经是嵌入地址的直接返回
+ */
+function getEmbedUrl(url: string, sourceType: VideoSourceType): string | null {
+  if (sourceType === 'bilibili') {
+    // 已是嵌入地址，补全参数后返回
+    if (url.includes('player.bilibili.com')) {
+      try {
+        const urlObj = new URL(url.startsWith('//') ? `https:${url}` : url)
+        if (!urlObj.searchParams.has('autoplay')) urlObj.searchParams.set('autoplay', '0')
+        if (!urlObj.searchParams.has('danmaku')) urlObj.searchParams.set('danmaku', '0')
+        return urlObj.toString()
+      } catch {
+        return url
+      }
+    }
+    // 从 bilibili 常规链接提取 BV 号
+    const bvMatch = url.match(/(BV[\w]+)/i)
+    if (bvMatch) {
+      return `https://player.bilibili.com/player.html?bvid=${bvMatch[1]}&autoplay=0&danmaku=0`
+    }
+    // 从 bilibili 常规链接提取 av 号
+    const avMatch = url.match(/av(\d+)/i)
+    if (avMatch) {
+      return `https://player.bilibili.com/player.html?aid=${avMatch[1]}&autoplay=0&danmaku=0`
+    }
+    return null
+  }
+
+  if (sourceType === 'youtube') {
+    // 已是嵌入地址
+    if (url.includes('youtube.com/embed/') || url.includes('youtube-nocookie.com/embed/')) {
+      return url
+    }
+    // 从 YouTube 常规链接提取视频 ID
+    const idMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
+    if (idMatch) {
+      return `https://www.youtube.com/embed/${idMatch[1]}?autoplay=0`
+    }
+    return null
+  }
+
+  return null
 }
 
 // ============================================
@@ -50,8 +122,8 @@ const DELAY_ANIMATE_START = 300
 
 const DEFAULT_DATA: HealthInterventionData = {
   title: 'Meditation and Breath Regulation',
-  videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-  videoPoster: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+  videoUrl: 'https://www.bilibili.com/video/BV1GJ411x7h7',
+  videoPoster: undefined,
   durationMinutes: 3,
   reasoning: 'Given the currently high systolic blood pressure, it is recommended to immediately put down your work, close your eyes, and sit quietly for 3 minutes.',
 }
@@ -119,6 +191,11 @@ export const Type11_HealthInterventionWidgetPage = observer(function Type11_Heal
   const [generatedPoster, setGeneratedPoster] = useState<string>('')
   const videoRef = useRef<HTMLVideoElement>(null)
 
+  // 检测视频源类型（Bilibili / YouTube / 直链 MP4）
+  const videoSourceType = useMemo(() => detectVideoSourceType(data.videoUrl), [data.videoUrl])
+  const embedUrl = useMemo(() => getEmbedUrl(data.videoUrl, videoSourceType), [data.videoUrl, videoSourceType])
+  const isEmbedVideo = videoSourceType !== 'direct'
+
   // 初始化原生桥接
   const { onData, send, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
@@ -151,7 +228,8 @@ export const Type11_HealthInterventionWidgetPage = observer(function Type11_Heal
   // 处理播放按钮点击
   const handlePlayClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
-    if (videoRef.current) {
+    // 仅直链视频支持通过 JS 控制播放/暂停，iframe 视频由嵌入播放器自行管理
+    if (!isEmbedVideo && videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause()
       } else {
@@ -161,11 +239,11 @@ export const Type11_HealthInterventionWidgetPage = observer(function Type11_Heal
     }
     // 通知 Android 用户点击了开始播放按钮
     send('click-widget-video-start', { pageId: PAGE_CONFIG.pageId, videoUrl: data.videoUrl })
-  }, [isPlaying, send, data.videoUrl])
+  }, [isPlaying, isEmbedVideo, send, data.videoUrl])
 
-  // 处理视频点击播放
+  // 处理视频点击播放（仅直链视频生效，iframe 视频点击由嵌入播放器处理）
   const handleVideoClick = useCallback(() => {
-    if (videoRef.current) {
+    if (!isEmbedVideo && videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause()
       } else {
@@ -174,7 +252,7 @@ export const Type11_HealthInterventionWidgetPage = observer(function Type11_Heal
       setIsPlaying(!isPlaying)
     }
     send('videoClick', { pageId: PAGE_CONFIG.pageId, videoUrl: data.videoUrl })
-  }, [isPlaying, send, data.videoUrl])
+  }, [isPlaying, isEmbedVideo, send, data.videoUrl])
 
   // 视频播放状态监听
   useEffect(() => {
@@ -307,33 +385,53 @@ export const Type11_HealthInterventionWidgetPage = observer(function Type11_Heal
 
             {/* 视频区域 */}
             <div
-              className="relative mb-4 overflow-hidden rounded-[20px] cursor-pointer group"
-              onClick={handleVideoClick}
+              className={`relative mb-4 overflow-hidden rounded-[20px] ${isEmbedVideo ? '' : 'cursor-pointer group'}`}
+              onClick={isEmbedVideo ? undefined : handleVideoClick}
               style={{ backgroundColor: '#F5F5F5' }}
             >
-              <video
-                ref={videoRef}
-                src={data.videoUrl}
-                poster={data.videoPoster || generatedPoster}
-                className="w-full aspect-video object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                playsInline
-                controlsList="nodownload nofullscreen noremoteplayback"
-                disablePictureInPicture
-                preload="metadata"
-                crossOrigin="anonymous"
-              />
+              {/* iframe 嵌入视频（Bilibili / YouTube） */}
+              {/* sandbox 策略：仅允许脚本和同源访问，禁止跳转父页面和弹出新窗口 */}
+              {isEmbedVideo && embedUrl ? (
+                <iframe
+                  src={embedUrl}
+                  className="w-full aspect-video"
+                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                  allowFullScreen
+                  sandbox="allow-scripts allow-same-origin allow-presentation allow-encrypted-media"
+                  frameBorder={0}
+                  scrolling="no"
+                  referrerPolicy="no-referrer"
+                  style={{ border: 'none' }}
+                  title={data.title}
+                />
+              ) : (
+                /* 直链视频（MP4 等） */
+                <video
+                  ref={videoRef}
+                  src={data.videoUrl}
+                  poster={data.videoPoster || generatedPoster}
+                  className="w-full aspect-video object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  playsInline
+                  controlsList="nodownload nofullscreen noremoteplayback"
+                  disablePictureInPicture
+                  preload="metadata"
+                  crossOrigin="anonymous"
+                />
+              )}
 
-              {/* 时长徽章 - 更明亮的橙色 */}
-              <div
-                className="absolute top-3 left-3 px-3 py-1.5 rounded-full text-white text-sm font-medium flex items-center gap-1"
-                style={{ backgroundColor: 'rgba(255, 140, 0, 0.95)' }}
-              >
-                <Play className="w-3 h-3 fill-current" />
-                <span>{data.durationMinutes} {t('widgets.type11.minutes')}</span>
-              </div>
+              {/* 时长徽章 - 仅直链视频显示（iframe 播放器有内置时长） */}
+              {!isEmbedVideo && (
+                <div
+                  className="absolute top-3 left-3 px-3 py-1.5 rounded-full text-white text-sm font-medium flex items-center gap-1"
+                  style={{ backgroundColor: 'rgba(255, 140, 0, 0.95)' }}
+                >
+                  <Play className="w-3 h-3 fill-current" />
+                  <span>{data.durationMinutes} {t('widgets.type11.minutes')}</span>
+                </div>
+              )}
 
-              {/* 播放遮罩 - 仅在未播放且悬停时显示中心按钮 */}
-              {!isPlaying && (
+              {/* 播放遮罩 - 仅直链视频在未播放时悬停显示 */}
+              {!isEmbedVideo && !isPlaying && (
                 <div className="absolute inset-0 bg-black/10 transition-all duration-300 group-hover:bg-black/25">
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-lg transform transition-transform group-hover:scale-110">

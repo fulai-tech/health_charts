@@ -284,6 +284,6 @@
       "durationMinutes": 3,
       "reasoning": "Given the currently high systolic blood pressure, it is recommended to immediately put down your work, close your eyes, and sit quietly for 3 minutes."
     },
-    "note": "Type-11 (Health Intervention Video Widget) displays urgent health recommendations with instructional videos. The videoUrl should be a direct MP4 URL or HLS stream (.m3u8). Video playback is controlled with click interactions and fullscreen is disabled for security."
+    "note": "Type-11 (Health Intervention Video Widget) displays urgent health recommendations with instructional videos. The videoUrl supports direct MP4 URL, HLS stream (.m3u8), Bilibili links (bilibili.com/video/BVxxx), and YouTube links (youtube.com/watch?v=xxx). Bilibili/YouTube URLs are auto-converted to iframe embeds. Video playback is controlled with click interactions and fullscreen is disabled for direct MP4 videos."
   }
 ]
