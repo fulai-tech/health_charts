@@ -1,25 +1,31 @@
 {
   "sleep_score_card": {
-    "score": 88,
-    "totalSleepMinutes": 375,
-    "deepSleepMinutes": 248,
-    "tags": [
-      {
-        "text": "深睡不足",
-        "type": "warning"
-      },
-      {
-        "text": "入睡困难",
-        "type": "warning"
-      },
-      {
-        "text": "呼吸良好",
-        "type": "good"
-      }
-    ]
+    "widget_name": "sleep_score_card",
+    "widget_type": "type-1",
+    "widget_data_format": {
+      "score": 88,
+      "totalSleepMinutes": 375,
+      "deepSleepMinutes": 248,
+      "tags": [
+        {
+          "text": "深睡不足",
+          "type": "warning"
+        },
+        {
+          "text": "入睡困难",
+          "type": "warning"
+        },
+        {
+          "text": "呼吸良好",
+          "type": "good"
+        }
+      ]
+    }
   },
   "sleep_fatigue_comparison_card": {
-    "sleep": {
+    "widget_name": "sleep_fatigue_comparison_card",
+    "widget_type": "type-2",
+    "widget_data_format": {
       "theme": "sleep",
       "left": {
         "title": "Deep sleep",
@@ -38,152 +44,234 @@
         "statusText": "Rise"
       }
     },
-    "BP": {
-      "theme": "BP",
-      "left": {
-        "title": "Systolic BP",
-        "value": "135mmHg",
-        "barPercent": 68,
-        "standardPercent": 60,
-        "status": "high",
-        "statusText": "High"
+    "widget_data_format_examples": {
+      "sleep_theme": {
+        "theme": "sleep",
+        "left": {
+          "title": "Deep sleep",
+          "value": "45min",
+          "barPercent": 45,
+          "standardPercent": 40,
+          "status": "low",
+          "statusText": "Low"
+        },
+        "right": {
+          "title": "Morning fatigue",
+          "value": "",
+          "barPercent": 75,
+          "standardPercent": 55,
+          "status": "high",
+          "statusText": "Rise"
+        }
       },
-      "right": {
-        "title": "Diastolic BP",
-        "value": "88mmHg",
-        "barPercent": 55,
-        "standardPercent": 50,
-        "status": "normal",
-        "statusText": "Normal"
+      "bp_theme": {
+        "theme": "BP",
+        "left": {
+          "title": "Systolic BP",
+          "value": "135mmHg",
+          "barPercent": 68,
+          "standardPercent": 60,
+          "status": "high",
+          "statusText": "High"
+        },
+        "right": {
+          "title": "Diastolic BP",
+          "value": "88mmHg",
+          "barPercent": 55,
+          "standardPercent": 50,
+          "status": "normal",
+          "statusText": "Normal"
+        }
       }
     }
   },
   "nutrition_intake_card": {
-    "nutritionScore": 85,
-    "totalCalories": 880,
-    "warningTitle": "钠摄入严重超标",
-    "mealIntake": {
-      "value": 8,
-      "unit": "mg",
-      "recommended": 5,
-      "exceedPercent": 40
-    },
-    "dailyIntake": {
-      "value": 28,
-      "unit": "mg",
-      "recommended": 20,
-      "exceedPercent": 27
-    },
-    "tipText": "您的钠摄入超出每日基准14%，且本餐摄入也超出基准。超标钠主要来源于宫保鸡丁和酱油。"
+    "widget_name": "nutrition_intake_card",
+    "widget_type": "type-3",
+    "widget_data_format": {
+      "nutritionScore": 85,
+      "totalCalories": 880,
+      "warningTitle": "钠摄入严重超标",
+      "mealIntake": {
+        "value": 8,
+        "unit": "mg",
+        "recommended": 5,
+        "exceedPercent": 40
+      },
+      "dailyIntake": {
+        "value": 28,
+        "unit": "mg",
+        "recommended": 20,
+        "exceedPercent": 27
+      },
+      "tipText": "您的钠摄入超出每日基准14%，且本餐摄入也超出基准。超标钠主要来源于宫保鸡丁和酱油。"
+    }
   },
   "music_recommendation_card": {
-    "items": [
-      {
-        "order": 1,
-        "songId": "song_001",
-        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
-        "title": "轻音乐",
-        "text": "[轻音乐] (放松、舒缓、减压、治愈)"
-      },
-      {
-        "order": 2,
-        "songId": "song_002",
-        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
-        "title": "禅音疗法",
-        "text": "禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐"
-      },
-      {
-        "order": 3,
-        "songId": "song_003",
-        "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
-        "title": "自然白噪音",
-        "text": "自然白噪音 | 雨声、海浪、森林 - 专注工作背景音"
-      }
-    ]
+    "widget_name": "music_recommendation_card",
+    "widget_type": "type-4",
+    "widget_data_format": {
+      "items": [
+        {
+          "order": 1,
+          "songId": "song_001",
+          "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
+          "title": "轻音乐",
+          "text": "[轻音乐] (放松、舒缓、减压、治愈)"
+        },
+        {
+          "order": 2,
+          "songId": "song_002",
+          "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
+          "title": "禅音疗法",
+          "text": "禅音疗法 | 冥想、失眠缓解、放松、专注工作 - 纯音乐"
+        },
+        {
+          "order": 3,
+          "songId": "song_003",
+          "imageUrl": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop&q=80",
+          "title": "自然白噪音",
+          "text": "自然白噪音 | 雨声、海浪、森林 - 专注工作背景音"
+        }
+      ]
+    }
   },
   "vital_overview_card": {
-    "heartRate": {
-      "value": 68,
-      "unit": "bpm",
-      "statusText": "steady rhythm",
-      "status": "normal"
-    },
-    "bloodPressure": {
-      "systolic": 115,
-      "diastolic": 75,
-      "unit": "mmHg",
-      "statusText": "Slightly high SBP",
-      "status": "warning",
-      "highlighted": true
-    },
-    "spo2": {
-      "value": 98,
-      "unit": "%",
-      "statusText": "Sufficient oxygen supply",
-      "status": "normal"
-    },
-    "poct": {
-      "value": 5.1,
-      "unit": "mmol/L",
-      "statusText": "Normal metabolism",
-      "status": "normal"
+    "widget_name": "vital_overview_card",
+    "widget_type": "type-5",
+    "widget_data_format": {
+      "heartRate": {
+        "value": 68,
+        "unit": "bpm",
+        "statusText": "steady rhythm",
+        "status": "normal"
+      },
+      "bloodPressure": {
+        "systolic": 115,
+        "diastolic": 75,
+        "unit": "mmHg",
+        "statusText": "Slightly high SBP",
+        "status": "warning",
+        "highlighted": true
+      },
+      "spo2": {
+        "value": 98,
+        "unit": "%",
+        "statusText": "Sufficient oxygen supply",
+        "status": "normal"
+      },
+      "poct": {
+        "value": 5.1,
+        "unit": "mmol/L",
+        "statusText": "Normal metabolism",
+        "status": "normal"
+      }
     }
   },
   "sodium_bp_card": {
-    "intake": {
-      "value": 8,
-      "unit": "mg",
-      "label": "Sodium intake per meal",
-      "percent": 60,
-      "level": "danger"
-    },
-    "alert": {
-      "text": "BP sharp rise",
-      "label": "Sodium intake per meal",
-      "level": "danger"
+    "widget_name": "sodium_bp_card",
+    "widget_type": "type-6",
+    "widget_data_format": {
+      "intake": {
+        "value": 8,
+        "unit": "mg",
+        "label": "Sodium intake per meal",
+        "percent": 60,
+        "level": "danger"
+      },
+      "alert": {
+        "text": "BP sharp rise",
+        "label": "Sodium intake per meal",
+        "level": "danger"
+      }
     }
   },
   "weekly_health_score_card": {
-    "weeklyScore": 92,
-    "maxScore": 100,
-    "weekNumber": 42,
-    "evaluationText": "表现极佳，保持这个节奏",
-    "daysToTargetText": "分数达标5天",
-    "pointsHigherThanLastWeekText": "较上周提升12分",
-    "metrics": [
-      {
-        "type": "sleep",
-        "label": "Sleep duration",
-        "value": 324,
-        "unit": "min"
-      },
-      {
-        "type": "exercise",
-        "label": "Exercise",
-        "value": 3,
-        "unit": "times"
-      },
-      {
-        "type": "dietary",
-        "label": "Dietary",
-        "value": "Goal",
-        "unit": ""
-      }
-    ]
+    "widget_name": "weekly_health_score_card",
+    "widget_type": "type-7",
+    "widget_data_format": {
+      "weeklyScore": 92,
+      "maxScore": 100,
+      "weekNumber": 42,
+      "evaluationText": "表现极佳，保持这个节奏",
+      "daysToTargetText": "分数达标5天",
+      "pointsHigherThanLastWeekText": "较上周提升12分",
+      "metrics": [
+        {
+          "type": "sleep",
+          "label": "Sleep duration",
+          "value": 324,
+          "unit": "min"
+        },
+        {
+          "type": "exercise",
+          "label": "Exercise",
+          "value": 3,
+          "unit": "times"
+        },
+        {
+          "type": "dietary",
+          "label": "Dietary",
+          "value": "Goal",
+          "unit": ""
+        }
+      ]
+    }
   },
   "sbp_sleep_trend_chart_card": {
-    "data": [
-      { "day": "Mon", "sbp": 118, "sleepDuration": 6.2 },
-      { "day": "Tue", "sbp": 122, "sleepDuration": 5.8 },
-      { "day": "Wed", "sbp": 115, "sleepDuration": 6.5 },
-      { "day": "Thu", "sbp": 128, "sleepDuration": 5.2 },
-      { "day": "Fri", "sbp": 120, "sleepDuration": 5.4 },
-      { "day": "Sat", "sbp": 125, "sleepDuration": 6.0 },
-      { "day": "Sun", "sbp": 119, "sleepDuration": 5.7 }
-    ],
-    "sbpLabel": "SBP",
-    "sleepDurationLabel": "Sleep duration",
-    "sbpColor": "rgb(249, 115, 22)",
-    "sleepDurationColor": "rgb(167, 139, 250)"
+    "widget_name": "sbp_sleep_trend_chart_card",
+    "widget_type": "type-8",
+    "widget_data_format": {
+      "data": [
+        { "day": "Mon", "sbp": 118, "sleepDuration": 6.2 },
+        { "day": "Tue", "sbp": 122, "sleepDuration": 5.8 },
+        { "day": "Wed", "sbp": 115, "sleepDuration": 6.5 },
+        { "day": "Thu", "sbp": 128, "sleepDuration": 5.2 },
+        { "day": "Fri", "sbp": 120, "sleepDuration": 5.4 },
+        { "day": "Sat", "sbp": 125, "sleepDuration": 6.0 },
+        { "day": "Sun", "sbp": 119, "sleepDuration": 5.7 }
+      ],
+      "sbpLabel": "SBP",
+      "sleepDurationLabel": "Sleep duration",
+      "sbpColor": "rgb(249, 115, 22)",
+      "sleepDurationColor": "rgb(167, 139, 250)"
+    }
+  },
+  "improvement_plan_card": {
+    "widget_name": "improvement_plan_card",
+    "widget_type": "type-9",
+    "widget_data_format": {
+      "title": "Customized improvement plan",
+      "items": [
+        {
+          "id": "exercise-1",
+          "type": "exercise",
+          "title": "Neck and shoulder exercises",
+          "description": "Supplement with appropriate...",
+          "isAdded": false
+        },
+        {
+          "id": "sleep-1",
+          "type": "sleep",
+          "title": "Mindfulness Breathing Practice",
+          "description": "Supplement with appropriate amo...",
+          "isAdded": false
+        },
+        {
+          "id": "nutrition-1",
+          "type": "nutrition",
+          "title": "Balanced Diet Plan",
+          "description": "Optimize nutrition intake...",
+          "isAdded": false
+        }
+      ]
+    }
+  },
+  "ppg_signal_card": {
+    "widget_name": "ppg_signal_card",
+    "widget_type": "type-10",
+    "widget_data_format": {
+      "note": "Type-10 (PPG Signal Widget) is controlled by events, not data. Android sends 'page-widget-ppg-start' and 'page-widget-ppg-stop' events through NativeBridge to control the measurement process. Real PPG data can be sent optionally with { values: number[] } format."
+    }
   }
 }
