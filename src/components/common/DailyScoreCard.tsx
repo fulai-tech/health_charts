@@ -136,8 +136,8 @@ const DailyScoreCardInner = ({
                 <div className="flex-1 flex flex-col justify-center">
                     {/* Title */}
                     <div className="flex items-center gap-1.5 mb-2">
-                        <Sparkles className="w-4 h-4 text-white" />
-                        <span className="text-white text-sm font-medium">{title}</span>
+                        <Sparkles className="w-4.5 h-4.5 text-white" />
+                        <span className="text-white text-base font-medium">{title}</span>
                     </div>
 
                     {/* Score */}
@@ -163,9 +163,9 @@ const DailyScoreCardInner = ({
 
             {/* Percentile message - full width */}
             {percentileMessage && (
-                <div className="flex items-center gap-1.5 bg-white/20 backdrop-blur-md rounded-full px-3 py-2 mb-4">
-                    <TrendingDown className="w-3.5 h-3.5 text-white" />
-                    <span className="text-white text-xs font-medium">{percentileMessage}</span>
+                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-md rounded-xl px-3 py-3 mb-4">
+                    <TrendingDown className="w-4.5 h-4.5 text-white shrink-0" />
+                    <span className="text-white text-base font-medium leading-none">{percentileMessage}</span>
                 </div>
             )}
 

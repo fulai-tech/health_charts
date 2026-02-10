@@ -15,12 +15,12 @@ export interface StatBoxProps {
  * Unified stats container with consistent styling
  * - Background: #F8F8F8
  * - Rounded corners: xl (12px)
- * - Margin: mx-3 (12px horizontal), mb-4
- * - Padding: py-3, px-6 (24px horizontal)
+ * - Margin: mb-4 (no horizontal margin, flush to parent)
+ * - Padding: py-3, px-4
  */
 export const StatBox = memo(({ children, className = '' }: StatBoxProps) => (
     <div
-        className={`rounded-xl py-3 px-6 mb-4 mx-3 ${className}`}
+        className={`rounded-xl py-3 mb-4 ${className}`}
         style={{ backgroundColor: '#F8F8F8' }}
     >
         {children}

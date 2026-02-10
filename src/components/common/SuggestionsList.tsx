@@ -72,19 +72,19 @@ const SuggestionsListInner = ({
                 {displaySuggestions.map((suggestion, index) => (
                     <div
                         key={index}
-                        className="bg-white py-4 shadow-sm border border-slate-100 flex items-center gap-4"
+                        className="bg-white py-5 shadow-sm border border-slate-100 flex items-center gap-4"
                         style={{
-                            borderRadius: UI_STYLES.cardBorderRadius,
+                            borderRadius: 24,
                             paddingLeft: UI_STYLES.cardPaddingX,
                             paddingRight: UI_STYLES.cardPaddingX,
                         }}
                     >
                         {/* Icon */}
-                        <div className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden">
                             <img
                                 src={suggestion.icon}
                                 alt=""
-                                className="w-8 h-8 object-contain"
+                                className="w-9 h-9 object-cover"
                                 onError={(e) => {
                                     // Fallback icon if image fails to load
                                     e.currentTarget.style.display = 'none'

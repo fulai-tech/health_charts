@@ -16,9 +16,7 @@ import type { SleepDailyData } from '@/modules/daily/sleep/types'
 import { generateHealthyDemoData } from '@/modules/daily/healthy/adapter'
 import { generateEmotionDemoData } from '@/modules/daily/emotion/adapter'
 import { generateSleepDemoData } from '@/modules/daily/sleep/adapter'
-import { isDemoModeEnabled as isHealthyDemoEnabled } from '@/modules/daily/healthy/demoMode'
-import { isDemoModeEnabled as isEmotionDemoEnabled } from '@/modules/daily/emotion/demoMode'
-import { isDemoModeEnabled as isSleepDemoEnabled } from '@/modules/daily/sleep/demoMode'
+import { globalStore } from '@/stores/globalStore'
 import { parseDateString, getTodayDateISO } from '@/hooks/core'
 
 export const dailyQueryKeys = {
@@ -133,7 +131,7 @@ export const useHealthyDailyData = createDailyDataHook<
   HealthyDailyData
 >({
   queryKeyPart: 'healthy',
-  isDemoEnabled: isHealthyDemoEnabled,
+  isDemoEnabled: () => globalStore.isTestEnv,
   fetchApi: fetchHealthyDaily,
   generateDemo: generateHealthyDemoData,
   fallbackData: null,
@@ -143,7 +141,7 @@ export const useHealthyDailyData = createDailyDataHook<
 /** Emotion daily data. */
 export const useEmotionDailyData = createDailyDataHook<EmotionDailyData, EmotionDailyData>({
   queryKeyPart: 'emotion',
-  isDemoEnabled: isEmotionDemoEnabled,
+  isDemoEnabled: () => globalStore.isTestEnv,
   fetchApi: fetchEmotionDaily,
   generateDemo: generateEmotionDemoData,
   logLabel: 'Emotion Daily',
@@ -152,7 +150,7 @@ export const useEmotionDailyData = createDailyDataHook<EmotionDailyData, Emotion
 /** Sleep daily data. */
 export const useSleepDailyData = createDailyDataHook<SleepDailyData, SleepDailyData>({
   queryKeyPart: 'sleep',
-  isDemoEnabled: isSleepDemoEnabled,
+  isDemoEnabled: () => globalStore.isTestEnv,
   fetchApi: fetchSleepDaily,
   generateDemo: generateSleepDemoData,
   logLabel: 'Sleep Daily',

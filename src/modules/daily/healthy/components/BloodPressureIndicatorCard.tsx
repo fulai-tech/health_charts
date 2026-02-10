@@ -145,8 +145,8 @@ const BloodPressureIndicatorCardInner = ({
 
             {/* Stats row - 2 columns with equal width */}
             <StatBox>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
+                <div className="grid grid-cols-2">
+                    <div className="pl-5">
                         <div className="flex items-baseline gap-1.5">
                             <span className="text-3xl font-bold" style={{ color: sbpColor }}>
                                 {latest ? `${latest.systolic}/${latest.diastolic}` : '--'}
@@ -157,7 +157,7 @@ const BloodPressureIndicatorCardInner = ({
                             {t('daily.newestValue', 'Newest value')}
                         </p>
                     </div>
-                    <div>
+                    <div className="pl-5">
                         <span className="text-2xl font-semibold text-slate-700">
                             {avg ? `${avg.systolic}/${avg.diastolic}` : '--'}
                         </span>

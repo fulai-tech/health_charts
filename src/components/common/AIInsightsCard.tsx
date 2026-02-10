@@ -53,7 +53,7 @@ const AIInsightsCardInner = ({
                 {insights.map((insight, index) => (
                     <div
                         key={index}
-                        className="bg-white rounded-xl p-4 shadow-sm border border-slate-100"
+                        className="bg-white rounded-xl p-4 border border-slate-100"
                     >
                         <p className="text-sm text-slate-700 leading-relaxed">{insight}</p>
                     </div>

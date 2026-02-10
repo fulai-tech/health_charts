@@ -43,11 +43,11 @@ export interface SleepDailyApiResponse {
             total_duration: {
                 formatted: string
                 total_minutes: number
-            }
+            } | null
             deep_duration: {
                 formatted: string
                 total_minutes: number
-            }
+            } | null
             chart: SleepChartSegment[]
         }
         structure_analysis: SleepStructureItem[]

@@ -96,8 +96,8 @@ interface StatItemProps {
 }
 
 const StatItem = memo(({ value, label, isHighlighted, themeColor, changeIndicator }: StatItemProps) => (
-    <div className="flex-1 text-center">
-        <div className="flex items-baseline justify-center gap-1">
+    <div className="pl-5">
+        <div className="flex items-baseline gap-1">
             <span
                 className={`font-bold ${isHighlighted ? 'text-3xl' : 'text-2xl'}`}
                 style={isHighlighted && themeColor ? { color: themeColor } : { color: '#334155' }}
@@ -187,7 +187,7 @@ const HeartRateIndicatorCardInner = ({
 
             {/* Stats row - 4 columns */}
             <StatBox>
-                <div className="flex divide-x divide-slate-200">
+                <div className="grid grid-cols-4">
                     <StatItem
                         value={latest}
                         label={t('daily.newestValue', 'Newest value')}
