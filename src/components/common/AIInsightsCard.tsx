@@ -32,7 +32,7 @@ const AIInsightsCardInner = ({
     const themeColorTransparent = themeColor.replace('rgb(', 'rgba(').replace(')', ', 0.8)')
 
     return (
-        <div className={`${className} py-6`} style={{
+        <div className={`${className} py-6 shadow-sm`} style={{
             backgroundColor: '#ffddb8ff',
             borderRadius: UI_STYLES.cardBorderRadius,
             paddingLeft: UI_STYLES.cardPaddingX,

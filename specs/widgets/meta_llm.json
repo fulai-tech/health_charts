@@ -1,0 +1,62 @@
+[
+  {
+    "id": "type-1",
+    "name": "sleep_score_card",
+    "description": "用于展示睡眠质量评分。当需要显示用户的睡眠得分、总睡眠时长、深睡时长以及睡眠相关的健康标签（如深睡不足、入睡困难等）时使用。"
+  },
+  {
+    "id": "type-2",
+    "name": "sleep_fatigue_comparison_card",
+    "description": "用于对比两个相关健康指标。当需要并排比较两个指标（如深睡vs晨起疲劳、收缩压vs舒张压）并显示它们的关系时使用。支持sleep和BP两种主题。"
+  },
+  {
+    "id": "type-3",
+    "name": "nutrition_intake_card",
+    "description": "用于展示营养摄入情况。当需要显示营养评分、卡路里摄入、以及营养素超标警告（特别是钠摄入）时使用。会显示单餐和全天摄入对比。"
+  },
+  {
+    "id": "type-4",
+    "name": "music_recommendation_card",
+    "description": "用于推荐放松音乐。当需要推荐助眠音乐、冥想音频、白噪音等放松类音频内容时使用。显示音乐列表（最多3首）及封面图。"
+  },
+  {
+    "id": "type-5",
+    "name": "vital_overview_card",
+    "description": "用于展示生命体征总览。当需要一次性显示多个生命体征（心率、血压、血氧、血糖）并突出显示异常值时使用。适合快速健康检查场景。"
+  },
+  {
+    "id": "type-6",
+    "name": "sodium_bp_card",
+    "description": "用于钠摄入与血压关联警告。当需要显示单餐钠摄入量并关联血压急升警告时使用。带有危险等级指示器和颜色编码。"
+  },
+  {
+    "id": "type-7",
+    "name": "weekly_health_score_card",
+    "description": "用于展示每周健康表现总结。当需要显示周健康评分、与上周对比、达标天数以及睡眠/运动/饮食三大指标时使用。"
+  },
+  {
+    "id": "type-8",
+    "name": "sbp_sleep_trend_chart_card",
+    "description": "用于展示收缩压与睡眠时长的趋势关联。当需要可视化一周内血压和睡眠的相关性、追踪周模式时使用。双轴折线图展示。"
+  },
+  {
+    "id": "type-9",
+    "name": "improvement_plan_card",
+    "description": "用于展示个性化改善计划。当需要提供可操作的健康改善建议（运动/睡眠/营养类别）并允许用户添加到日程时使用。"
+  },
+  {
+    "id": "type-10",
+    "name": "ppg_signal_card",
+    "description": "用于实时PPG信号测量。当需要进行实时心率测量、显示光电容积脉搏波形时使用。注意：此组件由原生事件控制，不是数据驱动。"
+  },
+  {
+    "id": "type-11",
+    "name": "video_recommendation",
+    "description": "用于'紧急干预'或'教程'。当需要给用户展示具体的指导视频（如呼吸法、冥想练习、急救演示）并要求立即行动时使用。支持MP4、HLS、Bilibili、YouTube链接。"
+  },
+  {
+    "id": "type-12",
+    "name": "hre_recommendation_card",
+    "description": "通用的健康推荐引擎。当需要推荐个性化内容（运动视频、放松音频、食谱图文、健康建议文本）且不符合上述特定音乐/视频场景时作为默认推荐组件。支持4种展示模式：视频、音频、图文、纯文本。"
+  }
+]
