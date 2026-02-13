@@ -325,12 +325,12 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
   // 开发者模式：高级动效版
   if (isDevMode) {
     return (
-      <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-        <EmbeddedContainer maxWidth="lg" fullHeight={false}>
+      <WidgetLayout align="left" className="p-0" style={{ backgroundColor: 'transparent' }}>
+        <EmbeddedContainer maxWidth="md" fullHeight={false}>
           <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="scale">
             {/* 卡片容器 - 弥散阴影，高级质感 */}
-            <div 
-              className="relative overflow-hidden rounded-3xl bg-white p-6 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90" 
+            <div
+              className="relative overflow-hidden rounded-3xl bg-transparent p-6 cursor-pointer select-none transition-all duration-200 active:scale-[0.98] active:opacity-90"
               onClick={handleCardClick}
             >
             {/* 对比图表区域 */}
@@ -377,12 +377,12 @@ export const Type2_ComparisonWidgetPage = observer(function Type2_ComparisonWidg
 
   // 默认模式：静态版
   return (
-    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: widgetBGColor }}>
-      <EmbeddedContainer maxWidth="lg" fullHeight={false}>
+    <WidgetLayout align="left" className="p-0" style={{ backgroundColor: 'transparent' }}>
+      <EmbeddedContainer maxWidth="md" fullHeight={false}>
         <WidgetEntranceContainer animate={canAnimate} animationKey={animationKey} mode="slideUp">
-          <div 
-            className="relative overflow-hidden rounded-2xl bg-white p-5 cursor-pointer select-none 
-                       transition-all duration-200 active:scale-[0.98] active:opacity-90" 
+          <div
+            className="relative overflow-hidden rounded-2xl bg-transparent p-5 cursor-pointer select-none
+                       transition-all duration-200 active:scale-[0.98] active:opacity-90"
             onClick={handleCardClick}
           >
           <div className="relative flex items-center justify-start gap-4">
