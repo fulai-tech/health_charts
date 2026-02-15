@@ -240,7 +240,7 @@ const QuickActionsGrid = () => {
         },
       }}
     >
-      {actions.map((action, index) => {
+      {actions.map((action, _index) => {
         const Icon = action.icon
         return (
           <motion.div
@@ -389,7 +389,7 @@ const ChatInterface = () => {
     return () => {
       timers.forEach(timer => clearTimeout(timer))
     }
-  }, [])
+  }, [setIsComplete])
 
   // 每次有新消息时滚动到底部
   useEffect(() => {

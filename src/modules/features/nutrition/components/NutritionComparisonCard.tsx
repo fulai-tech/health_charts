@@ -7,9 +7,9 @@ import { VITAL_COLORS } from '@/config/theme'
 import { useState, useEffect, useRef } from 'react'
 
 // Theme colors
-const PEACH_BG = '#FEE4CD'
+const _PEACH_BG = '#FEE4CD'
 const BRAND_ORANGE = '#FB923D'
-const MUTED_GREY = '#94A3B8'
+const _MUTED_GREY = '#94A3B8'
 const LIGHT_BLUE_BG = '#EFF6FF'
 const BAR_GREY = '#D1D5DB'
 const DATA_ATTRIBUTION_BG = '#F8F8F8'
@@ -130,8 +130,8 @@ const ComparisonBarChart = ({ lastWeekValue, thisWeekValue, themeColor = BRAND_O
 function useAnimatedNumber(targetValue: number) {
     const [displayValue, setDisplayValue] = useState(targetValue)
     const animationFrameRef = useRef<number | undefined>(undefined)
-    const startTimeRef = useRef<number>(performance.now())
-    const lastTimeRef = useRef<number>(performance.now())
+    const startTimeRef = useRef<number>(0)
+    const lastTimeRef = useRef<number>(0)
     
     // PID controller state (for small errors)
     const integralRef = useRef<number>(0)
@@ -365,7 +365,7 @@ const ComparisonSlide = ({ data, dish, index = 0 }: ComparisonSlideProps) => {
  */
 export const NutritionComparisonCard = ({ data, className, isLoading }: NutritionComparisonCardProps) => {
     const { t } = useTranslation()
-    const isPlaceholder = !data
+    const _isPlaceholder = !data
 
     // Placeholder content when no data is provided
     const placeholderDish: ComparisonDishData = {

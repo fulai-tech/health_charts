@@ -19,7 +19,7 @@ import type {
   WeeklyComparisonData,
   ComparisonDishData
 } from './types'
-import { WEEKDAY_LABEL_MAP, getCurrentWeekDateRange } from '@/lib/dateUtils'
+// dateUtils imports removed - WEEKDAY_LABEL_MAP and getCurrentWeekDateRange were unused
 
 /**
  * Helper to get nutrition status from backend data safely
@@ -27,7 +27,7 @@ import { WEEKDAY_LABEL_MAP, getCurrentWeekDateRange } from '@/lib/dateUtils'
  */
 function getNutritionStatus(backendData: BackendNutritionResponse | null) {
   if (!backendData?.data) return null
-  return backendData.data.report?.nutrition_status || (backendData.data as any).nutrition_status
+  return backendData.data.report?.nutrition_status || (backendData.data as Record<string, unknown>).nutrition_status
 }
 
 /**
@@ -333,13 +333,13 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
 
   if (ns) {
     const statusItems = Object.values(ns as object)
-    const normalCount = statusItems.filter((item: any) => item.status === '达标').length
+    const normalCount = statusItems.filter((item: Record<string, unknown>) => item.status === '达标').length
     const totalCount = statusItems.length
     score = Math.round((normalCount / totalCount) * 100)
   }
 
   // Handle report-level fields which might also be directly under data now
-  const dataAnalysis = report?.data_analysis || (backendData.data as any).data_analysis
+  const dataAnalysis = report?.data_analysis || (backendData.data as Record<string, unknown>).data_analysis
 
   // Use data_analysis as summary (can be string or array)
   let summary: string = mockData.summary
@@ -379,11 +379,11 @@ function adaptAnalysis(backendData: BackendNutritionResponse | null, mockData: N
  */
 function adaptWeeklySummary(backendData: BackendNutritionResponse | null, mockData: NutritionWeeklySummary): NutritionWeeklySummary {
   // Try new backend format first (weekly_summary.overview, weekly_summary.highlights)
-  const weeklySummary = (backendData?.data as any)?.weekly_summary
+  const weeklySummary = (backendData?.data as Record<string, unknown>)?.weekly_summary as Record<string, unknown> | undefined
   if (weeklySummary) {
     return {
-      overview: weeklySummary.overview || mockData.overview,
-      highlights: weeklySummary.highlights || mockData.highlights,
+      overview: (weeklySummary.overview as string) || mockData.overview,
+      highlights: (weeklySummary.highlights as string) || mockData.highlights,
       // Ignore backend suggestions as per requirement
       suggestions: []
     }
@@ -420,7 +420,7 @@ function adaptCategoryEvaluations(backendData: BackendNutritionResponse | null):
   }
 
   const report = backendData.data.report
-  const categoryEvaluations = report?.category_evaluations || (backendData.data as any).category_evaluations
+  const categoryEvaluations = report?.category_evaluations || (backendData.data as Record<string, unknown>).category_evaluations
 
   if (!categoryEvaluations) {
     return defaultEvaluations

@@ -43,6 +43,25 @@ export interface HealthBloodSugarCardProps {
   onClick?: () => void
 }
 
+// Placeholder data - smooth wave pattern with values around 7.4
+const PLACEHOLDER_DATA = [
+  { x: 0, value: 5.2 },
+  { x: 1, value: 4.8 },
+  { x: 2, value: 8.5 },
+  { x: 3, value: 9.2 },
+  { x: 4, value: 7.8 },
+  { x: 5, value: 6.5 },
+  { x: 6, value: 5.8 },
+  { x: 7, value: 4.2 },
+  { x: 8, value: 3.8 },
+  { x: 9, value: 5.5 },
+  { x: 10, value: 6.8 },
+  { x: 11, value: 8.2 },
+  { x: 12, value: 9.5 },
+  { x: 13, value: 8.8 },
+  { x: 14, value: 7.2 },
+]
+
 const HealthBloodSugarCardInner = ({
   data,
   className,
@@ -51,27 +70,8 @@ const HealthBloodSugarCardInner = ({
 }: HealthBloodSugarCardProps) => {
   const { t } = useTranslation()
 
-  // Placeholder data - smooth wave pattern with values around 7.4
-  const placeholderData = [
-    { x: 0, value: 5.2 },
-    { x: 1, value: 4.8 },
-    { x: 2, value: 8.5 },
-    { x: 3, value: 9.2 },
-    { x: 4, value: 7.8 },
-    { x: 5, value: 6.5 },
-    { x: 6, value: 5.8 },
-    { x: 7, value: 4.2 },
-    { x: 8, value: 3.8 },
-    { x: 9, value: 5.5 },
-    { x: 10, value: 6.8 },
-    { x: 11, value: 8.2 },
-    { x: 12, value: 9.5 },
-    { x: 13, value: 8.8 },
-    { x: 14, value: 7.2 },
-  ]
-
   const chartData = useMemo(
-    () => data?.chartData ?? placeholderData,
+    () => data?.chartData ?? PLACEHOLDER_DATA,
     [data?.chartData]
   )
 

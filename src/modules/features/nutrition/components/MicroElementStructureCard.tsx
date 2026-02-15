@@ -19,7 +19,7 @@ function getStatus(current: number, total: number): 'goal' | 'exceed' | 'insuffi
 }
 
 // Get status badge color and text
-function getStatusBadge(status: 'goal' | 'exceed' | 'insufficient', t: any) {
+function getStatusBadge(status: 'goal' | 'exceed' | 'insufficient', t: (key: string, fallback?: string) => string) {
     switch (status) {
         case 'goal':
             return {
@@ -60,7 +60,7 @@ export const MicroElementStructureCard = ({ data, summary, className }: MicroEle
             <div className="flex flex-col gap-4">
                 {data.map((item, index) => {
                     const status = getStatus(item.current, item.total)
-                    const badge = getStatusBadge(status, t)
+                    const badge = getStatusBadge(status, (key, fallback) => t(key, fallback ?? key))
 
                     return (
                         <div key={index} className="rounded-xl p-4 relative" style={{ backgroundColor: UI_COLORS.background.gray }}>

@@ -41,3 +41,23 @@ export {
   useLanguageStore,
   useGlobalStore,
 } from '@/stores'
+
+// Reactive orchestration layer (pipeline architecture)
+export {
+  useGuardChain,
+  useProjection,
+  useAutoProjection,
+  useMultiProjection,
+  useOrchestrator,
+} from '@/lib/pipeline/hooks'
+
+// Worker isolation layer (gRPC transport + mutex synchronization)
+export {
+  useWorkerBridge,
+  useWorkerAuth,
+  useWorkerStorage,
+  useWorkerStorageValue,
+  useWorkerPrefetch,
+  useWorkerDiagnostics,
+  useWorkerLock,
+} from '@/lib/pipeline/worker'

@@ -257,23 +257,37 @@ function PlanItemCard({ item, onAdd, t }: PlanItemCardProps) {
   useEffect(() => {
     if (buttonState === displayState) return
     
-    // 开始退出动画
-    setAnimPhase('exit')
+    let cancelled = false
+    
+    // 开始退出动画（异步调度以避免 effect 内同步 setState）
+    const startTimer = setTimeout(() => {
+      if (cancelled) return
+      setAnimPhase('exit')
+    }, 0)
     
     // 退出动画完成后切换内容并开始进入动画
     const exitTimer = setTimeout(() => {
+      if (cancelled) return
       setDisplayState(buttonState)
       setAnimPhase('enter')
       
       // 进入动画完成后恢复 idle
       const enterTimer = setTimeout(() => {
+        if (cancelled) return
         setAnimPhase('idle')
       }, 150)
       
-      return () => clearTimeout(enterTimer)
+      cleanupTimers.push(enterTimer)
     }, 150)
     
-    return () => clearTimeout(exitTimer)
+    const cleanupTimers: ReturnType<typeof setTimeout>[] = []
+    
+    return () => {
+      cancelled = true
+      clearTimeout(startTimer)
+      clearTimeout(exitTimer)
+      cleanupTimers.forEach(clearTimeout)
+    }
   }, [buttonState, displayState])
 
   // Cancel 状态 1.2 秒后自动完成

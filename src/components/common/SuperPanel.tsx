@@ -583,10 +583,8 @@ function SuperPanelInner() {
                             isSmallScreen 
                                 ? 'w-[calc(100vw-24px)] max-w-72' 
                                 : 'w-72',
-                            // 限制最大高度，防止溢出屏幕
-                            isSmallScreen
-                                ? 'max-h-[calc(100vh-70px)]'
-                                : 'max-h-[calc(100vh-100px)]',
+                            // 限制最大高度为 50svh（Small Viewport Height），防止溢出屏幕
+                            'max-h-[60svh]',
                             'overflow-hidden flex flex-col',
                             'bg-white rounded-2xl shadow-2xl border border-slate-200',
                             'transform transition-all duration-200 origin-bottom-right',

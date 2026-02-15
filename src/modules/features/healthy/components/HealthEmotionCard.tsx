@@ -40,6 +40,25 @@ export interface HealthEmotionCardProps {
   onClick?: () => void
 }
 
+// Placeholder data - each segment as percentage (0-100) of its section
+// All bars have same total height, just different segment proportions
+const PLACEHOLDER_DATA = [
+  { day: 'D1', positive: 35, neutral: 45, negative: 20 },
+  { day: 'D2', positive: 30, neutral: 50, negative: 20 },
+  { day: 'D3', positive: 40, neutral: 40, negative: 20 },
+  { day: 'D4', positive: 25, neutral: 55, negative: 20 },
+  { day: 'D5', positive: 45, neutral: 40, negative: 15 },
+  { day: 'D6', positive: 35, neutral: 45, negative: 20 },
+  { day: 'D7', positive: 30, neutral: 45, negative: 25 },
+  { day: 'D8', positive: 40, neutral: 40, negative: 20 },
+  { day: 'D9', positive: 35, neutral: 45, negative: 20 },
+  { day: 'D10', positive: 45, neutral: 40, negative: 15 },
+  { day: 'D11', positive: 38, neutral: 42, negative: 20 },
+  { day: 'D12', positive: 32, neutral: 48, negative: 20 },
+  { day: 'D13', positive: 28, neutral: 52, negative: 20 },
+  { day: 'D14', positive: 50, neutral: 35, negative: 15 },
+]
+
 const HealthEmotionCardInner = ({
   data,
   className,
@@ -48,27 +67,8 @@ const HealthEmotionCardInner = ({
 }: HealthEmotionCardProps) => {
   const { t } = useTranslation()
 
-  // Placeholder data - each segment as percentage (0-100) of its section
-  // All bars have same total height, just different segment proportions
-  const placeholderData = [
-    { day: 'D1', positive: 35, neutral: 45, negative: 20 },
-    { day: 'D2', positive: 30, neutral: 50, negative: 20 },
-    { day: 'D3', positive: 40, neutral: 40, negative: 20 },
-    { day: 'D4', positive: 25, neutral: 55, negative: 20 },
-    { day: 'D5', positive: 45, neutral: 40, negative: 15 },
-    { day: 'D6', positive: 35, neutral: 45, negative: 20 },
-    { day: 'D7', positive: 30, neutral: 45, negative: 25 },
-    { day: 'D8', positive: 40, neutral: 40, negative: 20 },
-    { day: 'D9', positive: 35, neutral: 45, negative: 20 },
-    { day: 'D10', positive: 45, neutral: 40, negative: 15 },
-    { day: 'D11', positive: 38, neutral: 42, negative: 20 },
-    { day: 'D12', positive: 32, neutral: 48, negative: 20 },
-    { day: 'D13', positive: 28, neutral: 52, negative: 20 },
-    { day: 'D14', positive: 50, neutral: 35, negative: 15 },
-  ]
-
   const chartData = useMemo(
-    () => data?.chartData ?? placeholderData,
+    () => data?.chartData ?? PLACEHOLDER_DATA,
     [data?.chartData]
   )
 

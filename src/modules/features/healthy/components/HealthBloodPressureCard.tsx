@@ -14,7 +14,7 @@
  * ```
  */
 
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Cell } from 'recharts'
 import { Heart, ChevronRight, Loader2 } from 'lucide-react'
@@ -49,16 +49,16 @@ const HealthBloodPressureCardInner = ({
   const { t } = useTranslation()
   const themeColor = SBP_COLOR
 
-  // Placeholder data - 14 data points for paired bars
-  const placeholderData = Array.from({ length: 14 }, (_, i) => ({
+  // Placeholder data - 14 data points for paired bars (lazy init to avoid impure Math.random in render)
+  const [placeholderData] = useState(() => Array.from({ length: 14 }, (_, i) => ({
     day: `D${i + 1}`,
     systolic: 100 + Math.random() * 60,
     diastolic: 60 + Math.random() * 40,
-  }))
+  })))
 
   const chartData = useMemo(
     () => data?.chartData ?? placeholderData,
-    [data?.chartData]
+    [data?.chartData, placeholderData]
   )
 
   const avgSystolic = data?.avgSystolic ?? 136

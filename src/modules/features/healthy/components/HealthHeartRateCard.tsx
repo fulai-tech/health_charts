@@ -43,6 +43,19 @@ export interface HealthHeartRateCardProps {
   onClick?: () => void
 }
 
+// Placeholder data - wave pattern with values above and below average (74)
+const PLACEHOLDER_DATA = [
+  { x: 0, value: 68 },
+  { x: 1, value: 70 },
+  { x: 2, value: 76 },
+  { x: 3, value: 78 },
+  { x: 4, value: 88 },
+  { x: 5, value: 90 },
+  { x: 6, value: 85 },
+  { x: 7, value: 75 },
+  { x: 8, value: 68 },
+]
+
 const HealthHeartRateCardInner = ({
   data,
   className,
@@ -51,21 +64,8 @@ const HealthHeartRateCardInner = ({
 }: HealthHeartRateCardProps) => {
   const { t } = useTranslation()
 
-  // Placeholder data - wave pattern with values above and below average (74)
-  const placeholderData = [
-    { x: 0, value: 68 },
-    { x: 1, value: 70 },
-    { x: 2, value: 76 },
-    { x: 3, value: 78 },
-    { x: 4, value: 88 },
-    { x: 5, value: 90 },
-    { x: 6, value: 85 },
-    { x: 7, value: 75 },
-    { x: 8, value: 68 },
-  ]
-
   const chartData = useMemo(
-    () => data?.chartData ?? placeholderData,
+    () => data?.chartData ?? PLACEHOLDER_DATA,
     [data?.chartData]
   )
 

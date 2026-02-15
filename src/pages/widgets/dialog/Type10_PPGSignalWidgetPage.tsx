@@ -268,7 +268,6 @@ function usePPGCanvas(
       ctx.beginPath()
 
       let lastX = 0
-      let lastY = centerY
 
       for (let i = 0; i < dataLength; i++) {
         const value = ringBuffer.get(i)
@@ -472,7 +471,7 @@ export const Type10_PPGSignalWidgetPage = observer(function Type10_PPGSignalWidg
   const timerRef = useRef<number>(0)
 
   // 初始化原生桥接
-  const { onData, send, isReady } = useNativeBridge({
+  const { onData, send: _send, isReady } = useNativeBridge({
     pageId: PAGE_CONFIG.pageId,
     pageName: PAGE_CONFIG.pageName,
     debug: import.meta.env.DEV,

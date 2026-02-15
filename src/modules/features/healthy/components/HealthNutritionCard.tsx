@@ -14,7 +14,7 @@
  * ```
  */
 
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ResponsiveContainer,
@@ -52,15 +52,15 @@ const HealthNutritionCardInner = ({
 }: HealthNutritionCardProps) => {
   const { t } = useTranslation()
 
-  // Placeholder data - wave pattern
-  const placeholderData = Array.from({ length: 15 }, (_, i) => ({
+  // Placeholder data - wave pattern (lazy init to avoid impure Math.random in render)
+  const [placeholderData] = useState(() => Array.from({ length: 15 }, (_, i) => ({
     x: i,
     value: 70 + Math.sin(i * 0.3) * 20 + Math.random() * 10,
-  }))
+  })))
 
   const chartData = useMemo(
     () => data?.chartData ?? placeholderData,
-    [data?.chartData]
+    [data?.chartData, placeholderData]
   )
 
   const avgValue = data?.avgValue ?? 74

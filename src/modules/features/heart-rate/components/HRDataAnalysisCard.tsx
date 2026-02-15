@@ -55,7 +55,7 @@ export function HRDataAnalysisCard({ data, className, isLoading }: HRDataAnalysi
 
   // Let's optimistically assume I need to map it.
 
-  const formattedItems = (dataAnalysis.length > 0 ? dataAnalysis : defaultAnalysis).map((item: any) => {
+  const formattedItems = (dataAnalysis.length > 0 ? dataAnalysis : defaultAnalysis).map((item: string | { content: string }) => {
     return typeof item === 'string' ? item : item.content
   })
 

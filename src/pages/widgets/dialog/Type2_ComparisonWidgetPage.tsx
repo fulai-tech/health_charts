@@ -9,7 +9,7 @@ import { WidgetEntranceContainer, useWidgetAnimation } from '@/components/common
 import { EmbeddedContainer } from '@/components/common/EmbeddedContainer'
 import { globalStore } from '@/stores/globalStore'
 import { TrendingDown, TrendingUp, ArrowRight, Moon, Zap, ChevronDown, ChevronUp, ChevronRight } from 'lucide-react'
-import { widgetBGColor, VITAL_COLORS } from '@/config/theme'
+import { VITAL_COLORS } from '@/config/theme'
 
 // ============================================
 // 类型定义

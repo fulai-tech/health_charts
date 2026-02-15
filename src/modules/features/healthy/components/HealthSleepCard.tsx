@@ -14,7 +14,7 @@
  * ```
  */
 
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ResponsiveContainer,
@@ -52,16 +52,16 @@ const HealthSleepCardInner = ({
 }: HealthSleepCardProps) => {
   const { t } = useTranslation()
 
-  // Placeholder data
-  const placeholderData = Array.from({ length: 14 }, (_, i) => ({
+  // Placeholder data (lazy init to avoid impure Math.random in render)
+  const [placeholderData] = useState(() => Array.from({ length: 14 }, (_, i) => ({
     day: `D${i + 1}`,
     hours: 6 + Math.random() * 3,
     quality: 60 + Math.random() * 30,
-  }))
+  })))
 
   const chartData = useMemo(
     () => data?.chartData ?? placeholderData,
-    [data?.chartData]
+    [data?.chartData, placeholderData]
   )
 
   const avgSleepTime = data?.avgSleepTime ?? { hours: 7, minutes: 11 }
